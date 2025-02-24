@@ -1,13 +1,13 @@
 "use client"
 
-import { useAppContext } from "../context/AppContext"
+import { useAppContext } from "../../context/AppContext"
 import { Button } from "@/components/ui/button"
 import { Mic } from "lucide-react"
 import { useState, useEffect } from 'react';
 
 let socket = null;
 
-export default function RightSection() {
+export default function microphoneButton() {
   const { microphoneConnected, setMicrophoneConnected, micStream, setMicStream, micTranscript, setMicTranscript, wholeConversation, setWholeConversation } = useAppContext()
   const [error, setError] = useState("");
 
@@ -16,18 +16,19 @@ export default function RightSection() {
     return new Promise((resolve, reject) => {
       const url = 'wss://api.deepgram.com/v1/listen';
 
-      socket = new WebSocket(url, ["token", "4b08338bac09573504cfd67cec24e2e6038178b6"]);
+      socket = new WebSocket(url, ["token", process.env.NEXT_PUBLIC_DEEPGRAM_API_KEY]);
 
       socket.onopen = () => {
         console.log("Connected to Deepgram WebSocket");
 
-        socket.send(JSON.stringify({
-          type: "Configure",
-          features: {
-            transcription: true,
-            speaker_diarization: true
-          }
-        }));
+        socket.send((JSON.stringify({
+          "type": "Configure",
+          "token": process.env.NEXT_PUBLIC_DEEPGRAM_API_KEY,
+          "encoding": "opus",
+          "sample_rate": 16000,
+          "interim_results": true,
+          "diarize": true,
+        })));
 
         resolve();
       };
@@ -107,33 +108,11 @@ export default function RightSection() {
   }, [micStream]);
 
   return (
-    <div className="border rounded-lg p-4 flex flex-col h-[600px]">
-      <h2 className="text-xl font-semibold mb-4">Microphone Transcription</h2>
-      {!microphoneConnected ? (<><p className="text-muted-foreground text-sm mb-4">
-        Click the button below to connect your microphone and include what you are saying in the AI response to provide
-        more context.
-      </p>
-        <div className="bg-muted/50 p-4 rounded-lg mb-4">
-          <p className="text-sm flex items-center gap-2">
-            <span className="text-red-500">⚠</span>
-            IMPORTANT: This is important if you want your responses to be included and analyzed in the AI summary.
-          </p>
-        </div></>) : (<></>)}
 
-      <div className="flex gap-2">
         <Button className="flex items-center gap-2" onClick={handleConnectMicrophone}>
           <Mic className="h-4 w-4" />
           {microphoneConnected ? "Disconnect" : "Connect"} Microphone
         </Button>
 
-      </div>
-      {error && <p className="text-red-500 mt-4">{error}</p>}
-      <div className="mt-4 flex flex-col h-max border rounded-lg p-2 overflow-y-auto bg-gray-100">
-        <h3 className="text-lg font-semibold mb-2">Transcript</h3>
-        <p className="text-sm text-gray-700 whitespace-pre-wrap">{micTranscript}</p>
-      </div>
-
-
-    </div>
   );
 }

@@ -1,10 +1,10 @@
 "use client"
 
-import LeftSection from "../components/left-section"
-import MiddleSection from "../components/middle-section"
-import RightSection from "../components/right-section"
-import { Button } from "@/components/ui/button"
-import { AppProvider } from "../context/AppContext"
+import LeftSection from "../../../components/SessionPageComponents/left-section"
+import MiddleSection from "../../../components/SessionPageComponents/middle-section"
+import RightSection from "../../../components/SessionPageComponents/right-section"
+import { Button } from "../../../components/ui/button"
+import { AppProvider } from "../../../context/AppContext"
 
 export default function Home() {
 

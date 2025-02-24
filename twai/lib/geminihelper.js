@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const genAI = new GoogleGenerativeAI("AIzaSyDUvMvxfieEc_axoBhI4oOn9LfGQW0jq-8"); // Store key in .env file
+const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY);
 
 export async function getGeminiResponse(conversation) {
   try {
