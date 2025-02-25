@@ -2,9 +2,7 @@
 
 import { useAppContext } from "../../context/AppContext"
 import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { X, Send } from "lucide-react"
-import { getGeminiResponse } from "@/lib/geminihelper"
+
 
 export default function MiddleSection() {
   const { setTranscript, setWholeConversation } = useAppContext()

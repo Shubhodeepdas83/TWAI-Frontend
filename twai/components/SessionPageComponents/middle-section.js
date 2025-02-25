@@ -4,7 +4,7 @@ import { useAppContext } from "../../context/AppContext"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { X, Send } from "lucide-react"
-import { getGeminiResponse } from "@/lib/geminihelper"
+import { get_AI_Help } from "../../lib/AI_Helper"
 
 export default function MiddleSection() {
   const { chatMessages, setChatMessages, userInput, setUserInput, setTranscript, wholeConversation, setWholeConversation,setMicTranscript } = useAppContext()
@@ -19,7 +19,7 @@ export default function MiddleSection() {
     if (userInput.trim()) {
       setChatMessages([...chatMessages, { text: userInput, sender: "user" }])
       setUserInput("")
-      const aiResponse = await getGeminiResponse([{other: userInput}]);
+      const aiResponse = await get_AI_Help([{other: userInput}]);
   
     setChatMessages((prev) => [
       ...prev.filter((msg) => msg.text !== "Thinking..."),
@@ -35,7 +35,7 @@ export default function MiddleSection() {
       { text: "Thinking...", sender: "ai" },
     ]);
   
-    const aiResponse = await getGeminiResponse(wholeConversation);
+    const aiResponse = await get_AI_Help(wholeConversation);
   
     setChatMessages((prev) => [
       ...prev.filter((msg) => msg.text !== "Thinking..."),{ text: aiResponse.question, sender: "user" },
