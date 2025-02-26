@@ -3,22 +3,20 @@
 import { useAppContext } from "../../context/AppContext"
 import { Button } from "@/components/ui/button"
 import { Mic, MicOff } from "lucide-react"
-import { useState, useEffect } from "react"
+import {  useEffect } from "react"
 
 let socket = null
 
-export default function microphoneButton() {
+export default function MicrophoneButton() {
   const {
     microphoneConnected,
     setMicrophoneConnected,
     micStream,
     setMicStream,
-    micTranscript,
     setMicTranscript,
     wholeConversation,
     setWholeConversation,
   } = useAppContext()
-  const [error, setError] = useState("")
 
   const openWebSocket = () => {
     return new Promise((resolve, reject) => {
@@ -96,7 +94,6 @@ export default function microphoneButton() {
 
         mediaRecorder.start(250)
       } catch (err) {
-        setError("Failed to access the microphone: " + err.message)
         console.error(err)
       }
     }

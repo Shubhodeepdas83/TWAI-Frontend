@@ -6,10 +6,7 @@ export async function POST(req) {
 
     // Extract form data
     const user_input = formData.get("user_input");
-    const use_web = formData.get("use_web");
-    const use_graph = formData.get("use_graph");
-    const raw_Conversation = formData.get("raw_Conversation");
-    const uploaded_file = formData.get("uploaded_file");
+
 
     // Validate required fields
     if (!user_input) {
