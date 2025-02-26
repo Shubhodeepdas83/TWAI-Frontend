@@ -48,7 +48,7 @@ export async function get_AI_Help(conversation, use_web, requestType = 'help') {
       };
     }
   } catch (error) {
-    console.error("Gemini API error:", error);
+    console.error("BACKEND API error:", error);
     return {
       question: "Sorry, I couldn't process the response.",
       answer: "Sorry, I couldn't process the response."
