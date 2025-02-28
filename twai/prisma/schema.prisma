@@ -1,0 +1,36 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("RDS")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id          String    @id @default(uuid())
+  email       String    @unique
+  name        String?
+  sessions    Session[] 
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  documents Document[]
+}
+
+model Document {
+  id        String  @id @default(uuid())
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fileUrl   String
+  isEmbedded Boolean @default(false)
+  uploadedAt DateTime @default(now())
+}
+
+model Session {
+  id           String   @id @unique @default(uuid())
+  userId       String   
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversation  Json[]  @default([])
+  createdAt    DateTime @default(now())
+  summary      String?  
+}
