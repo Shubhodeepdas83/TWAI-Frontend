@@ -8,7 +8,6 @@ import FileUploadButton from "../../components/DashboardPageComponents/fileUploa
 
 export default function DashboardPage() {
     const { data: session, status } = useSession();
-    const [isModalOpen, setIsModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [user, setUser] = useState(null);
     const [isDocumentsModalOpen, setIsDocumentsModalOpen] = useState(false);

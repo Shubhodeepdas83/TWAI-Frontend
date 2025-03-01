@@ -5,7 +5,7 @@ import MiddleSection from "../../../components/SessionPageComponents/middle-sect
 import RightSection from "../../../components/SessionPageComponents/right-section"
 import { Button } from "../../../components/ui/button"
 import { LogOut } from "lucide-react"
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { isValidSession, appendConversation } from "./actions";
@@ -13,7 +13,7 @@ import { useAppContext } from "../../../context/AppContext"
 
 export default function Home() {
   const { sessionId } = useParams();
-  const { data: session, status } = useSession();
+  const {  status } = useSession();
 
 
 

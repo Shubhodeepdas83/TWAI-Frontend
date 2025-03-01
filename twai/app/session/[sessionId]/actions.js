@@ -6,24 +6,24 @@ import { getServerSession } from "next-auth";
 
 const prisma = new PrismaClient();
 
-export async function isValidSession({sessionId}) {
+export async function isValidSession({ sessionId }) {
     const session = await getServerSession(authOptions);
 
-  if (!session) {
-    return { failure: "not authenticated" };
-  }
-  
+    if (!session) {
+        return { failure: "not authenticated" };
+    }
+
     const user = await prisma.user.findUnique({
         where: { email: session.user.email },
         select: {
-        sessions: {
-            select: {
-            id: true,
-            conversation: true,
-            createdAt: true,
-            summary: true,
+            sessions: {
+                select: {
+                    id: true,
+                    conversation: true,
+                    createdAt: true,
+                    summary: true,
+                },
             },
-        },
         },
     });
 
@@ -42,24 +42,24 @@ export async function isValidSession({sessionId}) {
 
 }
 
-export async function appendConversation({ sessionId , newMessages }) {
+export async function appendConversation({ sessionId, newMessages }) {
     const session = await getServerSession(authOptions);
 
-  if (!session) {
-    return { failure: "not authenticated" };
-  }
-  
+    if (!session) {
+        return { failure: "not authenticated" };
+    }
+
     const user = await prisma.user.findUnique({
         where: { email: session.user.email },
         select: {
-        sessions: {
-            select: {
-            id: true,
-            conversation: true,
-            createdAt: true,
-            summary: true,
+            sessions: {
+                select: {
+                    id: true,
+                    conversation: true,
+                    createdAt: true,
+                    summary: true,
+                },
             },
-        },
         },
     });
 
@@ -72,10 +72,10 @@ export async function appendConversation({ sessionId , newMessages }) {
     if (!foundSession) {
         return { failure: "Session not found" };
     }
-    const _ = await prisma.session.update({
+    await prisma.session.update({
         where: { id: sessionId },
         data: {
-        conversation: [...foundSession.conversation, ...newMessages],
+            conversation: [...foundSession.conversation, ...newMessages],
         },
     });
 

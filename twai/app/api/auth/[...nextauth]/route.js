@@ -1,5 +1,3 @@
-// [...nextauth].js or [...nextauth].ts
-
 import { prisma } from '../../../../lib/prisma'
 import NextAuth from 'next-auth/next'
 import GoogleProvider from 'next-auth/providers/google'
@@ -8,6 +6,7 @@ const GOOGLE_CLIENT_ID = process.env.AUTH_GOOGLE_ID
 const GOOGLE_CLIENT_SECRET = process.env.AUTH_GOOGLE_SECRET
 const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET
 
+// @ts-expect-error: Suppressing TypeScript error due to non-TypeScript usage
 export const authOptions = {
   session: {
     strategy: 'jwt',
@@ -20,9 +19,9 @@ export const authOptions = {
   ],
   secret: NEXTAUTH_SECRET,
   callbacks: {
-    async signIn({ account, profile }) {
+    async signIn({ profile }) {
       if (!profile?.email) {
-        throw new Error('No profile')
+        throw new Error('No profile');
       }
 
       await prisma.user.upsert({
@@ -36,32 +35,34 @@ export const authOptions = {
         update: {
           name: profile.name,
         },
-      })
-      return true
+      });
+      return true;
     },
     async session({ session, token }) {
       if (token?.id) {
-        session.user.id = token.id
+        session.user.id = token.id;
       }
-      return session
+      return session;
     },
-    async jwt({ token, user, account, profile }) {
+    async jwt({ token, profile }) {
       if (profile) {
         const fetchedUser = await prisma.user.findUnique({
           where: {
             email: profile.email,
           },
-        })
+        });
         if (!fetchedUser) {
-          throw new Error('No user found')
+          throw new Error('No user found');
         }
 
-        token.id = fetchedUser.id
+        token.id = fetchedUser.id;
       }
-      return token
+      return token;
     },
   },
-}
+};
+
+
 
 const handler = NextAuth(authOptions)
 export { handler as GET, handler as POST }
