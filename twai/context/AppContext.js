@@ -12,7 +12,7 @@ export function AppProvider({ children }) {
   const [micStream, setMicStream] = useState(null);
   const [micTranscript, setMicTranscript] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [wholeConversation, setWholeConversation] = useState([{"other": "Whats the difference between DAO and Traditional Organizations?"},{"user":"They are the same"}]);
+  const [wholeConversation, setWholeConversation] = useState([]);
   const [enableWebSearch, setEnableWebSearch] = useState(false);
   const [showGraph, setShowGraph] = useState(false);
   const [stream,setStream] = useState(null);

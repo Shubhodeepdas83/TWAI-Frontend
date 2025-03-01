@@ -9,9 +9,11 @@ import CaptureScreenButton from "@/components/SessionPageComponents/captureScree
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
-
+import { useParams } from "next/navigation"
+import {appendConversation} from "../../app/session/[sessionId]/actions"
 export default function LeftSection() {
   const { wholeConversation, videoRef, stream, setWholeConversation } = useAppContext()
+  const{sessionId} = useParams();
 
   useEffect(() => {
     if (stream && videoRef.current) {
@@ -20,7 +22,15 @@ export default function LeftSection() {
   }, [stream, videoRef])
 
   const handleClearConversation = () => {
-    setWholeConversation([])
+
+    const appending = appendConversation({ sessionId, newMessages: wholeConversation });
+    if(appending.success){
+      setWholeConversation([])
+    }
+
+    else{
+      console.log(appending?.failure)
+    }
   }
 
   return (

@@ -20,6 +20,7 @@ export default function MiddleSection() {
     wholeConversation,
     showGraph,
     setUsedCitations,
+    setIsProcessing
   } = useAppContext()
 
   const [image, setImage] = useState(null)
@@ -28,6 +29,7 @@ export default function MiddleSection() {
 
   const handleSendMessage = async () => {
     if (userInput.trim()) {
+      setIsProcessing(true)
       setChatMessages([...chatMessages, { text: userInput, sender: "user" }])
       setUserInput("")
 
@@ -76,6 +78,7 @@ export default function MiddleSection() {
       } else {
         setUsedCitations([])
       }
+      setIsProcessing(false)
     }
   }
 

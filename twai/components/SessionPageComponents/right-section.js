@@ -9,7 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-
+import {appendConversation} from "../../app/session/[sessionId]/actions"
+import { useParams } from "next/navigation"
 export default function RightSection() {
   const {
     isProcessing,
@@ -28,14 +29,25 @@ export default function RightSection() {
     setUsedCitations,
   } = useAppContext()
 
+  const { sessionId } = useParams();
+
   const handleAIAnswer = async (requestType) => {
     if (isProcessing) return
     setIsProcessing(true)
 
     setChatMessages([...chatMessages, { text: "Thinking...", sender: "ai" }])
 
+    const appending = await appendConversation({ sessionId, newMessages: wholeConversation });
+    let tempconv = wholeConversation
+    if(appending.success){
+      
+      setTranscript("")
+      setWholeConversation([])
+      setMicTranscript("")
+    }
+
     try {
-      const aiResponse = await get_AI_Help(wholeConversation, enableWebSearch, requestType)
+      const aiResponse = await get_AI_Help(tempconv, enableWebSearch, requestType)
 
       setChatMessages((prev) => [
         ...prev.filter((msg) => msg.text !== "Thinking..."),
@@ -57,9 +69,7 @@ export default function RightSection() {
       console.error("AI Request failed:", error)
     } finally {
       setIsProcessing(false)
-      setTranscript("")
-      setWholeConversation([])
-      setMicTranscript("")
+      
     }
   }
 
