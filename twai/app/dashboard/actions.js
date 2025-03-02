@@ -121,7 +121,7 @@ export async function removeDocument(documentId) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ pdf_url: document.fileUrl }),
+        body: JSON.stringify({ pdf_url: document.fileUrl,userId:user.id }),
       });
       
       if (!res.ok) {

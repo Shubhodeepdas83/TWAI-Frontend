@@ -85,7 +85,7 @@ export async function POST(req) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ s3_url: fileUrl }),
+        body: JSON.stringify({ s3_url: fileUrl ,userId:user.id}),
       });
 
       if (!res.ok) {

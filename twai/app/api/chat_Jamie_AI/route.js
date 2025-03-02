@@ -4,21 +4,27 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route"; // Make sure t
 
 export async function POST(req) {
   try {
-    // Check session to validate user
+    // Step 1: Validate User Authentication
     const session = await getServerSession(authOptions);
-    
     if (!session) {
-      return NextResponse.json(
-        {
-          error: "Unauthorized: You must be logged in to access this route.",
-        },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
+
+    // Step 2: Get user from database
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Extract form data
     const formData = await req.formData();
     const user_input = formData.get("user_input");
+    formData.append("userId", user.id);
+
 
     // Validate required fields
     if (!user_input) {
