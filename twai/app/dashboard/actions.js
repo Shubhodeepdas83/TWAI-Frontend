@@ -144,3 +144,69 @@ export async function removeDocument(documentId) {
   }
 }
 
+
+export async function getSummary(sessionId) {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    return { failure: "not authenticated" };
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+    select: { id: true },
+  });
+
+  if (!user) {
+    return { failure: "User not found" };
+  }
+
+  const s = await prisma.session.findUnique({
+    where: { id:sessionId,userId:user.id }
+  });
+
+  if (!s) {
+    return { failure: "Summary not found or user not linked to the summary" };
+  }
+  console.log(s)
+
+  if(!s.summary){
+
+
+  const response = await fetch(`${process.env.BACKEND_URL}/process-ai-summary`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({raw_conversation: s.conversation}),
+  });
+
+  if (!response.ok) {
+    const data = await response.json();
+    console.log(data)
+    return {
+      failure: "Sorry, I couldn't process the summary of this meeting at this time.",
+    };
+  } else {
+    const data = await response.json();
+
+    const _ = await prisma.session.update({
+      where: { id: sessionId },
+      data: { summary: data.result },
+    });
+
+    return {
+      summary: data.result,
+      createdAt : s.createdAt
+    };
+  }}
+  else{
+    return {
+      summary: s.summary,
+      createdAt : s.createdAt
+    };
+  }
+
+
+
+}

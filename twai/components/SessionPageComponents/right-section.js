@@ -1,15 +1,13 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import { BookOpen, Clock, Search, BarChart2, ExternalLink, FileText } from "lucide-react"
+import { BookOpen, Clock, ExternalLink, FileText } from "lucide-react"
 import { useAppContext } from "../../context/AppContext"
 import { get_AI_Help } from "../../lib/sessionActions"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Separator } from "@/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import {appendConversation} from "../../app/session/[sessionId]/actions"
+import { appendConversation } from "../../app/session/[sessionId]/actions"
 import { useParams } from "next/navigation"
 export default function RightSection() {
   const {
@@ -29,7 +27,7 @@ export default function RightSection() {
     setUsedCitations,
   } = useAppContext()
 
-  const { sessionId } = useParams();
+  const { sessionId } = useParams()
 
   const handleAIAnswer = async (requestType) => {
     if (isProcessing) return
@@ -37,10 +35,9 @@ export default function RightSection() {
 
     setChatMessages([...chatMessages, { text: "Thinking...", sender: "ai" }])
 
-    const appending = await appendConversation({ sessionId, newMessages: wholeConversation });
-    let tempconv = wholeConversation
-    if(appending.success){
-      
+    const appending = await appendConversation({ sessionId, newMessages: wholeConversation })
+    const tempconv = wholeConversation
+    if (appending.success) {
       setTranscript("")
       setWholeConversation([])
       setMicTranscript("")
@@ -69,12 +66,7 @@ export default function RightSection() {
       console.error("AI Request failed:", error)
     } finally {
       setIsProcessing(false)
-      
     }
-  }
-
-  const handleCheckboxChange = (setter) => {
-    setter((prev) => !prev)
   }
 
   return (
@@ -141,34 +133,6 @@ export default function RightSection() {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-          </div>
-
-          <Separator className="my-4" />
-
-          <div className="space-y-3">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <Checkbox
-                checked={enableWebSearch}
-                onCheckedChange={() => handleCheckboxChange(setEnableWebSearch)}
-                id="web-search"
-              />
-              <div className="flex items-center gap-2">
-                <Search className="h-4 w-4 text-muted-foreground" />
-                <span>Enable Web search</span>
-              </div>
-            </label>
-
-            <label className="flex items-center gap-2 cursor-pointer">
-              <Checkbox
-                checked={showGraph}
-                onCheckedChange={() => handleCheckboxChange(setShowGraph)}
-                id="show-graph"
-              />
-              <div className="flex items-center gap-2">
-                <BarChart2 className="h-4 w-4 text-muted-foreground" />
-                <span>Show Graph</span>
-              </div>
-            </label>
           </div>
         </CardContent>
       </Card>

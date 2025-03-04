@@ -18,6 +18,7 @@ export function AppProvider({ children }) {
   const [stream,setStream] = useState(null);
   const videoRef = useRef(null);
   const [usedCitations, setUsedCitations] = useState([]);
+  const [copiedText, setCopiedText] = useState("");
 
   return (
     <AppContext.Provider
@@ -42,7 +43,7 @@ export function AppProvider({ children }) {
         enableWebSearch,
         setEnableWebSearch,
         showGraph,
-        setShowGraph,usedCitations, setUsedCitations
+        setShowGraph,usedCitations, setUsedCitations,setCopiedText,copiedText
       }}
     >
       {children}

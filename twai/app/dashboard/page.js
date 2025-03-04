@@ -3,7 +3,7 @@
 import { useSession, signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getUserDetails, createSession, removeDocument } from "./actions";
+import { getUserDetails, createSession, removeDocument, getSummary } from "./actions";
 import FileUploadButton from "../../components/DashboardPageComponents/fileUploadButton";
 
 export default function DashboardPage() {
@@ -14,6 +14,8 @@ export default function DashboardPage() {
     const [documents, setDocuments] = useState([]);
     const [isDeleting, setIsDeleting] = useState(false);
     const [deletingId, setDeletingId] = useState(null);
+    const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
+    const [selectedSessionSummary, setSelectedSessionSummary] = useState(null);
     const router = useRouter();
 
     useEffect(() => {
@@ -51,10 +53,10 @@ export default function DashboardPage() {
     const handleDeleteDocument = async (documentId) => {
         setIsDeleting(true);
         setDeletingId(documentId);
-        
+
         try {
             const result = await removeDocument(documentId);
-            
+
             if (result.success) {
                 // Update documents list after successful deletion
                 await fetchUserData();
@@ -68,6 +70,16 @@ export default function DashboardPage() {
         } finally {
             setIsDeleting(false);
             setDeletingId(null);
+        }
+    };
+
+    const handleGenerateSummary = async (sessionId) => {
+        const data = await getSummary(sessionId); // Call the server action for summary
+        if (data.summary) {
+            setSelectedSessionSummary(data.summary);
+            setIsSummaryModalOpen(true); // Open the summary modal
+        } else {
+            alert("Failed to generate summary");
         }
     };
 
@@ -159,7 +171,18 @@ export default function DashboardPage() {
                                                     <span className="text-gray-400">No summary available</span>
                                                 )}
                                             </p>
+                                            <p className="text-xs text-gray-400">
+                                                Created on: {new Date(session.createdAt).toLocaleString()}
+                                            </p>
                                         </div>
+                                        {!session.summary && (
+                                            <button
+                                                onClick={() => handleGenerateSummary(session.id)} // Generate summary
+                                                className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                                            >
+                                                Show Summary
+                                            </button>
+                                        )}
                                     </div>
                                 ))}
                             </div>
@@ -203,44 +226,55 @@ export default function DashboardPage() {
                                             <button
                                                 onClick={() => handleDeleteDocument(doc.id)}
                                                 disabled={isDeleting && deletingId === doc.id}
-                                                className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 transition-colors"
+                                                className={`rounded-md px-4 py-2 text-sm font-medium ${isDeleting && deletingId === doc.id ? "bg-gray-400 text-white" : "bg-red-600 text-white"}`}
                                             >
-                                                {isDeleting && deletingId === doc.id ? (
-                                                    <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                    </svg>
-                                                ) : (
-                                                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            strokeWidth="2"
-                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                                        />
-                                                    </svg>
-                                                )}
+                                                {isDeleting && deletingId === doc.id ? "Deleting..." : "Delete"}
                                             </button>
                                         </div>
-                                        <iframe
-                                            src={doc.fileUrl}
-                                            width="100%"
-                                            height="200px"
-                                            className="border rounded"
-                                        ></iframe>
+                                        <p className="text-xs text-gray-500">{doc.fileUrl}</p>
                                     </div>
                                 ))
                             ) : (
-                                <div className="text-center text-gray-500">No documents uploaded yet.</div>
+                                <p>No documents uploaded yet.</p>
                             )}
                         </div>
+                    </div>
+                </div>
+            )}
 
-                        <button
-                            onClick={() => setIsDocumentsModalOpen(false)}
-                            className="inline-flex w-full items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-                        >
-                            Close
-                        </button>
+            {/* Summary Modal */}
+            {isSummaryModalOpen && selectedSessionSummary && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                    <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+                        <div className="mb-4 flex justify-between items-center">
+                            <h2 className="text-lg font-medium">Session Summary</h2>
+                            <button onClick={() => setIsSummaryModalOpen(false)} className="rounded-full p-1 hover:bg-gray-200">
+                                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M6 18L18 6M6 6l12 12"
+                                    />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div>
+                            <h3 className="font-medium text-blue-600">Summary:</h3>
+                            <div className="space-y-2">
+                                {selectedSessionSummary
+                                    .split("-")
+                                    .filter((line) => line.trim() !== "") // Remove empty lines
+                                    .map((line, index) => (
+                                        <div key={index} className="flex items-start">
+                                            <span className="mr-2">•</span>
+                                            <p className="text-sm text-gray-700">{line.trim()}</p>
+                                        </div>
+                                    ))}
+                            </div>
+
+                        </div>
                     </div>
                 </div>
             )}

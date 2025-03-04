@@ -17,7 +17,7 @@ export default function Home() {
 
 
 
-  const {wholeConversation } = useAppContext();
+  const {wholeConversation,setCopiedText } = useAppContext();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
@@ -40,6 +40,35 @@ export default function Home() {
 
     fetchData();
   }, [status, sessionId, router]);
+
+  
+  useEffect(() => {
+    const handleMouseUp = () => {
+      const selectedText = window.getSelection()?.toString().trim();
+      if (!selectedText) return;
+  
+      const selection = window.getSelection();
+      if (!selection) return;
+  
+      const anchorNode = selection.anchorNode;
+      const focusNode = selection.focusNode;
+      if (!anchorNode || !focusNode) return;
+  
+      const conversationContainer = document.getElementById("conversation-container");
+  
+      // Ensure BOTH the start and end of selection are inside the conversation container
+      if (conversationContainer?.contains(anchorNode) && conversationContainer.contains(focusNode)) {
+        navigator.clipboard.writeText(selectedText)
+          .then(() => {console.log("Copied:", selectedText) ; setCopiedText(selectedText)})
+          .catch(err => console.error("Copy failed:", err));
+      }
+    };
+  
+    document.addEventListener("mouseup", handleMouseUp);
+    return () => document.removeEventListener("mouseup", handleMouseUp);
+  }, []);
+  
+  
 
   const handleExit = async () => {
     await appendConversation({ sessionId: sessionId, newMessages: wholeConversation });

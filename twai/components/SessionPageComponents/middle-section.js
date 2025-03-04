@@ -3,11 +3,11 @@ import ReactMarkdown from "react-markdown"
 import { useAppContext } from "../../context/AppContext"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { X, Send, CloudUpload, Trash, Image, Bot } from "lucide-react"
+import { X, Send, CloudUpload, Trash, Image, Bot, Search, BarChart2 } from "lucide-react"
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Badge } from "@/components/ui/badge"
+import { Checkbox } from "@/components/ui/checkbox"
 
 export default function MiddleSection() {
   const {
@@ -17,10 +17,12 @@ export default function MiddleSection() {
     setUserInput,
     isProcessing,
     enableWebSearch,
-    wholeConversation,
+    setEnableWebSearch,
     showGraph,
+    setShowGraph,
+    wholeConversation,
     setUsedCitations,
-    setIsProcessing
+    setIsProcessing,
   } = useAppContext()
 
   const [image, setImage] = useState(null)
@@ -73,7 +75,7 @@ export default function MiddleSection() {
           Object.entries(data.used_citations).map(([key, value]) => ({
             id: key,
             ...value,
-          }))
+          })),
         )
       } else {
         setUsedCitations([])
@@ -149,8 +151,9 @@ export default function MiddleSection() {
                 {chatMessages.map((message, index) => (
                   <div key={index} className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}>
                     <div
-                      className={`p-3 rounded-lg max-w-[85%] ${message.sender === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
-                        }`}
+                      className={`p-3 rounded-lg max-w-[85%] ${
+                        message.sender === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
+                      }`}
                     >
                       {message.text === "Thinking..." ? (
                         <div className="flex items-center gap-2">
@@ -224,20 +227,41 @@ export default function MiddleSection() {
               </div>
             </div>
 
-            <div className="flex items-center text-xs text-muted-foreground">
-              {enableWebSearch && (
-                <Badge variant="outline" className="mr-2">
-                  Web Search Enabled
-                </Badge>
-              )}
-              {showGraph && <Badge variant="outline">Graph Visualization Enabled</Badge>}
-              <span className="ml-auto">Press Enter to send, Shift+Enter for new line</span>
+            <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
+              <div className="flex space-x-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <Checkbox
+                    checked={enableWebSearch}
+                    onCheckedChange={() => setEnableWebSearch(!enableWebSearch)}
+                    id="web-search"
+                    className={enableWebSearch ? "bg-primary text-primary-foreground" : ""}
+                  />
+                  <div className="flex items-center gap-1">
+                    <Search className={`h-4 w-4 ${enableWebSearch ? "text-primary" : "text-muted-foreground"}`} />
+                    <span className={enableWebSearch ? "text-primary font-medium" : ""}>Web Search</span>
+                  </div>
+                </label>
+
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <Checkbox
+                    checked={showGraph}
+                    onCheckedChange={() => setShowGraph(!showGraph)}
+                    id="show-graph"
+                    className={showGraph ? "bg-primary text-primary-foreground" : ""}
+                  />
+                  <div className="flex items-center gap-1">
+                    <BarChart2 className={`h-4 w-4 ${showGraph ? "text-primary" : "text-muted-foreground"}`} />
+                    <span className={showGraph ? "text-primary font-medium" : ""}>Graph Visualization</span>
+                  </div>
+                </label>
+              </div>
+              <span>Press Enter to send, Shift+Enter for new line</span>
             </div>
           </div>
         </div>
 
         {/* Graph Icon - Displayed Below the Chat Input */}
-        {(graphImage&&showGraph) && (
+        {graphImage && showGraph && (
           <Button
             variant="link"
             size="icon"
@@ -275,3 +299,4 @@ export default function MiddleSection() {
     </Card>
   )
 }
+
