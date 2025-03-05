@@ -1,16 +1,16 @@
 "use client"
 
-import { createContext, useContext, useState,useRef } from "react"
+import { createContext, useContext, useState,useRef, use } from "react"
 
 const AppContext = createContext()
 
 export function AppProvider({ children }) {
-  const [transcript, setTranscript] = useState("")
+  const [capturePartialTranscript, setCapturePartialTranscript] = useState("")
   const [chatMessages, setChatMessages] = useState([])
   const [userInput, setUserInput] = useState("")
   const [microphoneConnected, setMicrophoneConnected] = useState(false)
   const [micStream, setMicStream] = useState(null);
-  const [micTranscript, setMicTranscript] = useState("");
+  const [micPartialTranscript, setMicPartialTranscript] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [wholeConversation, setWholeConversation] = useState([{'other':"whatt are the Disadvantages of a centralized organization"},{'user':"i am not sure let me think"}]);
   const [enableWebSearch, setEnableWebSearch] = useState(false);
@@ -19,12 +19,14 @@ export function AppProvider({ children }) {
   const videoRef = useRef(null);
   const [usedCitations, setUsedCitations] = useState([]);
   const [copiedText, setCopiedText] = useState("");
+  const micToken = useRef(null);
+  const captureToken = useRef(null);
 
   return (
     <AppContext.Provider
       value={{
-        transcript,
-        setTranscript,
+        capturePartialTranscript,
+        setCapturePartialTranscript,
         chatMessages,
         setChatMessages,
         userInput,
@@ -36,14 +38,14 @@ export function AppProvider({ children }) {
         setStream,
         micStream,
         setMicStream,
-        micTranscript,
-        setMicTranscript,
+        micPartialTranscript,
+        setMicPartialTranscript,
         wholeConversation, setWholeConversation,
         isProcessing, setIsProcessing,
         enableWebSearch,
         setEnableWebSearch,
         showGraph,
-        setShowGraph,usedCitations, setUsedCitations,setCopiedText,copiedText
+        setShowGraph,usedCitations, setUsedCitations,setCopiedText,copiedText,micToken,captureToken
       }}
     >
       {children}

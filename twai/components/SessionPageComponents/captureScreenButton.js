@@ -6,10 +6,12 @@ import { MonitorSmartphone, StopCircle } from "lucide-react"
 import { useState } from "react"
 
 export default function CaptureScreenButton() {
-  const { setTranscript, setWholeConversation, setStream, videoRef, stream } = useAppContext()
+  const { setCapturePartialTranscript, setWholeConversation, setStream, videoRef, stream,captureToken } = useAppContext()
   const [isCapturing, setIsCapturing] = useState(false)
 
   let socket = null
+  let mediaRecorder = null
+  const ASSEMBLY_TOKEN = captureToken.current || ""
 
   const startScreenShare = async () => {
     try {
@@ -38,19 +40,38 @@ export default function CaptureScreenButton() {
       const audioTrack = mediaStream.getAudioTracks()[0]
       if (audioTrack) {
         console.log("Audio found")
-        const audioStream = new MediaStream([audioTrack])
-
-        const mediaRecorder = new MediaRecorder(audioStream, { mimeType: "audio/webm" })
-
-        await openWebSocket()
-
-        mediaRecorder.ondataavailable = (event) => {
+        
+        // Create audio context to process the audio
+        const audioContext = new AudioContext({
+          sampleRate: 16000, // Match the required sample rate
+        })
+        
+        // Create a MediaStreamSource from the audio track
+        const source = audioContext.createMediaStreamSource(new MediaStream([audioTrack]))
+        
+        // Create a processor to convert to the required format
+        const processor = audioContext.createScriptProcessor(4096, 1, 1)
+        
+        // Connect the source to the processor
+        source.connect(processor)
+        processor.connect(audioContext.destination)
+        
+        // Initialize the websocket connection
+        await connectToAssemblyAI()
+        
+        // Process audio data
+        processor.onaudioprocess = (e) => {
           if (socket && socket.readyState === WebSocket.OPEN) {
-            socket.send(event.data)
+            // Get audio data
+            const inputData = e.inputBuffer.getChannelData(0)
+            
+            // Convert to 16-bit PCM
+            const pcmData = convertFloatTo16BitPCM(inputData)
+            
+            // Send the data
+            socket.send(pcmData)
           }
         }
-
-        mediaRecorder.start(250)
       } else {
         console.warn("No audio track found")
       }
@@ -60,42 +81,34 @@ export default function CaptureScreenButton() {
     }
   }
 
-  const stopScreenShare = () => {
-    if (stream) {
-      stream.getTracks().forEach((track) => track.stop())
-      setStream(null)
-      setIsCapturing(false)
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = null
-      }
-
-      if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.close()
-      }
+  // Convert Float32Array to Int16Array for PCM_S16LE format
+  const convertFloatTo16BitPCM = (float32Array) => {
+    const int16Array = new Int16Array(float32Array.length)
+    for (let i = 0; i < float32Array.length; i++) {
+      // Convert from [-1, 1] to [-32768, 32767]
+      const s = Math.max(-1, Math.min(1, float32Array[i]))
+      int16Array[i] = s < 0 ? s * 0x8000 : s * 0x7FFF
     }
+    return int16Array.buffer
   }
 
-  const openWebSocket = () => {
+  const connectToAssemblyAI = () => {
     return new Promise((resolve, reject) => {
-      const url = "wss://api.deepgram.com/v1/listen"
-
-      socket = new WebSocket(url, ["token", process.env.NEXT_PUBLIC_DEEPGRAM_API_KEY])
+      // AssemblyAI WebSocket URL
+      const url = "wss://api.assemblyai.com/v2/realtime/ws"
+      
+      // AssemblyAI query params with updated configurations
+      const queryParams = new URLSearchParams({
+        sample_rate: "16000",
+        encoding: "pcm_s16le", // PCM 16-bit little-endian
+        token: ASSEMBLY_TOKEN
+      }).toString()
+      
+      console.log("Connecting to AssemblyAI with params:", queryParams)
+      socket = new WebSocket(`${url}?${queryParams}`)
 
       socket.onopen = () => {
-        console.log("Connected to Deepgram WebSocket")
-
-        socket.send(
-          JSON.stringify({
-            type: "Configure",
-            token: process.env.NEXT_PUBLIC_DEEPGRAM_API_KEY,
-            encoding: "opus",
-            sample_rate: 16000,
-            interim_results: true,
-            diarize: true,
-          }),
-        )
-
+        console.log("Connected to AssemblyAI WebSocket")
         resolve()
       }
 
@@ -105,23 +118,48 @@ export default function CaptureScreenButton() {
       }
 
       socket.onmessage = (event) => {
-        const data = JSON.parse(event.data)
-        if (data.channel && data.channel.alternatives) {
-          const transcript = data.channel.alternatives[0].transcript
-          if (transcript.trim()) {
-            setTranscript((prevMessages) => prevMessages + " " + transcript)
-
-            setWholeConversation((prev) => {
-              if (prev[prev.length - 1]?.other) {
-                return [...prev.slice(0, -1), { other: prev[prev.length - 1].other + " " + transcript }]
-              } else {
-                return [...prev, { other: transcript }]
-              }
-            })
-          }
+        const transcript = JSON.parse(event.data)
+        if (!transcript.text) {
+          return;
+        }
+  
+        console.log('Capture Transcript received:', transcript);
+        
+        if (transcript.message_type === 'PartialTranscript') {
+          setCapturePartialTranscript(transcript.text);
+        } else {
+          setCapturePartialTranscript("");
+          
+          setWholeConversation((prev) => {
+            if (prev.length > 0 && prev[prev.length - 1]?.other) {
+              return [...prev.slice(0, -1), { other: prev[prev.length - 1].other+" " + transcript.text }];
+  
+            } else {
+              return [...prev, { other: transcript.text }];
+            }
+          });
         }
       }
     })
+  }
+
+  const stopScreenShare = () => {
+    if (stream) {
+      setCapturePartialTranscript("")
+      stream.getTracks().forEach((track) => track.stop())
+      setStream(null)
+      setIsCapturing(false)
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = null
+      }
+
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        // Send a termination message to the websocket
+        socket.send(JSON.stringify({ terminate_session: true }))
+        socket.close()
+      }
+    }
   }
 
   return (
@@ -144,4 +182,3 @@ export default function CaptureScreenButton() {
     </Button>
   )
 }
-

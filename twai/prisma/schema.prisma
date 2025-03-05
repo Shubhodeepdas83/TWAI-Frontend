@@ -29,6 +29,8 @@ model Session {
   conversation Json[]   @default([])
   summary     String?
   createdAt   DateTime @default(now())
+  micToken    String?
+  captureToken String?
 
   user   User   @relation(fields: [userId], references: [id])
   userId String

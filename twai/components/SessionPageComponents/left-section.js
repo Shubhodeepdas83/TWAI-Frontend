@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 export default function LeftSection() {
-  const { wholeConversation, videoRef, stream, setWholeConversation } = useAppContext()
+  const { wholeConversation, videoRef, stream, setWholeConversation, micPartialTranscript, capturePartialTranscript } = useAppContext()
   const { sessionId } = useParams()
   const [autoScroll, setAutoScroll] = useState(true)
   const [manualInput, setManualInput] = useState("")
@@ -44,7 +44,7 @@ export default function LeftSection() {
         scrollContainer.scrollTop = scrollContainer.scrollHeight
       }
     }
-  }, [autoScroll,wholeConversation])
+  }, [autoScroll, wholeConversation])
 
   const handleAddConversation = () => {
     if (manualInput.trim()) {
@@ -69,8 +69,8 @@ export default function LeftSection() {
 
           {/* Buttons Section */}
           <div className="flex flex-col sm:flex-row gap-2">
-            <MicrophoneButton />
-            <CaptureScreenButton />
+            <MicrophoneButton sessionId={sessionId}/>
+            <CaptureScreenButton sessionId={sessionId}/>
           </div>
         </CardContent>
       </Card>
@@ -98,29 +98,58 @@ export default function LeftSection() {
           <div className="flex-1 min-h-0 overflow-hidden">
             <ScrollArea id="conversation-container" className="h-full pr-3" ref={scrollAreaRef}>
               {wholeConversation.length > 0 ? (
-                wholeConversation.map((message, index) => (
-                  <div key={index} className="mb-3">
-                    {message.user && (
-                      <div className="text-left bg-primary/10 text-primary p-3 rounded-lg mb-2">
-                        <div className="font-semibold text-xs mb-1 text-muted-foreground">You</div>
-                        {message.user}
-                      </div>
-                    )}
-                    {message.other && (
-                      <div className="text-left bg-muted p-3 rounded-lg">
-                        <div className="font-semibold text-xs mb-1 text-muted-foreground">Other</div>
-                        {message.other}
-                      </div>
-                    )}
-                    {index < wholeConversation.length - 1 && <Separator className="my-3" />}
-                  </div>
-                ))
+                wholeConversation.map((message, index) => {
+                  const lastUserMessageIndex = wholeConversation
+                    .map((m, i) => (m.user ? i : -1))
+                    .filter(i => i !== -1)
+                    .pop();
+
+                  const lastOtherMessageIndex = wholeConversation
+                    .map((m, i) => (m.other ? i : -1))
+                    .filter(i => i !== -1)
+                    .pop();
+
+                  const isLastUserMessage = message.user && index === lastUserMessageIndex;
+                  const isLastOtherMessage = message.other && index === lastOtherMessageIndex;
+
+                  return (
+                    <div key={index} className="mb-3">
+                      {/* User Messages */}
+                      {message.user && (
+                        <div className="text-left bg-primary/10 text-primary p-3 rounded-lg mb-2">
+                          <div className="font-semibold text-xs mb-1 text-muted-foreground">You</div>
+                          {message.user}
+                          {/* {isLastUserMessage && micPartialTranscript !== "" && (
+                            <span className="text-muted-foreground animate-blink"> {micPartialTranscript}...</span>
+                          )} */}
+                        </div>
+                      )}
+
+                      {/* Other Messages */}
+                      {message.other && (
+                        <div className="text-left bg-muted p-3 rounded-lg">
+                          <div className="font-semibold text-xs mb-1 text-muted-foreground">Other</div>
+                          {message.other}
+                          {/* {isLastOtherMessage && capturePartialTranscript !== "" && (
+                            <span className="text-muted-foreground animate-blink"> {capturePartialTranscript}...</span>
+                          )} */}
+                        </div>
+                      )}
+
+                      {/* Separator */}
+                      {index < wholeConversation.length - 1 && <Separator className="my-3" />}
+                    </div>
+                  );
+                })
               ) : (
                 <div className="text-center text-muted-foreground py-8">
                   <p>No conversation recorded yet...</p>
                   <p className="text-sm mt-2">Use the microphone or screen capture to start recording</p>
                 </div>
               )}
+
+
+
             </ScrollArea>
           </div>
 

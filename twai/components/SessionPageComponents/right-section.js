@@ -13,8 +13,8 @@ export default function RightSection() {
   const {
     isProcessing,
     setIsProcessing,
-    setTranscript,
-    setMicTranscript,
+    setCapturePartialTranscript,
+    setMicPartialTranscript,
     setWholeConversation,
     setChatMessages,
     chatMessages,
@@ -38,9 +38,9 @@ export default function RightSection() {
     const appending = await appendConversation({ sessionId, newMessages: wholeConversation })
     const tempconv = wholeConversation
     if (appending.success) {
-      setTranscript("")
+      setCapturePartialTranscript("")
       setWholeConversation([])
-      setMicTranscript("")
+      setMicPartialTranscript("")
     }
 
     try {

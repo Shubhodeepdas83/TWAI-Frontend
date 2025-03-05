@@ -17,7 +17,7 @@ export default function Home() {
 
 
 
-  const {wholeConversation,setCopiedText } = useAppContext();
+  const {wholeConversation,setCopiedText ,micToken,captureToken} = useAppContext();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
@@ -27,11 +27,13 @@ export default function Home() {
       }
 
       const data = await isValidSession({ sessionId: sessionId });
-      console.log(data);
+
 
       if (data.failure) {
         router.push("/");
       } else {
+        micToken.current = data.micToken;
+        captureToken.current = data.captureToken;
         setIsLoading(false);
       }
 
