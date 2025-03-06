@@ -60,3 +60,12 @@ model MeetingTemplate {
   documents      Document[] // Many-to-many relation with Document
   sessions       Session[]
 }
+
+model AgentStore {
+  id          String   @id @default(uuid())
+  title       String   @unique
+  description String
+  toolsUsed   String[]
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+}

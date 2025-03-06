@@ -72,6 +72,21 @@ export async function getUserDetails() {
   return { user }
 }
 
+export async function getAgentStore() {
+  try {
+    const agents = await prisma.agentStore.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+    })
+
+    return { agents }
+  } catch (error) {
+    console.error("Error fetching agent store:", error)
+    return { failure: "Failed to fetch agent store" }
+  }
+}
+
 export async function createSession(formData) {
   const session = await getServerSession(authOptions)
 

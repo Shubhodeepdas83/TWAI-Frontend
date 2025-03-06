@@ -101,7 +101,8 @@ export default function CaptureScreenButton() {
       const queryParams = new URLSearchParams({
         sample_rate: "16000",
         encoding: "pcm_s16le", // PCM 16-bit little-endian
-        token: ASSEMBLY_TOKEN
+        token: ASSEMBLY_TOKEN,
+        disable_partial_transcripts:true
       }).toString()
       
       console.log("Connecting to AssemblyAI with params:", queryParams)
