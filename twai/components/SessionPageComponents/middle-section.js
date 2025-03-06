@@ -8,6 +8,8 @@ import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Checkbox } from "@/components/ui/checkbox"
+import MicrophoneButton from "@/components/SessionPageComponents/microphoneButton"
+import CaptureScreenButton from "@/components/SessionPageComponents/captureScreenButton"
 
 export default function MiddleSection() {
   const {
@@ -23,6 +25,8 @@ export default function MiddleSection() {
     wholeConversation,
     setUsedCitations,
     setIsProcessing,
+    videoRef,
+    stream,
   } = useAppContext()
 
   const [image, setImage] = useState(null)
@@ -112,166 +116,186 @@ export default function MiddleSection() {
   }
 
   return (
-    <Card className="border shadow-sm h-[calc(100vh-120px)] flex flex-col overflow-hidden">
-      {/* Fixed Header */}
-      <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between shrink-0">
-        <div className="flex items-center gap-2">
-          <Bot className="h-5 w-5 text-primary" />
-          <CardTitle className="text-lg font-medium">AI Meeting Helper</CardTitle>
-        </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleClear}
-          className="text-muted-foreground h-8"
-          disabled={chatMessages.length === 0}
-        >
-          <X className="h-4 w-4 mr-1" />
-          Clear Chat
-        </Button>
-      </CardHeader>
+    <div className="h-[calc(100vh-120px)] flex flex-col gap-4">
+      {/* Video Card - Fixed Height */}
+      <Card className="border shadow-sm">
+        <CardHeader className="p-4 pb-2">
+          <CardTitle className="text-lg font-medium">Screen Capture</CardTitle>
+        </CardHeader>
+        <CardContent className="p-4 pt-0">
+          {/* Video Section */}
+          <div className="aspect-video bg-gray-800 rounded-lg overflow-hidden mb-3">
+            <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
+          </div>
 
-      {/* Flexible Content Area */}
-      <CardContent className="p-4 pt-0 flex-1 flex flex-col overflow-hidden">
-        {/* Scrollable Messages Area */}
-        <div className="flex-1 overflow-hidden">
-          <ScrollArea className="h-full pr-3">
-            {chatMessages.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-center p-8">
-                <div className="max-w-sm">
-                  <Bot className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium mb-2">Welcome to AI Meeting Helper</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Ask questions or upload an image to get assistance with your meeting preparation.
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4 py-2">
-                {chatMessages.map((message, index) => (
-                  <div key={index} className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}>
-                    <div
-                      className={`p-3 rounded-lg max-w-[85%] ${
-                        message.sender === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
-                      }`}
-                    >
-                      {message.text === "Thinking..." ? (
-                        <div className="flex items-center gap-2">
-                          <div className="animate-pulse">Thinking</div>
-                          <span className="animate-bounce">.</span>
-                          <span className="animate-bounce delay-100">.</span>
-                          <span className="animate-bounce delay-200">.</span>
-                        </div>
-                      ) : (
-                        <div className="text-sm">
-                          <ReactMarkdown>{message.text}</ReactMarkdown>
-                        </div>
-                      )}
-                    </div>
+          {/* Buttons Section */}
+          <div className="flex flex-col sm:flex-row gap-2">
+            <MicrophoneButton />
+            <CaptureScreenButton />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* AI Chat Card - Flexible Height */}
+      <Card className="border shadow-sm flex-1 flex flex-col overflow-hidden">
+        <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between shrink-0">
+          <div className="flex items-center gap-2">
+            <Bot className="h-5 w-5 text-primary" />
+            <CardTitle className="text-lg font-medium">AI Meeting Helper</CardTitle>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleClear}
+            className="text-muted-foreground h-8"
+            disabled={chatMessages.length === 0}
+          >
+            <X className="h-4 w-4 mr-1" />
+            Clear Chat
+          </Button>
+        </CardHeader>
+
+        <CardContent className="p-4 pt-0 flex-1 flex flex-col overflow-hidden">
+          {/* Scrollable Messages Area */}
+          <div className="flex-1 overflow-hidden">
+            <ScrollArea className="h-full pr-3">
+              {chatMessages.length === 0 ? (
+                <div className="h-full flex items-center justify-center text-center p-8">
+                  <div className="max-w-sm">
+                    <Bot className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-medium mb-2">Welcome to AI Meeting Helper</h3>
+                    <p className="text-muted-foreground text-sm">
+                      Ask questions or upload an image to get assistance with your meeting preparation.
+                    </p>
                   </div>
-                ))}
+                </div>
+              ) : (
+                <div className="space-y-4 py-2">
+                  {chatMessages.map((message, index) => (
+                    <div key={index} className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}>
+                      <div
+                        className={`p-3 rounded-lg max-w-[85%] ${
+                          message.sender === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
+                        }`}
+                      >
+                        {message.text === "Thinking..." ? (
+                          <div className="flex items-center gap-2">
+                            <div className="animate-pulse">Thinking</div>
+                            <span className="animate-bounce">.</span>
+                            <span className="animate-bounce delay-100">.</span>
+                            <span className="animate-bounce delay-200">.</span>
+                          </div>
+                        ) : (
+                          <div className="text-sm">
+                            <ReactMarkdown>{message.text}</ReactMarkdown>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </ScrollArea>
+          </div>
+
+          {/* Fixed Input Area */}
+          <div className="mt-4 shrink-0">
+            {image && (
+              <div className="mb-3 p-2 bg-muted rounded-lg flex items-center">
+                <img
+                  src={URL.createObjectURL(image) || "/placeholder.svg"}
+                  alt="Uploaded Preview"
+                  className="h-12 w-12 object-cover rounded-md"
+                />
+                <span className="text-sm ml-2 flex-1 truncate">{image.name}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleRemoveImage}
+                  className="text-destructive hover:text-destructive/90 h-8 w-8 p-0"
+                >
+                  <Trash className="h-4 w-4" />
+                </Button>
               </div>
             )}
-          </ScrollArea>
-        </div>
 
-        {/* Fixed Input Area */}
-        <div className="mt-4 shrink-0">
-          {image && (
-            <div className="mb-3 p-2 bg-muted rounded-lg flex items-center">
-              <img
-                src={URL.createObjectURL(image) || "/placeholder.svg"}
-                alt="Uploaded Preview"
-                className="h-12 w-12 object-cover rounded-md"
-              />
-              <span className="text-sm ml-2 flex-1 truncate">{image.name}</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleRemoveImage}
-                className="text-destructive hover:text-destructive/90 h-8 w-8 p-0"
-              >
-                <Trash className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
-
-          <div className="flex flex-col gap-2">
-            <div className="flex gap-2">
-              <Textarea
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                placeholder="Type a message..."
-                className="resize-none min-h-[80px]"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault()
-                    handleSendMessage()
-                  }
-                }}
-              />
-              <div className="flex flex-col gap-2">
-                <Button disabled={isProcessing || !userInput.trim()} onClick={handleSendMessage} className="flex-1">
-                  <Send className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="icon" className="flex-1" onClick={triggerFileInput}>
-                  <CloudUpload className="h-4 w-4" />
-                </Button>
-                <input
-                  type="file"
-                  id="imageUpload"
-                  accept="image/png, image/jpeg, image/jpg"
-                  onChange={handleImageUpload}
-                  style={{ display: "none" }}
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-2">
+                <Textarea
+                  value={userInput}
+                  onChange={(e) => setUserInput(e.target.value)}
+                  placeholder="Type a message..."
+                  className="resize-none min-h-[80px]"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault()
+                      handleSendMessage()
+                    }
+                  }}
                 />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
-              <div className="flex space-x-4">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <Checkbox
-                    checked={enableWebSearch}
-                    onCheckedChange={() => setEnableWebSearch(!enableWebSearch)}
-                    id="web-search"
-                    className={enableWebSearch ? "bg-primary text-primary-foreground" : ""}
+                <div className="flex flex-col gap-2">
+                  <Button disabled={isProcessing || !userInput.trim()} onClick={handleSendMessage} className="flex-1">
+                    <Send className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="icon" className="flex-1" onClick={triggerFileInput}>
+                    <CloudUpload className="h-4 w-4" />
+                  </Button>
+                  <input
+                    type="file"
+                    id="imageUpload"
+                    accept="image/png, image/jpeg, image/jpg"
+                    onChange={handleImageUpload}
+                    style={{ display: "none" }}
                   />
-                  <div className="flex items-center gap-1">
-                    <Search className={`h-4 w-4 ${enableWebSearch ? "text-primary" : "text-muted-foreground"}`} />
-                    <span className={enableWebSearch ? "text-primary font-medium" : ""}>Web Search</span>
-                  </div>
-                </label>
-
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <Checkbox
-                    checked={showGraph}
-                    onCheckedChange={() => setShowGraph(!showGraph)}
-                    id="show-graph"
-                    className={showGraph ? "bg-primary text-primary-foreground" : ""}
-                  />
-                  <div className="flex items-center gap-1">
-                    <BarChart2 className={`h-4 w-4 ${showGraph ? "text-primary" : "text-muted-foreground"}`} />
-                    <span className={showGraph ? "text-primary font-medium" : ""}>Graph Visualization</span>
-                  </div>
-                </label>
+                </div>
               </div>
-              <span>Press Enter to send, Shift+Enter for new line</span>
+
+              <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
+                <div className="flex space-x-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <Checkbox
+                      checked={enableWebSearch}
+                      onCheckedChange={() => setEnableWebSearch(!enableWebSearch)}
+                      id="web-search"
+                      className={enableWebSearch ? "bg-primary text-primary-foreground" : ""}
+                    />
+                    <div className="flex items-center gap-1">
+                      <Search className={`h-4 w-4 ${enableWebSearch ? "text-primary" : "text-muted-foreground"}`} />
+                      <span className={enableWebSearch ? "text-primary font-medium" : ""}>Web Search</span>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <Checkbox
+                      checked={showGraph}
+                      onCheckedChange={() => setShowGraph(!showGraph)}
+                      id="show-graph"
+                      className={showGraph ? "bg-primary text-primary-foreground" : ""}
+                    />
+                    <div className="flex items-center gap-1">
+                      <BarChart2 className={`h-4 w-4 ${showGraph ? "text-primary" : "text-muted-foreground"}`} />
+                      <span className={showGraph ? "text-primary font-medium" : ""}>Graph Visualization</span>
+                    </div>
+                  </label>
+                </div>
+                <span>Press Enter to send, Shift+Enter for new line</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Graph Icon - Displayed Below the Chat Input */}
-        {graphImage && showGraph && (
-          <Button
-            variant="link"
-            size="icon"
-            className="absolute bottom-20 left-1/2 transform -translate-x-1/2 text-primary hover:text-primary/90"
-            onClick={toggleGraphVisibility}
-          >
-            <Image className="h-5 w-5" />
-          </Button>
-        )}
-      </CardContent>
+          {/* Graph Icon - Displayed Below the Chat Input */}
+          {graphImage && showGraph && (
+            <Button
+              variant="link"
+              size="icon"
+              className="absolute bottom-20 left-1/2 transform -translate-x-1/2 text-primary hover:text-primary/90"
+              onClick={toggleGraphVisibility}
+            >
+              <Image className="h-5 w-5" />
+            </Button>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Display the Graph in a Pop-up or Modal */}
       {isGraphVisible && graphImage && (
@@ -296,7 +320,7 @@ export default function MiddleSection() {
           </div>
         </div>
       )}
-    </Card>
+    </div>
   )
 }
 

@@ -1,10 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { createMeetingTemplate, getEmbeddedDocuments } from "../../app/dashboard/actions"
+import { updateMeetingTemplate, getEmbeddedDocuments } from "../../app/dashboard/actions"
 import { X } from "lucide-react"
 
-export default function CreateTemplateModal({ isOpen, onClose, onSuccess }) {
+export default function EditTemplateModal({ isOpen, onClose, template, onSuccess }) {
   const [purpose, setPurpose] = useState("")
   const [goal, setGoal] = useState("")
   const [additionalInfo, setAdditionalInfo] = useState("")
@@ -15,10 +15,21 @@ export default function CreateTemplateModal({ isOpen, onClose, onSuccess }) {
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    if (isOpen) {
+    if (template) {
+      setPurpose(template.purpose || "")
+      setGoal(template.goal || "")
+      setAdditionalInfo(template.additionalInfo || "")
+      setDuration(template.duration || "30 mins")
+
+      if (template.documents) {
+        setSelectedDocuments(template.documents.map((doc) => doc.id))
+      } else {
+        setSelectedDocuments([])
+      }
+
       fetchDocuments()
     }
-  }, [isOpen])
+  }, [template])
 
   const fetchDocuments = async () => {
     setIsLoading(true)
@@ -50,21 +61,16 @@ export default function CreateTemplateModal({ isOpen, onClose, onSuccess }) {
     })
 
     try {
-      const result = await createMeetingTemplate(formData)
+      const result = await updateMeetingTemplate(template.id, formData)
       if (result.success) {
         onSuccess()
-        setPurpose("")
-        setGoal("")
-        setAdditionalInfo("")
-        setDuration("30 mins")
-        setSelectedDocuments([])
       } else {
-        console.error("Failed to create template:", result.failure)
-        alert("Failed to create template. Please try again.")
+        console.error("Failed to update template:", result.failure)
+        alert("Failed to update template. Please try again.")
       }
     } catch (error) {
-      console.error("Error creating template:", error)
-      alert("An error occurred while creating the template.")
+      console.error("Error updating template:", error)
+      alert("An error occurred while updating the template.")
     } finally {
       setIsSubmitting(false)
     }
@@ -74,13 +80,13 @@ export default function CreateTemplateModal({ isOpen, onClose, onSuccess }) {
     setSelectedDocuments((prev) => (prev.includes(docId) ? prev.filter((id) => id !== docId) : [...prev, docId]))
   }
 
-  if (!isOpen) return null
+  if (!isOpen || !template) return null
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-medium">Create Meeting Template</h2>
+          <h2 className="text-lg font-medium">Edit Meeting Template</h2>
           <button onClick={onClose} className="rounded-full p-1 hover:bg-gray-200">
             <X className="h-5 w-5" />
           </button>
@@ -89,7 +95,7 @@ export default function CreateTemplateModal({ isOpen, onClose, onSuccess }) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="purpose" className="block text-sm font-medium text-gray-700">
-              Add meeting purpose
+              Meeting Purpose
             </label>
             <input
               type="text"
@@ -104,7 +110,7 @@ export default function CreateTemplateModal({ isOpen, onClose, onSuccess }) {
 
           <div>
             <label htmlFor="goal" className="block text-sm font-medium text-gray-700">
-              Your goal of the meeting/ what do you want to achieve?
+              Meeting Goal
             </label>
             <input
               type="text"
@@ -119,7 +125,7 @@ export default function CreateTemplateModal({ isOpen, onClose, onSuccess }) {
 
           <div>
             <label htmlFor="additionalInfo" className="block text-sm font-medium text-gray-700">
-              Add any other relevant communications, correspondence, etc?
+              Additional Information
             </label>
             <textarea
               id="additionalInfo"
@@ -133,7 +139,7 @@ export default function CreateTemplateModal({ isOpen, onClose, onSuccess }) {
 
           <div>
             <label htmlFor="duration" className="block text-sm font-medium text-gray-700">
-              Duration of meeting
+              Duration
             </label>
             <select
               id="duration"
@@ -189,7 +195,7 @@ export default function CreateTemplateModal({ isOpen, onClose, onSuccess }) {
               disabled={isSubmitting}
               className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:bg-blue-400"
             >
-              {isSubmitting ? "Creating..." : "Create"}
+              {isSubmitting ? "Updating..." : "Update Template"}
             </button>
           </div>
         </form>

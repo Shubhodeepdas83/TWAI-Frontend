@@ -1,15 +1,38 @@
 "use client"
 
-import { useState } from "react"
-import { createSession } from "../../app/dashboard/actions"
+import { useState, useEffect } from "react"
+import { createSession, getUserDetails } from "../../app/dashboard/actions"
 import { useRouter } from "next/navigation"
 import { X } from "lucide-react"
 
 export default function CreateSessionModal({ isOpen, onClose, onSuccess }) {
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
+  const [selectedTemplate, setSelectedTemplate] = useState("")
+  const [templates, setTemplates] = useState([])
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchTemplates()
+    }
+  }, [isOpen])
+
+  const fetchTemplates = async () => {
+    setIsLoading(true)
+    try {
+      const data = await getUserDetails()
+      if (data.user && data.user.meetingTemplates) {
+        setTemplates(data.user.meetingTemplates)
+      }
+    } catch (error) {
+      console.error("Error fetching templates:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -18,6 +41,9 @@ export default function CreateSessionModal({ isOpen, onClose, onSuccess }) {
     const formData = new FormData()
     formData.append("name", name)
     formData.append("description", description)
+    if (selectedTemplate) {
+      formData.append("templateId", selectedTemplate)
+    }
 
     try {
       const result = await createSession(formData)
@@ -76,6 +102,29 @@ export default function CreateSessionModal({ isOpen, onClose, onSuccess }) {
               placeholder="Enter session description"
               rows={3}
             />
+          </div>
+
+          <div>
+            <label htmlFor="template" className="block text-sm font-medium text-gray-700">
+              Meeting Template (Optional)
+            </label>
+            {isLoading ? (
+              <div className="text-center py-2 text-sm">Loading templates...</div>
+            ) : (
+              <select
+                id="template"
+                value={selectedTemplate}
+                onChange={(e) => setSelectedTemplate(e.target.value)}
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+              >
+                <option value="">-- Select a template --</option>
+                {templates.map((template) => (
+                  <option key={template.id} value={template.id}>
+                    {template.purpose}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           <div className="flex justify-end space-x-2">

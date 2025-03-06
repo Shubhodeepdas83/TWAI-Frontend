@@ -61,7 +61,13 @@ export default function MicrophoneButton() {
             return [...prev.slice(0, -1), { user: prev[prev.length - 1].user+" " + transcript.text }];
 
           } else {
-            return [...prev, { user: transcript.text }];
+            if(prev.length<1){
+              return [...prev, { user: transcript.text }];
+            }
+            else{
+
+            }
+
           }
         });
       }

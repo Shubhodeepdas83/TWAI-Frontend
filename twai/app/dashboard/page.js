@@ -4,10 +4,12 @@ import { useSession, signOut } from "next-auth/react"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { getUserDetails, removeDocument, getSummary, deleteMeetingTemplate } from "./actions"
-import { Calendar, FileText, Folder, LogOut, Plus, Trash, User } from "lucide-react"
+import { Calendar, FileText, Folder, LogOut, Plus, Trash, User, Edit } from "lucide-react"
 import CreateSessionModal from "../../components/DashboardPageComponents/CreateSessionModal"
 import DocumentUploadModal from "../../components/DashboardPageComponents/DocumentUploadModal"
 import CreateTemplateModal from "../../components/DashboardPageComponents/CreateTemplateModal"
+import EditDocumentModal from "../../components/DashboardPageComponents/EditDocumentModal"
+import EditTemplateModal from "../../components/DashboardPageComponents/EditTemplateModal"
 
 export default function DashboardPage() {
   const { data: session, status } = useSession()
@@ -22,6 +24,12 @@ export default function DashboardPage() {
   const [isDeleting, setIsDeleting] = useState(false)
   const [deletingId, setDeletingId] = useState(null)
   const router = useRouter()
+
+  // Add these state variables in the DashboardPage component
+  const [isEditDocumentModalOpen, setIsEditDocumentModalOpen] = useState(false)
+  const [isEditTemplateModalOpen, setIsEditTemplateModalOpen] = useState(false)
+  const [selectedDocument, setSelectedDocument] = useState(null)
+  const [selectedTemplate, setSelectedTemplate] = useState(null)
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -94,6 +102,17 @@ export default function DashboardPage() {
     } else {
       alert("Failed to generate summary")
     }
+  }
+
+  // Add these handlers in the DashboardPage component
+  const handleEditDocument = (document) => {
+    setSelectedDocument(document)
+    setIsEditDocumentModalOpen(true)
+  }
+
+  const handleEditTemplate = (template) => {
+    setSelectedTemplate(template)
+    setIsEditTemplateModalOpen(true)
   }
 
   if (status === "loading" || isLoading) {
@@ -216,7 +235,6 @@ export default function DashboardPage() {
                           className="rounded-md bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-200"
                         >
                           {/* {session.summary ? "View Summary" : "Generate Summary"} */}
-
                           View Summary
                         </button>
                       </div>
@@ -259,19 +277,37 @@ export default function DashboardPage() {
                         <h3 className="font-medium text-blue-600 truncate max-w-[200px]">
                           {doc.title || "Untitled Document"}
                         </h3>
-                        <span className="text-xs text-gray-500">{new Date(doc.uploadedAt).toLocaleDateString()}</span>
+                        <div className="flex items-center gap-2">
+                          {doc.isEmbedded ? (
+                            <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Embedded</span>
+                          ) : (
+                            <span className="text-xs px-2 py-1 bg-gray-100 text-gray-800 rounded-full">
+                              Not Embedded
+                            </span>
+                          )}
+                          <span className="text-xs text-gray-500">{new Date(doc.uploadedAt).toLocaleDateString()}</span>
+                        </div>
                       </div>
                       {doc.description && <p className="mb-3 text-sm text-gray-600 line-clamp-2">{doc.description}</p>}
                       <p className="mb-3 text-xs text-gray-500 truncate">{doc.fileUrl}</p>
                       <div className="mt-4 flex justify-between">
-                        <a
-                          href={doc.fileUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="rounded-md bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 hover:bg-blue-200"
-                        >
-                          View Document
-                        </a>
+                        <div className="flex gap-2">
+                          <a
+                            href={doc.fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="rounded-md bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 hover:bg-blue-200"
+                          >
+                            View
+                          </a>
+                          <button
+                            onClick={() => handleEditDocument(doc)}
+                            className="rounded-md bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-200"
+                          >
+                            <Edit className="mr-1 inline-block h-3 w-3" />
+                            Edit
+                          </button>
+                        </div>
                         <button
                           onClick={() => handleDeleteDocument(doc.id)}
                           disabled={isDeleting && deletingId === doc.id}
@@ -338,10 +374,31 @@ export default function DashboardPage() {
                           <p className="text-sm text-gray-600 line-clamp-2">{template.additionalInfo}</p>
                         </div>
                       )}
+                      {template.documents && template.documents.length > 0 && (
+                        <div className="mb-3">
+                          <p className="text-sm font-medium text-gray-700">Documents:</p>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {template.documents.map((doc) => (
+                              <span key={doc.id} className="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded-full">
+                                {doc.title || "Untitled"}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                       <div className="mt-4 flex justify-between">
-                        <span className="text-xs text-gray-500">
-                          Created: {new Date(template.createdAt).toLocaleDateString()}
-                        </span>
+                        <div className="flex gap-2">
+                          <span className="text-xs text-gray-500">
+                            Created: {new Date(template.createdAt).toLocaleDateString()}
+                          </span>
+                          <button
+                            onClick={() => handleEditTemplate(template)}
+                            className="rounded-md bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-200"
+                          >
+                            <Edit className="mr-1 inline-block h-3 w-3" />
+                            Edit
+                          </button>
+                        </div>
                         <button
                           onClick={() => handleDeleteTemplate(template.id)}
                           disabled={isDeleting && deletingId === template.id}
@@ -437,6 +494,27 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
+
+      {/* Add these modals at the end of the component */}
+      <EditDocumentModal
+        isOpen={isEditDocumentModalOpen}
+        onClose={() => setIsEditDocumentModalOpen(false)}
+        document={selectedDocument}
+        onSuccess={() => {
+          setIsEditDocumentModalOpen(false)
+          fetchUserData()
+        }}
+      />
+
+      <EditTemplateModal
+        isOpen={isEditTemplateModalOpen}
+        onClose={() => setIsEditTemplateModalOpen(false)}
+        template={selectedTemplate}
+        onSuccess={() => {
+          setIsEditTemplateModalOpen(false)
+          fetchUserData()
+        }}
+      />
     </div>
   )
 }

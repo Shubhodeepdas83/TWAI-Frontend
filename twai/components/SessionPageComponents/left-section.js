@@ -1,11 +1,9 @@
 "use client"
 
 import { useAppContext } from "../../context/AppContext"
-import { useEffect, useState, useRef } from "react"
+import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { MessageSquare, ScrollText, Send } from "lucide-react"
-import MicrophoneButton from "@/components/SessionPageComponents/microphoneButton"
-import CaptureScreenButton from "@/components/SessionPageComponents/captureScreenButton"
+import { MessageSquare, ScrollText, Send, Trash } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
@@ -14,37 +12,21 @@ import { appendConversation } from "../../app/session/[sessionId]/actions"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
+
 export default function LeftSection() {
-  const { wholeConversation, videoRef, stream, setWholeConversation, micPartialTranscript, capturePartialTranscript } = useAppContext()
+  const { wholeConversation, setWholeConversation, micPartialTranscript, capturePartialTranscript } = useAppContext()
   const { sessionId } = useParams()
   const [autoScroll, setAutoScroll] = useState(true)
   const [manualInput, setManualInput] = useState("")
   const [isUser, setIsUser] = useState(false)
   const scrollAreaRef = useRef(null)
 
-  useEffect(() => {
-    if (stream && videoRef.current) {
-      videoRef.current.srcObject = stream
-    }
-  }, [stream, videoRef])
-
-  const handleClearConversation = () => {
-    const appending = appendConversation({ sessionId, newMessages: wholeConversation })
-    if (appending.success) {
-      setWholeConversation([])
-    } else {
-      console.log(appending?.failure)
-    }
+  const handleClearConversation = async () => {
+    // Save current conversation to backend before clearing
+    await appendConversation({ sessionId, newMessages: wholeConversation })
+    // Clear the conversation in the UI
+    setWholeConversation([])
   }
-
-  useEffect(() => {
-    if (autoScroll && scrollAreaRef.current) {
-      const scrollContainer = scrollAreaRef.current.querySelector("[data-radix-scroll-area-viewport]")
-      if (scrollContainer) {
-        scrollContainer.scrollTop = scrollContainer.scrollHeight
-      }
-    }
-  }, [autoScroll, wholeConversation])
 
   const handleAddConversation = () => {
     if (manualInput.trim()) {
@@ -55,42 +37,35 @@ export default function LeftSection() {
   }
 
   return (
-    <div className="h-[calc(100vh-120px)] flex flex-col gap-4">
-      {/* Video Card - Fixed Height */}
-      <Card className="border shadow-sm">
-        <CardHeader className="p-4 pb-2">
-          <CardTitle className="text-lg font-medium">Screen Capture</CardTitle>
-        </CardHeader>
-        <CardContent className="p-4 pt-0">
-          {/* Video Section */}
-          <div className="aspect-video bg-gray-800 rounded-lg overflow-hidden mb-3">
-            <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
-          </div>
-
-          {/* Buttons Section */}
-          <div className="flex flex-col sm:flex-row gap-2">
-            <MicrophoneButton sessionId={sessionId}/>
-            <CaptureScreenButton sessionId={sessionId}/>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Conversation Card - Flexible Height with Fixed Container */}
+    <div className="h-[calc(100vh-120px)] flex flex-col">
+      {/* Conversation Card - Full Height */}
       <Card className="border shadow-sm flex-1 flex flex-col overflow-hidden">
         <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
             <MessageSquare className="h-4 w-4" />
             <CardTitle className="text-lg font-medium">Conversation</CardTitle>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setAutoScroll(!autoScroll)}
-            className={`text-muted-foreground h-8 ${autoScroll ? "bg-primary/10 text-primary" : ""}`}
-          >
-            <ScrollText className="h-4 w-4 mr-1" />
-            {autoScroll ? "Auto-scroll On" : "Auto-scroll Off"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setAutoScroll(!autoScroll)}
+              className={`text-muted-foreground h-8 ${autoScroll ? "bg-primary/10 text-primary" : ""}`}
+            >
+              <ScrollText className="h-4 w-4 mr-1" />
+              {autoScroll ? "Auto-scroll On" : "Auto-scroll Off"}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClearConversation}
+              className="text-red-500 h-8"
+              disabled={wholeConversation.length === 0}
+            >
+              <Trash className="h-4 w-4 mr-1" />
+              Clear
+            </Button>
+          </div>
         </CardHeader>
 
         <CardContent className="p-4 pt-0 flex-1 flex flex-col overflow-hidden">
@@ -101,16 +76,16 @@ export default function LeftSection() {
                 wholeConversation.map((message, index) => {
                   const lastUserMessageIndex = wholeConversation
                     .map((m, i) => (m.user ? i : -1))
-                    .filter(i => i !== -1)
-                    .pop();
+                    .filter((i) => i !== -1)
+                    .pop()
 
                   const lastOtherMessageIndex = wholeConversation
                     .map((m, i) => (m.other ? i : -1))
-                    .filter(i => i !== -1)
-                    .pop();
+                    .filter((i) => i !== -1)
+                    .pop()
 
-                  const isLastUserMessage = message.user && index === lastUserMessageIndex;
-                  const isLastOtherMessage = message.other && index === lastOtherMessageIndex;
+                  const isLastUserMessage = message.user && index === lastUserMessageIndex
+                  const isLastOtherMessage = message.other && index === lastOtherMessageIndex
 
                   return (
                     <div key={index} className="mb-3">
@@ -119,9 +94,9 @@ export default function LeftSection() {
                         <div className="text-left bg-primary/10 text-primary p-3 rounded-lg mb-2">
                           <div className="font-semibold text-xs mb-1 text-muted-foreground">You</div>
                           {message.user}
-                          {/* {isLastUserMessage && micPartialTranscript !== "" && (
+                          {isLastUserMessage && micPartialTranscript !== "" && (
                             <span className="text-muted-foreground animate-blink"> {micPartialTranscript}...</span>
-                          )} */}
+                          )}
                         </div>
                       )}
 
@@ -130,16 +105,16 @@ export default function LeftSection() {
                         <div className="text-left bg-muted p-3 rounded-lg">
                           <div className="font-semibold text-xs mb-1 text-muted-foreground">Other</div>
                           {message.other}
-                          {/* {isLastOtherMessage && capturePartialTranscript !== "" && (
+                          {isLastOtherMessage && capturePartialTranscript !== "" && (
                             <span className="text-muted-foreground animate-blink"> {capturePartialTranscript}...</span>
-                          )} */}
+                          )}
                         </div>
                       )}
 
                       {/* Separator */}
                       {index < wholeConversation.length - 1 && <Separator className="my-3" />}
                     </div>
-                  );
+                  )
                 })
               ) : (
                 <div className="text-center text-muted-foreground py-8">
@@ -147,9 +122,6 @@ export default function LeftSection() {
                   <p className="text-sm mt-2">Use the microphone or screen capture to start recording</p>
                 </div>
               )}
-
-
-
             </ScrollArea>
           </div>
 
@@ -174,6 +146,12 @@ export default function LeftSection() {
                   value={manualInput}
                   onChange={(e) => setManualInput(e.target.value)}
                   className="min-h-[60px] flex-1"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault()
+                      handleAddConversation()
+                    }
+                  }}
                 />
                 <Button onClick={handleAddConversation} disabled={!manualInput.trim()} size="icon" className="self-end">
                   <Send className="h-4 w-4" />

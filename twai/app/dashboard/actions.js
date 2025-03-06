@@ -33,6 +33,7 @@ export async function getUserDetails() {
           conversation: true,
           createdAt: true,
           summary: true,
+          templateId: true,
         },
       },
       documents: {
@@ -42,6 +43,7 @@ export async function getUserDetails() {
           uploadedAt: true,
           title: true,
           description: true,
+          isEmbedded: true,
         },
       },
       meetingTemplates: {
@@ -52,6 +54,12 @@ export async function getUserDetails() {
           additionalInfo: true,
           duration: true,
           createdAt: true,
+          documents: {
+            select: {
+              id: true,
+              title: true,
+            },
+          },
         },
       },
     },
@@ -82,13 +90,21 @@ export async function createSession(formData) {
 
   const name = formData.get("name") || "Untitled Session"
   const description = formData.get("description") || ""
+  const templateId = formData.get("templateId") || null
+
+  const sessionData = {
+    userId: user.id,
+    name,
+    description,
+  }
+
+  // Add template relation if a template was selected
+  if (templateId) {
+    sessionData.templateId = templateId
+  }
 
   const newSession = await prisma.session.create({
-    data: {
-      userId: user.id,
-      name,
-      description,
-    },
+    data: sessionData,
   })
 
   return { sessionId: newSession.id }
@@ -243,6 +259,7 @@ export async function createMeetingTemplate(formData) {
   const goal = formData.get("goal")
   const additionalInfo = formData.get("additionalInfo")
   const duration = formData.get("duration")
+  const documentIds = formData.getAll("documentIds")
 
   if (!purpose || !goal) {
     return { failure: "Purpose and goal are required" }
@@ -255,6 +272,9 @@ export async function createMeetingTemplate(formData) {
       goal,
       additionalInfo: additionalInfo || "",
       duration: duration || "30 mins",
+      documents: {
+        connect: documentIds.map((id) => ({ id })),
+      },
     },
   })
 
@@ -295,5 +315,175 @@ export async function deleteMeetingTemplate(templateId) {
   })
 
   return { success: true }
+}
+
+export async function updateDocument(documentId, formData) {
+  const session = await getServerSession(authOptions)
+
+  if (!session) {
+    return { failure: "not authenticated" }
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+    select: { id: true },
+  })
+
+  if (!user) {
+    return { failure: "User not found" }
+  }
+
+  const document = await prisma.document.findUnique({
+    where: { id: documentId },
+    select: { userId: true, fileUrl: true, isEmbedded: true },
+  })
+
+  if (!document) {
+    return { failure: "Document not found" }
+  }
+
+  if (document.userId !== user.id) {
+    return { failure: "Unauthorized" }
+  }
+
+  const title = formData.get("title") || ""
+  const description = formData.get("description") || ""
+  const addEmbedding = formData.get("add_embedding") === "true"
+
+  // Check if embedding status has changed
+  if (addEmbedding !== document.isEmbedded) {
+    if (addEmbedding) {
+      // Add embedding
+      const res = await fetch(`${process.env.BACKEND_URL}/add_embeddings`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ s3_url: document.fileUrl, userId: user.id }),
+      })
+
+      if (!res.ok) {
+        console.log("Failed to add embeddings")
+        const d = await res.json()
+        console.log(d)
+        return { error: "Failed to add embeddings" }
+      }
+    } else {
+      // Remove embedding
+      const res = await fetch(`${process.env.BACKEND_URL}/delete_embeddings`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ pdf_url: document.fileUrl, userId: user.id }),
+      })
+
+      if (!res.ok) {
+        console.log("Failed to delete embeddings")
+        const d = await res.json()
+        console.log(d)
+        return { error: "Failed to delete embeddings" }
+      }
+    }
+  }
+
+  // Update document in database
+  await prisma.document.update({
+    where: { id: documentId },
+    data: {
+      title,
+      description,
+      isEmbedded: addEmbedding,
+    },
+  })
+
+  return { success: true }
+}
+
+export async function updateMeetingTemplate(templateId, formData) {
+  const session = await getServerSession(authOptions)
+
+  if (!session) {
+    return { failure: "not authenticated" }
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+    select: { id: true },
+  })
+
+  if (!user) {
+    return { failure: "User not found" }
+  }
+
+  const template = await prisma.meetingTemplate.findUnique({
+    where: { id: templateId },
+    select: { userId: true },
+  })
+
+  if (!template) {
+    return { failure: "Template not found" }
+  }
+
+  if (template.userId !== user.id) {
+    return { failure: "Unauthorized" }
+  }
+
+  const purpose = formData.get("purpose")
+  const goal = formData.get("goal")
+  const additionalInfo = formData.get("additionalInfo")
+  const duration = formData.get("duration")
+  const documentIds = formData.getAll("documentIds")
+
+  if (!purpose || !goal) {
+    return { failure: "Purpose and goal are required" }
+  }
+
+  // Update template in database
+  await prisma.meetingTemplate.update({
+    where: { id: templateId },
+    data: {
+      purpose,
+      goal,
+      additionalInfo: additionalInfo || "",
+      duration: duration || "30 mins",
+      documents: {
+        set: [], // Remove all existing connections
+        connect: documentIds.map((id) => ({ id })), // Connect selected documents
+      },
+    },
+  })
+
+  return { success: true }
+}
+
+export async function getEmbeddedDocuments() {
+  const session = await getServerSession(authOptions)
+
+  if (!session) {
+    return { failure: "not authenticated" }
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+    select: { id: true },
+  })
+
+  if (!user) {
+    return { failure: "User not found" }
+  }
+
+  const documents = await prisma.document.findMany({
+    where: {
+      userId: user.id,
+      isEmbedded: true,
+    },
+    select: {
+      id: true,
+      title: true,
+    },
+  })
+
+  return { documents }
 }
 
