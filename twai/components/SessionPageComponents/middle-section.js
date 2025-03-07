@@ -1,13 +1,16 @@
 "use client"
-import ReactMarkdown from "react-markdown"
 import { useAppContext } from "../../context/AppContext"
 import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { X, Send, CloudUpload, Trash, Image, Bot } from "lucide-react"
+import { X, Image, FileText, ExternalLink, BookOpen, Clock } from "lucide-react"
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Badge } from "@/components/ui/badge"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import MicrophoneButton from "@/components/SessionPageComponents/microphoneButton"
+import CaptureScreenButton from "@/components/SessionPageComponents/captureScreenButton"
+import { useParams } from "next/navigation"
+import { appendConversation } from "../../app/session/[sessionId]/actions"
+import { get_AI_Help } from "../../lib/sessionActions"
 
 export default function MiddleSection() {
   const {
@@ -17,15 +20,28 @@ export default function MiddleSection() {
     setUserInput,
     isProcessing,
     enableWebSearch,
-    wholeConversation,
+    setEnableWebSearch,
     showGraph,
+    setShowGraph,
+    wholeConversation,
     setUsedCitations,
-    setIsProcessing
+    setIsProcessing,
+    videoRef,
+    stream,
+    setUseHighlightedText,
+    useHighlightedText,
+    usedCitations,
+    setCapturePartialTranscript,
+    setWholeConversation,
+    setMicPartialTranscript,
+    copiedText,
   } = useAppContext()
 
   const [image, setImage] = useState(null)
   const [graphImage, setGraphImage] = useState(null)
   const [isGraphVisible, setIsGraphVisible] = useState(false)
+
+  const { sessionId } = useParams()
 
   const handleSendMessage = async () => {
     if (userInput.trim()) {
@@ -73,7 +89,7 @@ export default function MiddleSection() {
           Object.entries(data.used_citations).map(([key, value]) => ({
             id: key,
             ...value,
-          }))
+          })),
         )
       } else {
         setUsedCitations([])
@@ -109,145 +125,235 @@ export default function MiddleSection() {
     setIsGraphVisible(!isGraphVisible)
   }
 
-  return (
-    <Card className="border shadow-sm h-[calc(100vh-120px)] flex flex-col overflow-hidden">
-      {/* Fixed Header */}
-      <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between shrink-0">
-        <div className="flex items-center gap-2">
-          <Bot className="h-5 w-5 text-primary" />
-          <CardTitle className="text-lg font-medium">AI Meeting Helper</CardTitle>
-        </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleClear}
-          className="text-muted-foreground h-8"
-          disabled={chatMessages.length === 0}
-        >
-          <X className="h-4 w-4 mr-1" />
-          Clear Chat
-        </Button>
-      </CardHeader>
+  const handleAIAnswer = async (requestType) => {
+    if (isProcessing) return
+    setIsProcessing(true)
 
-      {/* Flexible Content Area */}
-      <CardContent className="p-4 pt-0 flex-1 flex flex-col overflow-hidden">
-        {/* Scrollable Messages Area */}
-        <div className="flex-1 overflow-hidden">
-          <ScrollArea className="h-full pr-3">
-            {chatMessages.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-center p-8">
-                <div className="max-w-sm">
-                  <Bot className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium mb-2">Welcome to AI Meeting Helper</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Ask questions or upload an image to get assistance with your meeting preparation.
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4 py-2">
-                {chatMessages.map((message, index) => (
-                  <div key={index} className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}>
-                    <div
-                      className={`p-3 rounded-lg max-w-[85%] ${message.sender === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
-                        }`}
-                    >
-                      {message.text === "Thinking..." ? (
-                        <div className="flex items-center gap-2">
-                          <div className="animate-pulse">Thinking</div>
-                          <span className="animate-bounce">.</span>
-                          <span className="animate-bounce delay-100">.</span>
-                          <span className="animate-bounce delay-200">.</span>
+    setChatMessages([...chatMessages, { text: "Thinking...", sender: "ai" }])
+
+    try {
+      // First save the conversation to the database
+      const appending = await appendConversation({ sessionId, newMessages: wholeConversation })
+      const tempconv = [...wholeConversation] // Create a copy to avoid reference issues
+
+      if (appending.success) {
+        setCapturePartialTranscript("")
+        setWholeConversation([])
+        setMicPartialTranscript("")
+      }
+
+      // Then get AI help
+      const aiResponse = await get_AI_Help(tempconv, enableWebSearch, requestType, useHighlightedText, copiedText)
+
+      if (aiResponse) {
+        setChatMessages((prev) => [
+          ...prev.filter((msg) => msg.text !== "Thinking..."),
+          { text: aiResponse.question || `Request for ${requestType}`, sender: "user" },
+          { text: aiResponse.answer || "No response received", sender: "ai" },
+        ])
+
+        if (aiResponse.used_citations) {
+          setUsedCitations(
+            Object.entries(aiResponse.used_citations).map(([key, value]) => ({
+              id: key,
+              ...value,
+            })),
+          )
+        } else {
+          setUsedCitations([])
+        }
+      } else {
+        setChatMessages((prev) => [
+          ...prev.filter((msg) => msg.text !== "Thinking..."),
+          { text: "Sorry, I couldn't process the request.", sender: "ai" },
+        ])
+      }
+    } catch (error) {
+      console.error("AI Request failed:", error)
+      setChatMessages((prev) => [
+        ...prev.filter((msg) => msg.text !== "Thinking..."),
+        { text: "An error occurred while processing your request.", sender: "ai" },
+      ])
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  return (
+    <div className="h-[calc(100vh-120px)] flex flex-col gap-4">
+      {/* Video Card - Fixed Height */}
+      <Card className="border shadow-sm">
+        <CardHeader className="p-4 pb-2">
+          <CardTitle className="text-lg font-medium">Screen Capture</CardTitle>
+        </CardHeader>
+        <CardContent className="p-4 pt-0">
+          {/* Video Section */}
+          <div className="aspect-video bg-gray-800 rounded-lg overflow-hidden mb-3">
+            <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
+          </div>
+
+          {/* Buttons Section */}
+          <div className="flex flex-col sm:flex-row gap-2">
+            <MicrophoneButton />
+            <CaptureScreenButton />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* AI Tools and Citations in a grid layout */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1">
+        {/* Citations Section - Expanded */}
+        <Card className="border shadow-sm md:col-span-2 flex flex-col overflow-hidden">
+          <CardHeader className="p-4 pb-2">
+            <CardTitle className="text-lg font-medium">Citations</CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 pt-0 flex-1 overflow-hidden">
+            {usedCitations.length > 0 ? (
+              <ScrollArea className="h-full pr-3">
+                <div className="space-y-3">
+                  {usedCitations.map((citation) => (
+                    <div key={citation.id} className="border rounded-lg p-3 hover:bg-muted/50 transition-colors">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="bg-primary/10 text-primary text-xs font-medium px-2 py-1 rounded">
+                          Citation #{citation.id}
                         </div>
-                      ) : (
-                        <div className="text-sm">
-                          <ReactMarkdown>{message.text}</ReactMarkdown>
+
+                        {citation.description.startsWith("http") && (
+                          <a
+                            href={citation.description}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:text-primary/80"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </a>
+                        )}
+                      </div>
+
+                      <div className="text-sm">
+                        {citation.description.startsWith("http") ? (
+                          <a
+                            href={citation.description}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline break-words"
+                          >
+                            {citation.description}
+                          </a>
+                        ) : (
+                          <p className="break-words">{citation.description}</p>
+                        )}
+                      </div>
+
+                      {citation.isimg && citation.image_data && (
+                        <div className="mt-2 bg-white p-2 rounded border">
+                          <img
+                            src={`data:image/png;base64,${citation.image_data}`}
+                            alt={`Citation ${citation.id}`}
+                            className="w-full rounded object-contain"
+                          />
                         </div>
                       )}
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+              </ScrollArea>
+            ) : (
+              <div className="h-full flex items-center justify-center text-center p-4">
+                <div>
+                  <FileText className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-muted-foreground">No citations available</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Citations will appear here when AI uses external sources
+                  </p>
+                </div>
               </div>
             )}
-          </ScrollArea>
-        </div>
+          </CardContent>
+        </Card>
 
-        {/* Fixed Input Area */}
-        <div className="mt-4 shrink-0">
-          {image && (
-            <div className="mb-3 p-2 bg-muted rounded-lg flex items-center">
-              <img
-                src={URL.createObjectURL(image) || "/placeholder.svg"}
-                alt="Uploaded Preview"
-                className="h-12 w-12 object-cover rounded-md"
-              />
-              <span className="text-sm ml-2 flex-1 truncate">{image.name}</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleRemoveImage}
-                className="text-destructive hover:text-destructive/90 h-8 w-8 p-0"
-              >
-                <Trash className="h-4 w-4" />
-              </Button>
+        {/* AI Tools Section - Compact */}
+        <Card className="border shadow-sm md:col-span-1">
+          <CardHeader className="p-3 pb-2">
+            <CardTitle className="text-lg font-medium">AI Tools</CardTitle>
+          </CardHeader>
+          <CardContent className="p-3 pt-0">
+            <div className="grid grid-cols-1 gap-2">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      disabled={isProcessing}
+                      onClick={() => handleAIAnswer("help")}
+                      variant="outline"
+                      className="justify-start"
+                      size="sm"
+                    >
+                      <BookOpen className="w-4 h-4 mr-2" />
+                      AI Answer
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Get AI assistance with your meeting questions</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      disabled={isProcessing}
+                      onClick={() => handleAIAnswer("factcheck")}
+                      variant="outline"
+                      className="justify-start"
+                      size="sm"
+                    >
+                      <FileText className="w-4 h-4 mr-2" />
+                      Fact Checking
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Verify facts in the conversation</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      disabled={isProcessing}
+                      onClick={() => handleAIAnswer("summary")}
+                      variant="outline"
+                      className="justify-start"
+                      size="sm"
+                    >
+                      <Clock className="w-4 h-4 mr-2" />
+                      Summarize
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Get a summary of the conversation so far</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
-          )}
+          </CardContent>
+        </Card>
+      </div>
 
-          <div className="flex flex-col gap-2">
-            <div className="flex gap-2">
-              <Textarea
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                placeholder="Type a message..."
-                className="resize-none min-h-[80px]"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault()
-                    handleSendMessage()
-                  }
-                }}
-              />
-              <div className="flex flex-col gap-2">
-                <Button disabled={isProcessing || !userInput.trim()} onClick={handleSendMessage} className="flex-1">
-                  <Send className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="icon" className="flex-1" onClick={triggerFileInput}>
-                  <CloudUpload className="h-4 w-4" />
-                </Button>
-                <input
-                  type="file"
-                  id="imageUpload"
-                  accept="image/png, image/jpeg, image/jpg"
-                  onChange={handleImageUpload}
-                  style={{ display: "none" }}
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center text-xs text-muted-foreground">
-              {enableWebSearch && (
-                <Badge variant="outline" className="mr-2">
-                  Web Search Enabled
-                </Badge>
-              )}
-              {showGraph && <Badge variant="outline">Graph Visualization Enabled</Badge>}
-              <span className="ml-auto">Press Enter to send, Shift+Enter for new line</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Graph Icon - Displayed Below the Chat Input */}
-        {(graphImage&&showGraph) && (
-          <Button
-            variant="link"
-            size="icon"
-            className="absolute bottom-20 left-1/2 transform -translate-x-1/2 text-primary hover:text-primary/90"
-            onClick={toggleGraphVisibility}
-          >
-            <Image className="h-5 w-5" />
-          </Button>
-        )}
-      </CardContent>
+      {/* Graph Icon - Displayed Below the Chat Input */}
+      {graphImage && showGraph && (
+        <Button
+          variant="link"
+          size="icon"
+          className="absolute bottom-20 left-1/2 transform -translate-x-1/2 text-primary hover:text-primary/90"
+          onClick={toggleGraphVisibility}
+        >
+          <Image className="h-5 w-5" />
+        </Button>
+      )}
 
       {/* Display the Graph in a Pop-up or Modal */}
       {isGraphVisible && graphImage && (
@@ -272,6 +378,7 @@ export default function MiddleSection() {
           </div>
         </div>
       )}
-    </Card>
+    </div>
   )
 }
+
