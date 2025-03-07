@@ -32,16 +32,18 @@ export default function MicrophoneButton() {
       console.error('No token found');
       return null;
     }
+    const tempAudioContext = new AudioContext();
+    const nativeSampleRate = tempAudioContext.sampleRate;
+    tempAudioContext.close();
 
     console.log('Creating transcriber with token:', token.substring(0, 5) + '...');
 
     // Create the transcriber with the native sample rate of the audio context
     // We'll let the browser handle the sample rate conversion
     const transcriber = new RealtimeTranscriber({
-      sampleRate: 44100, // Use standard sample rate, will be resampled if needed
+      sampleRate: nativeSampleRate || 44100, // Use standard sample rate, will be resampled if needed
       token: token,
       encoding: 'pcm_s16le', // Explicitly set encoding to match our Int16Array format
-      disable_partial_transcripts: true,
 
     });
 
@@ -53,20 +55,17 @@ export default function MicrophoneButton() {
       console.log('Transcript received:', transcript);
 
       if (transcript.message_type === 'PartialTranscript') {
-        // setMicPartialTranscript(transcript.text);
+        setMicPartialTranscript(transcript.text);
       } else {
         setMicPartialTranscript("");
 
         setWholeConversation((prev) => {
-          if (prev.length > 0 && prev[prev.length - 1]?.user) {
-            return [...prev.slice(0, -1), { user: prev[prev.length - 1].user + " " + transcript.text }];
 
-          } else {
             return [...prev, { user: transcript.text }];
 
 
           }
-        });
+        );
       }
     });
 
@@ -120,7 +119,7 @@ export default function MicrophoneButton() {
         // Request audio with specific constraints to ensure quality
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: {
-            echoCancellation: false, // Try disabling these to get raw audio
+            echoCancellation: true, // Try disabling these to get raw audio
             noiseSuppression: false,
             autoGainControl: true,
             channelCount: 1  // Mono audio

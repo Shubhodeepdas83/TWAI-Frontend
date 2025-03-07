@@ -94,17 +94,18 @@ export default function Home() {
         </Button>
       </header>
 
-      <main className="flex-1 container mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-4 max-h-[calc(100vh-80px)] overflow-hidden">
-        <div className="lg:col-span-5 xl:col-span-5 overflow-hidden">
-          <LeftSection />
-        </div>
-        <div className="lg:col-span-4 xl:col-span-4 overflow-hidden">
-          <MiddleSection />
-        </div>
-        <div className="lg:col-span-3 overflow-hidden">
-          <RightSection />
-        </div>
-      </main>
+      <main className="flex-1 w-full p-4 grid grid-cols-1 lg:grid-cols-12 gap-4 max-h-[calc(100vh-80px)] overflow-hidden">
+  <div className="lg:col-span-4 xl:col-span-4 overflow-hidden">
+    <LeftSection />
+  </div>
+  <div className="lg:col-span-4 xl:col-span-4 overflow-hidden">
+    <MiddleSection />
+  </div>
+  <div className="lg:col-span-4 xl:col-span-4 overflow-hidden">
+    <RightSection />
+  </div>
+</main>
+
     </div>
   )
 }

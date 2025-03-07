@@ -5,7 +5,7 @@ import { getServerSession } from "next-auth";
 
 const prisma = new PrismaClient();
 //CHANGE: PUT ZOD CHECK HERE
-export async function get_AI_Help(conversation, use_web, requestType = 'help') {
+export async function get_AI_Help(conversation, use_web, requestType = 'help',useHighlightedText,copiedText) {
 
   const session = await getServerSession(authOptions);
   
@@ -30,6 +30,9 @@ export async function get_AI_Help(conversation, use_web, requestType = 'help') {
       raw_conversation: conversation,
       use_web: use_web !== undefined ? use_web : true,
       userId: user.id,
+      useHighlightedText: useHighlightedText,
+      highlightedText: copiedText
+
     };
 
 

@@ -102,7 +102,6 @@ export default function CaptureScreenButton() {
         sample_rate: "16000",
         encoding: "pcm_s16le", // PCM 16-bit little-endian
         token: ASSEMBLY_TOKEN,
-        disable_partial_transcripts:true
       }).toString()
       
       console.log("Connecting to AssemblyAI with params:", queryParams)
@@ -132,13 +131,9 @@ export default function CaptureScreenButton() {
           setCapturePartialTranscript("");
           
           setWholeConversation((prev) => {
-            if (prev.length > 0 && prev[prev.length - 1]?.other) {
-              return [...prev.slice(0, -1), { other: prev[prev.length - 1].other+" " + transcript.text }];
-  
-            } else {
               return [...prev, { other: transcript.text }];
             }
-          });
+          );
         }
       }
     })
@@ -155,10 +150,16 @@ export default function CaptureScreenButton() {
         videoRef.current.srcObject = null
       }
 
-      if (socket && socket.readyState === WebSocket.OPEN) {
+      if (socket) {
         // Send a termination message to the websocket
-        socket.send(JSON.stringify({ terminate_session: true }))
+        try{
+          socket.send(JSON.stringify({ terminate_session: true }))
         socket.close()
+        }
+        catch (error) {
+          console.error("Error sending termination message to AssemblyAI WebSocket", error)
+        }
+        
       }
     }
   }

@@ -12,13 +12,14 @@ export function AppProvider({ children }) {
   const [micStream, setMicStream] = useState(null);
   const [micPartialTranscript, setMicPartialTranscript] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [wholeConversation, setWholeConversation] = useState([{'other':"whatt are the Disadvantages of a centralized organization"},{'user':"i am not sure let me think"}]);
+  const [wholeConversation, setWholeConversation] = useState([]);
   const [enableWebSearch, setEnableWebSearch] = useState(false);
   const [showGraph, setShowGraph] = useState(false);
   const [stream,setStream] = useState(null);
   const videoRef = useRef(null);
   const [usedCitations, setUsedCitations] = useState([]);
   const [copiedText, setCopiedText] = useState("");
+  const [useHighlightedText,setUseHighlightedText] = useState(false);
   const micToken = useRef(null);
   const captureToken = useRef(null);
 
@@ -45,7 +46,7 @@ export function AppProvider({ children }) {
         enableWebSearch,
         setEnableWebSearch,
         showGraph,
-        setShowGraph,usedCitations, setUsedCitations,setCopiedText,copiedText,micToken,captureToken
+        setShowGraph,usedCitations, setUsedCitations,setCopiedText,copiedText,micToken,captureToken,setUseHighlightedText,useHighlightedText
       }}
     >
       {children}
