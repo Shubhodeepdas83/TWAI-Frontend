@@ -146,7 +146,7 @@ export default function MiddleSection() {
       }
 
       // Then get AI help
-      const aiResponse = await get_AI_Help(tempconv, enableWebSearch, requestType, useHighlightedText, copiedText)
+      const aiResponse = await get_AI_Help(tempconv, enableWebSearch, requestType, useHighlightedText, copiedText,sessionId)
 
       if (aiResponse) {
         setChatMessages((prev) => [

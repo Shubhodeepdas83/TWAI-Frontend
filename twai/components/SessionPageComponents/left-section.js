@@ -22,7 +22,7 @@ export default function LeftSection() {
   const [isUser, setIsUser] = useState(false)
   const scrollAreaRef = useRef(null)
   const conversationEndRef = useRef(null)
-  const [activeTab, setActiveTab] = useState("transcripts")
+  const [activeTab, setActiveTab] = useState("input")
 
   const handleClearConversation = async () => {
     const tempConversation = [...wholeConversation]

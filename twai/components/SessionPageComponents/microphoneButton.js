@@ -46,24 +46,36 @@ export default function MicrophoneButton() {
         reject(error)
       }
 
-      socket.onmessage = (event) => {
-        const data = JSON.parse(event.data)
-        if (data.channel && data.channel.alternatives) {
-          const transcript = data.channel.alternatives[0].transcript
-          if (transcript.trim()) {
-            console.log(wholeConversation)
-            // setMicTranscript((prevMessages) => prevMessages + " " + transcript)
+      const MAX_MESSAGE_LENGTH = 200;
 
+      socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.channel && data.channel.alternatives) {
+          const transcript = data.channel.alternatives[0].transcript;
+          if (transcript.trim()) {
+            console.log(wholeConversation);
+      
             setWholeConversation((prev) => {
-              if (prev[prev.length - 1]?.user) {
-                return [...prev.slice(0, -1), { user: prev[prev.length - 1].user + " " + transcript }]
+              const lastMessage = prev[prev.length - 1];
+      
+              if (lastMessage?.user) {
+                const updatedMessage = lastMessage.user + " " + transcript;
+                
+                if (updatedMessage.length > MAX_MESSAGE_LENGTH) {
+                  // If the message exceeds max length, start a new message
+                  return [...prev, { user: transcript }];
+                } else {
+                  // Otherwise, update the last message
+                  return [...prev.slice(0, -1), { user: updatedMessage }];
+                }
               } else {
-                return [...prev, { user: transcript }]
+                return [...prev, { user: transcript }];
               }
-            })
+            });
           }
         }
-      }
+      };
+      
     })
   }
 
@@ -86,7 +98,7 @@ export default function MicrophoneButton() {
         await openWebSocket()
 
         const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" })
-        setIsConnecting(false)
+        
 
         mediaRecorder.ondataavailable = (event) => {
           if (socket && socket.readyState === WebSocket.OPEN) {
@@ -99,6 +111,7 @@ export default function MicrophoneButton() {
         console.error(err)
       }
     }
+    setIsConnecting(false)
   }
 
   useEffect(() => {

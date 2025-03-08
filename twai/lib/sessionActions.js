@@ -5,7 +5,7 @@ import { getServerSession } from "next-auth";
 
 const prisma = new PrismaClient();
 //CHANGE: PUT ZOD CHECK HERE
-export async function get_AI_Help(conversation, use_web, requestType = 'help',useHighlightedText,copiedText) {
+export async function get_AI_Help(conversation, use_web, requestType = 'help',useHighlightedText,copiedText,sessionId) {
 
   const session = await getServerSession(authOptions);
   
@@ -24,6 +24,32 @@ export async function get_AI_Help(conversation, use_web, requestType = 'help',us
           return { failure: "User not found" };
       }
 
+      const Session = await prisma.session.findUnique({
+        where: { userId: user.id,id:sessionId },
+        select: { templateId:true },
+      });
+
+      if (!Session) {
+        return { failure: "Session not found" };
+      }
+      let template={}
+      if(Session.templateId){
+        template = await prisma.meetingTemplate.findUnique({
+          where: { id: Session.templateId },
+          select: { purpose:true,
+            goal:true,
+            additionalInfo:true,
+            duration:true,
+            documents:{
+              select:{
+                fileUrl:true,
+                title:true,
+              }
+            }
+          },
+        });
+      }
+
   try {
     // Create the payload for the FastAPI POST request
     const payload = {
@@ -31,7 +57,8 @@ export async function get_AI_Help(conversation, use_web, requestType = 'help',us
       use_web: use_web !== undefined ? use_web : true,
       userId: user.id,
       useHighlightedText: useHighlightedText,
-      highlightedText: copiedText
+      highlightedText: copiedText,
+      meetingTemplate: JSON.stringify(template)
 
     };
 

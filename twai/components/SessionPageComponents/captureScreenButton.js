@@ -104,23 +104,35 @@ export default function CaptureScreenButton() {
         reject(error)
       }
 
-      socket.onmessage = (event) => {
-        const data = JSON.parse(event.data)
-        if (data.channel && data.channel.alternatives) {
-          const transcript = data.channel.alternatives[0].transcript
-          if (transcript.trim()) {
-            // setTranscript((prevMessages) => prevMessages + " " + transcript)
+      const MAX_MESSAGE_LENGTH = 200;
 
+      socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.channel && data.channel.alternatives) {
+          const transcript = data.channel.alternatives[0].transcript;
+          if (transcript.trim()) {
+            // Assuming messages could be from "user" or "other"
             setWholeConversation((prev) => {
-              if (prev[prev.length - 1]?.other) {
-                return [...prev.slice(0, -1), { other: prev[prev.length - 1].other + " " + transcript }]
+              const lastMessage = prev[prev.length - 1];
+      
+              if (lastMessage?.other) {
+                const updatedMessage = lastMessage.other + " " + transcript;
+      
+                if (updatedMessage.length > MAX_MESSAGE_LENGTH) {
+                  // If the message exceeds max length, start a new "other" message
+                  return [...prev, { other: transcript }];
+                } else {
+                  // Otherwise, update the last message
+                  return [...prev.slice(0, -1), { other: updatedMessage }];
+                }
               } else {
-                return [...prev, { other: transcript }]
+                return [...prev, { other: transcript }];
               }
-            })
+            });
           }
         }
-      }
+      };
+      
     })
   }
 
