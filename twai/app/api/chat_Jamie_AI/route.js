@@ -67,6 +67,12 @@ export async function POST(req) {
       if(template){
         formData.append("meetingTemplate",JSON.stringify(template))
       }
+      else{
+        formData.append("meetingTemplate",JSON.stringify({}))
+      }
+    }
+    else{
+      formData.append("meetingTemplate",JSON.stringify({}))
     }
     
 
