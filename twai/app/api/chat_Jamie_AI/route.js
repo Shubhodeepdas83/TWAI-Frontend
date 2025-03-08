@@ -24,10 +24,51 @@ export async function POST(req) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+
+
+    
+
     // Extract form data
     const formData = await req.formData();
     const user_input = formData.get("user_input");
+    const sessionId = formData.get("sessionId");
     formData.append("userId", user.id);
+
+    if(!sessionId){
+      return NextResponse.json({ error: "Session ID not provided" }, { status: 400 });
+    }
+
+    const Session = await prisma.session.findUnique({
+      where: { userId: user.id,id:sessionId },
+      select: { templateId:true },
+    });
+
+    if (!Session) {
+      return NextResponse.json({ error: "Session not found" }, { status: 404 });
+    }
+    
+    if(Session.templateId){
+      const template = await prisma.meetingTemplate.findUnique({
+        where: { id: Session.templateId },
+        select: { purpose:true,
+          goal:true,
+          additionalInfo:true,
+          duration:true,
+          documents:{
+            select:{
+              fileUrl:true,
+              title:true,
+              description:true,     
+            }
+          },
+
+         },
+      });
+      if(template){
+        formData.append("meetingTemplate",JSON.stringify(template))
+      }
+    }
+    
 
 
     // Validate required fields
@@ -40,6 +81,8 @@ export async function POST(req) {
         { status: 200 }
       );
     }
+
+    console.log(formData)
 
     // Call the FastAPI backend with the extracted data
     const aiResponse = await fetch(`${process.env.BACKEND_URL}/chat_with_jamie`, {

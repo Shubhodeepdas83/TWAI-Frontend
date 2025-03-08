@@ -95,7 +95,7 @@ export default function LeftSection() {
 
         <CardContent className="p-4 pt-0 flex-1 flex flex-col overflow-hidden">
           <div className="flex-1 min-h-0 overflow-hidden">
-            <ScrollArea className="h-full pr-3" ref={scrollAreaRef}>
+            <ScrollArea className="h-full pr-3" ref={scrollAreaRef} id="conversation-container">
               {wholeConversation.length > 0 ? (
                 <div className="space-y-3 py-2">
                   {wholeConversation.map((message, index) => (
