@@ -54,6 +54,9 @@ export default function MiddleSection() {
       formData.append("use_web", enableWebSearch)
       formData.append("use_graph", showGraph)
 
+
+      console.log(formData)
+
       if (image) {
         formData.append("uploaded_file", image)
       }

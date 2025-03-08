@@ -41,29 +41,35 @@ export default function Home() {
 
   useEffect(() => {
     const handleMouseUp = () => {
-      const selectedText = window.getSelection()?.toString().trim()
-      if (!selectedText) return
-
-      const selection = window.getSelection()
-      if (!selection) return
-
-      const anchorNode = selection.anchorNode
-      const focusNode = selection.focusNode
-      if (!anchorNode || !focusNode) return
-
-      const conversationContainer = document.getElementById("conversation-container")
-
+      const selectedText = window.getSelection()?.toString().trim();
+      if (!selectedText) return;
+    
+      const selection = window.getSelection();
+      if (!selection) return;
+    
+      const anchorNode = selection.anchorNode;
+      const focusNode = selection.focusNode;
+    
+      if (!anchorNode || !focusNode) return;
+    
       // Ensure BOTH the start and end of selection are inside the conversation container
-      if (conversationContainer?.contains(anchorNode) && conversationContainer.contains(focusNode)) {
+      const conversationContainer = document.getElementById("conversation-container");
+    
+      if (
+        conversationContainer &&
+        conversationContainer.contains(anchorNode) &&
+        conversationContainer.contains(focusNode)
+      ) {
         navigator.clipboard
           .writeText(selectedText)
           .then(() => {
-            console.log("Copied:", selectedText)
-            setCopiedText(selectedText)
+            console.log("Copied:", selectedText);
+            setCopiedText(selectedText);
           })
-          .catch((err) => console.error("Copy failed:", err))
+          .catch((err) => console.error("Copy failed:", err));
       }
-    }
+    };
+    
 
     document.addEventListener("mouseup", handleMouseUp)
     return () => document.removeEventListener("mouseup", handleMouseUp)

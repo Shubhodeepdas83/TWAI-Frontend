@@ -105,7 +105,7 @@ export default function RightSection() {
       formData.append("user_input", userInput)
       formData.append("use_web", enableWebSearch)
       formData.append("use_graph", showGraph)
-
+      formData.append("sessionId", sessionId)
       if (image) {
         formData.append("uploaded_file", image)
       }
