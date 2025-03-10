@@ -10,8 +10,9 @@ import MicrophoneButton from "@/components/SessionPageComponents/microphoneButto
 import CaptureScreenButton from "@/components/SessionPageComponents/captureScreenButton"
 import { useParams } from "next/navigation"
 import { appendConversation } from "../../app/session/[sessionId]/actions"
-
+import { unstable_noStore as noStore } from 'next/cache';
 export default function MiddleSection() {
+  noStore();
   const {
     chatMessages,
     setChatMessages,
