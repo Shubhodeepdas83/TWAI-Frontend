@@ -100,17 +100,23 @@ export default function Home() {
         </Button>
       </header>
 
-      <main className="flex-1 w-full p-4 grid grid-cols-1 lg:grid-cols-12 gap-4 max-h-[calc(100vh-80px)] overflow-hidden">
-  <div className="lg:col-span-4 xl:col-span-4 overflow-hidden">
+      <main className="flex-1 w-full p-4 grid grid-cols-1 lg:grid-cols-12 gap-4 max-h-screen overflow-hidden">
+  {/* Left Section */}
+  <div className="lg:col-span-4 xl:col-span-4 overflow-hidden flex flex-col">
     <LeftSection />
   </div>
-  <div className="lg:col-span-4 xl:col-span-4 overflow-hidden">
+
+  {/* Middle Section */}
+  <div className="lg:col-span-4 xl:col-span-4 overflow-hidden flex flex-col max-h-[calc(100vh-80px)]">
     <MiddleSection />
   </div>
-  <div className="lg:col-span-4 xl:col-span-4 overflow-hidden">
+
+  {/* Right Section */}
+  <div className="lg:col-span-4 xl:col-span-4 overflow-hidden flex flex-col">
     <RightSection />
   </div>
 </main>
+
 
     </div>
   )

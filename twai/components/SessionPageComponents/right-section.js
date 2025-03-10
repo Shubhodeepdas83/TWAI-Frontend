@@ -41,64 +41,13 @@ export default function RightSection() {
   const chatEndRef = useRef(null)
   const [image, setImage] = useState(null)
 
-  const handleAIAnswer = async (requestType) => {
-    if (isProcessing) return
-    setIsProcessing(true)
 
-    setChatMessages([...chatMessages, { text: "Thinking...", sender: "ai" }])
-
-    try {
-      // First save the conversation to the database
-      const appending = await appendConversation({ sessionId, newMessages: wholeConversation })
-      const tempconv = [...wholeConversation] // Create a copy to avoid reference issues
-
-      if (appending.success) {
-        setCapturePartialTranscript("")
-        setWholeConversation([])
-        setMicPartialTranscript("")
-      }
-
-      // Then get AI help
-      const aiResponse = await get_AI_Help(tempconv, enableWebSearch, requestType, useHighlightedText, copiedText)
-
-      if (aiResponse) {
-        setChatMessages((prev) => [
-          ...prev.filter((msg) => msg.text !== "Thinking..."),
-          { text: aiResponse.question || `Request for ${requestType}`, sender: "user" },
-          { text: aiResponse.answer || "No response received", sender: "ai" },
-        ])
-
-        if (aiResponse.used_citations) {
-          setUsedCitations(
-            Object.entries(aiResponse.used_citations).map(([key, value]) => ({
-              id: key,
-              ...value,
-            })),
-          )
-        } else {
-          setUsedCitations([])
-        }
-      } else {
-        setChatMessages((prev) => [
-          ...prev.filter((msg) => msg.text !== "Thinking..."),
-          { text: "Sorry, I couldn't process the request.", sender: "ai" },
-        ])
-      }
-    } catch (error) {
-      console.error("AI Request failed:", error)
-      setChatMessages((prev) => [
-        ...prev.filter((msg) => msg.text !== "Thinking..."),
-        { text: "An error occurred while processing your request.", sender: "ai" },
-      ])
-    } finally {
-      setIsProcessing(false)
-    }
-  }
 
   const handleSendMessage = async () => {
     if (userInput.trim()) {
       setIsProcessing(true)
-      setChatMessages([...chatMessages, { text: userInput, sender: "user" }])
+      setChatMessages((prev) => [...prev, { text: userInput, sender: "user" }])
+      setChatMessages((prev) => [...prev, { text: "Thinking...", sender: "ai"} ]);
       setUserInput("")
 
       const formData = new FormData()
@@ -120,28 +69,78 @@ export default function RightSection() {
         body: formData,
       })
 
-      if (!response.ok) {
-        return setChatMessages((prev) => [...prev, { text: "Sorry, I couldn't process the response.", sender: "ai" }])
+      if (!response) throw new Error("AI response is undefined");
+  
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        // Ensure we process full JSON objects by splitting on newline (\n)
+        const lines = buffer.split("\n").filter(line => line.trim() !== "");
+        // buffer = lines.pop() || ""; // Save the last (possibly incomplete) line for next read
+
+
+
+        console.log("Lines:", lines);
+        console.log("Remaining Buffer:", buffer);
+        console.log("Buffer split:",buffer.split("\n").filter(line => line.trim() !== ""))
+        for (const line of lines) {
+          try {
+              const h = JSON.parse(line);
+              buffer = lines.slice(1).join() || "";
+              // if (h.query) {
+              //   setChatMessages((prev) => [
+              //     ...prev.filter((msg) => msg.text !== "Thinking..."),
+              //     { text: h.query, sender: "user" },
+              //   ]);
+              // }
+              if (h.result) {
+                setChatMessages((prev) => [
+                  ...prev.filter((msg) => msg.text !== "Thinking..."),
+                  { text: h.result, sender: "ai" },
+                ]);
+              }
+              if (h.used_citations) {
+                setUsedCitations(
+                  Object.entries(h.used_citations).map(([key, value]) => ({
+                    id: key,
+                    ...value,
+                  }))
+                );
+              }
+              if(h.graph){
+                setGraphImage(h.graph)
+                setShowGraph(true)
+              }
+          } catch (error) {
+              console.error('JSON Parsing Error:', error);
+          }
       }
 
-      const data = await response.json()
+
+      
+    }
 
       // Update chat messages with AI response
-      setChatMessages((prev) => [
-        ...prev.filter((msg) => msg.text !== "Thinking..."),
-        { text: data.answer, sender: "ai" },
-      ])
+      // setChatMessages((prev) => [
+      //   ...prev.filter((msg) => msg.text !== "Thinking..."),
+      //   { text: data.answer, sender: "ai" },
+      // ])
 
-      if (data.used_citations) {
-        setUsedCitations(
-          Object.entries(data.used_citations).map(([key, value]) => ({
-            id: key,
-            ...value,
-          })),
-        )
-      } else {
-        setUsedCitations([])
-      }
+      // if (data.used_citations) {
+      //   setUsedCitations(
+      //     Object.entries(data.used_citations).map(([key, value]) => ({
+      //       id: key,
+      //       ...value,
+      //     })),
+      //   )
+      // } else {
+      //   setUsedCitations([])
+      // }
       setIsProcessing(false)
     }
   }
@@ -183,6 +182,13 @@ export default function RightSection() {
           <div className="flex items-center gap-2">
             <Bot className="h-5 w-5 text-primary" />
             <CardTitle className="text-lg font-medium">AI Meeting Helper</CardTitle>
+            {isProcessing && (
+    <div className="flex space-x-2">
+      <div className="w-2.5 h-2.5 bg-primary rounded-full animate-bounce"></div>
+      <div className="w-2.5 h-2.5 bg-primary rounded-full animate-bounce delay-150"></div>
+      <div className="w-2.5 h-2.5 bg-primary rounded-full animate-bounce delay-300"></div>
+    </div>
+  )}
           </div>
           <div className="flex items-center gap-2">
             <Button

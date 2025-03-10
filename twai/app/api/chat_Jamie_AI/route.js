@@ -91,23 +91,35 @@ export async function POST(req) {
     console.log(formData)
 
     // Call the FastAPI backend with the extracted data
-    const aiResponse = await fetch(`${process.env.BACKEND_URL}/chat_with_jamie`, {
+    const response = await fetch(`http://127.0.0.1:8000/chat_with_jamie`, {
       method: "POST",
       body: formData, // Forwarding the same FormData to FastAPI
     });
 
-    if (!aiResponse.ok) {
-      return NextResponse.json(
-        {
-          question: "Sorry, I couldn't process the response.",
-          answer: "Sorry, I couldn't process the response.",
-        },
-        { status: 200 }
-      );
-    }
+    if (!response.body) {
+      return NextResponse.json({ error: 'No response body' }, { status: 500 });
+  }
 
-    const data = await aiResponse.json();
-    return NextResponse.json({ question: data.query, answer: data.result, used_citations: data.used_citations, graph: data.graph }, { status: 200 });
+  const encoder = new TextEncoder();
+  const readableStream = new ReadableStream({
+      async start(controller) {
+          const reader = response.body.getReader();
+          while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              controller.enqueue(value);
+          }
+          controller.close();
+      }
+  });
+
+  return new NextResponse(readableStream, {
+      headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache',
+      },
+  });
+    // return NextResponse.json({ question: data.query, answer: data.result, used_citations: data.used_citations, graph: data.graph }, { status: 200 });
 
   } catch (error) {
     console.error("Error in POST handler:", error);

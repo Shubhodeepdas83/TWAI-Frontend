@@ -10,7 +10,6 @@ import MicrophoneButton from "@/components/SessionPageComponents/microphoneButto
 import CaptureScreenButton from "@/components/SessionPageComponents/captureScreenButton"
 import { useParams } from "next/navigation"
 import { appendConversation } from "../../app/session/[sessionId]/actions"
-import { get_AI_Help } from "../../lib/sessionActions"
 
 export default function MiddleSection() {
   const {
@@ -43,144 +42,107 @@ export default function MiddleSection() {
 
   const { sessionId } = useParams()
 
-  const handleSendMessage = async () => {
-    if (userInput.trim()) {
-      setIsProcessing(true)
-      setChatMessages([...chatMessages, { text: userInput, sender: "user" }])
-      setUserInput("")
-
-      const formData = new FormData()
-      formData.append("user_input", userInput)
-      formData.append("use_web", enableWebSearch)
-      formData.append("use_graph", showGraph)
-
-
-      console.log(formData)
-
-      if (image) {
-        formData.append("uploaded_file", image)
-      }
-
-      if (wholeConversation) {
-        formData.append("raw_Conversation", JSON.stringify(wholeConversation))
-      }
-
-      // Send the request to the server-side route
-      const response = await fetch("/api/chat_Jamie_AI", {
-        method: "POST",
-        body: formData,
-      })
-
-      if (!response.ok) {
-        return setChatMessages((prev) => [...prev, { text: "Sorry, I couldn't process the response.", sender: "ai" }])
-      }
-
-      const data = await response.json()
-
-      // Update chat messages with AI response
-      setChatMessages((prev) => [
-        ...prev.filter((msg) => msg.text !== "Thinking..."),
-        { text: data.answer, sender: "ai" },
-      ])
-
-      // If graph image exists, update the state
-      if (data.graph) {
-        setGraphImage(data.graph)
-      }
-      if (data.used_citations) {
-        setUsedCitations(
-          Object.entries(data.used_citations).map(([key, value]) => ({
-            id: key,
-            ...value,
-          })),
-        )
-      } else {
-        setUsedCitations([])
-      }
-      setIsProcessing(false)
-    }
-  }
-
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0]
-    if (file && ["image/png", "image/jpeg", "image/jpg"].includes(file.type)) {
-      setImage(file)
-    } else {
-      alert("Please upload a valid image file (PNG, JPG, JPEG).")
-    }
-  }
-
-  const handleClear = () => {
-    setChatMessages([])
-    setUserInput("")
-    setGraphImage(null)
-  }
-
-  const triggerFileInput = () => {
-    document.getElementById("imageUpload").click()
-  }
-
-  const handleRemoveImage = () => {
-    setImage(null)
-  }
-
   const toggleGraphVisibility = () => {
     setIsGraphVisible(!isGraphVisible)
   }
 
   const handleAIAnswer = async (requestType) => {
-    if (isProcessing) return
-    setIsProcessing(true)
+    if (isProcessing) return;
+    setIsProcessing(true);
 
-    setChatMessages([...chatMessages, { text: "Thinking...", sender: "ai" }])
+    setChatMessages([...chatMessages, { text: "Thinking...", sender: "ai" }]);
 
     try {
-      // First save the conversation to the database
-      const appending = await appendConversation({ sessionId, newMessages: wholeConversation })
-      const tempconv = [...wholeConversation] // Create a copy to avoid reference issues
+      // Save the conversation to the database
+      const appending = await appendConversation({ sessionId, newMessages: wholeConversation });
+      const tempconv = [...wholeConversation]; // Avoid reference issues
 
       if (appending.success) {
-        setCapturePartialTranscript("")
-        setWholeConversation([])
-        setMicPartialTranscript("")
+        setCapturePartialTranscript("");
+        setWholeConversation([]);
+        setMicPartialTranscript("");
       }
 
-      // Then get AI help
-      const aiResponse = await get_AI_Help(tempconv, enableWebSearch, requestType, useHighlightedText, copiedText,sessionId)
+      // Call the new API route
+      const response = await fetch("/api/get_AI_Help", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          conversation: tempconv,
+          use_web: enableWebSearch,
+          requestType,
+          useHighlightedText,
+          copiedText,
+          sessionId,
+        }),
+      });
 
-      if (aiResponse) {
-        setChatMessages((prev) => [
-          ...prev.filter((msg) => msg.text !== "Thinking..."),
-          { text: aiResponse.question || `Request for ${requestType}`, sender: "user" },
-          { text: aiResponse.answer || "No response received", sender: "ai" },
-        ])
+      if (!response.ok) throw new Error(`Server responded with ${response.status}`);
 
-        if (aiResponse.used_citations) {
-          setUsedCitations(
-            Object.entries(aiResponse.used_citations).map(([key, value]) => ({
-              id: key,
-              ...value,
-            })),
-          )
-        } else {
-          setUsedCitations([])
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("Streaming not supported");
+
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        // Split buffer into lines to handle streamed JSON objects
+        const lines = buffer.split("\n").filter((line) => line.trim() !== "");
+
+
+        console.log("Lines:", lines);
+        console.log("Remaining Buffer:", buffer);
+        console.log("Buffer split:", buffer.split("\n").filter(line => line.trim() !== ""))
+
+        for (const line of lines) {
+          try {
+            const h = JSON.parse(line);
+            buffer = lines.slice(1).join() || "";
+
+            if (h.query) {
+              setChatMessages((prev) => [
+                ...prev.filter((msg) => msg.text !== "Thinking..."),
+                { text: h.query, sender: "user" }, { text: "Thinking...", sender: "ai" },
+              ]);
+
+            }
+
+            if (h.result) {
+              setChatMessages((prev) => [
+                ...prev.filter((msg) => msg.text !== "Thinking..."), { text: h.result, sender: "ai" },
+              ]);
+            }
+
+            if (h.used_citations) {
+              setUsedCitations(
+                Object.entries(h.used_citations).map(([key, value]) => ({
+                  id: key,
+                  ...value,
+                }))
+              );
+            }
+          } catch (error) {
+            console.warn("Streaming JSON parse error:", error);
+          }
         }
-      } else {
-        setChatMessages((prev) => [
-          ...prev.filter((msg) => msg.text !== "Thinking..."),
-          { text: "Sorry, I couldn't process the request.", sender: "ai" },
-        ])
       }
     } catch (error) {
-      console.error("AI Request failed:", error)
+      console.error("AI Request failed:", error);
       setChatMessages((prev) => [
         ...prev.filter((msg) => msg.text !== "Thinking..."),
         { text: "An error occurred while processing your request.", sender: "ai" },
-      ])
+      ]);
     } finally {
-      setIsProcessing(false)
+      setIsProcessing(false);
     }
-  }
+  };
+
+
 
   return (
     <div className="h-[calc(100vh-120px)] flex flex-col gap-4">
@@ -210,11 +172,20 @@ export default function MiddleSection() {
           <CardHeader className="p-4 pb-2">
             <CardTitle className="text-lg font-medium">Citations</CardTitle>
           </CardHeader>
-          <CardContent className="p-4 pt-0 flex-1 overflow-hidden">
+          <CardContent className="p-4 pt-0 flex-1 overflow-y-auto max-h-[calc(100vh-300px)]">
             {usedCitations.length > 0 ? (
-              <ScrollArea className="h-full pr-3">
-                <div className="space-y-3">
-                  {usedCitations.map((citation) => (
+              <div className="space-y-3">
+                {usedCitations.map((citation) => {
+                  // Extract the page number from the description if present
+                  let modifiedDescription = citation.description;
+                  const pageMatch = modifiedDescription.match(/, Page (\d+(\.\d+)?)/i);
+
+                  if (pageMatch) {
+                    const pageNumber = pageMatch[1];
+                    modifiedDescription = modifiedDescription.replace(pageMatch[0], `#page=${parseInt(pageNumber)+1}`);
+                  }
+
+                  return (
                     <div key={citation.id} className="border rounded-lg p-3 hover:bg-muted/50 transition-colors">
                       <div className="flex items-center justify-between mb-2">
                         <div className="bg-primary/10 text-primary text-xs font-medium px-2 py-1 rounded">
@@ -223,7 +194,7 @@ export default function MiddleSection() {
 
                         {citation.description.startsWith("http") && (
                           <a
-                            href={citation.description}
+                            href={modifiedDescription}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-primary hover:text-primary/80"
@@ -236,12 +207,12 @@ export default function MiddleSection() {
                       <div className="text-sm">
                         {citation.description.startsWith("http") ? (
                           <a
-                            href={citation.description}
+                            href={modifiedDescription}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-primary hover:underline break-words"
                           >
-                            {citation.description}
+                            {modifiedDescription}
                           </a>
                         ) : (
                           <p className="break-words">{citation.description}</p>
@@ -253,14 +224,15 @@ export default function MiddleSection() {
                           <img
                             src={`data:image/png;base64,${citation.image_data}`}
                             alt={`Citation ${citation.id}`}
-                            className="w-full rounded object-contain"
+                            className="w-full max-h-80 object-contain rounded"
                           />
                         </div>
                       )}
                     </div>
-                  ))}
-                </div>
-              </ScrollArea>
+                  );
+                })}
+
+              </div>
             ) : (
               <div className="h-full flex items-center justify-center text-center p-4">
                 <div>
@@ -382,6 +354,8 @@ export default function MiddleSection() {
         </div>
       )}
     </div>
+
+
   )
 }
 
