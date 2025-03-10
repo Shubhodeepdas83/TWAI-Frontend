@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth";
 
 const prisma = new PrismaClient();
 export const maxDuration = 60;
+export const dynamic = 'force-dynamic';
 export async function POST(req) {
   try {
     const session = await getServerSession(authOptions);

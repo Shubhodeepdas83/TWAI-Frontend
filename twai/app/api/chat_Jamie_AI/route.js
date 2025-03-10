@@ -4,6 +4,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route"; // Make sure t
 import { PrismaClient } from '@prisma/client';
 
 export const maxDuration = 60;
+export const dynamic = 'force-dynamic';
 
 const prisma = new PrismaClient();
 
