@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"; // Make sure this path is correct
 import { PrismaClient } from '@prisma/client';
 
+export const maxDuration = 60;
 
 const prisma = new PrismaClient();
 

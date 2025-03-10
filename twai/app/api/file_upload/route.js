@@ -5,6 +5,8 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3"
 import { randomUUID } from "crypto"
 import { NextResponse } from "next/server"
 
+export const maxDuration = 60;
+
 const prisma = new PrismaClient()
 
 // AWS S3 Configuration
