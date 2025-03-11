@@ -55,14 +55,9 @@ export default function MiddleSection() {
 
     try {
       // Save the conversation to the database
-      const appending = await appendConversation({ sessionId, newMessages: wholeConversation });
-      const tempconv = [...wholeConversation]; // Avoid reference issues
-
-      if (appending.success) {
-        setCapturePartialTranscript("");
-        setWholeConversation([]);
-        setMicPartialTranscript("");
-      }
+      const tempconv = [...wholeConversation]
+      setWholeConversation([]);
+      
 
       // Call the new API route
       const response = await fetch("/api/get_AI_Help", {
@@ -131,6 +126,20 @@ export default function MiddleSection() {
             console.warn("Streaming JSON parse error:", error);
           }
         }
+      }
+
+
+      const appending = await appendConversation({ sessionId, newMessages: tempconv });
+
+
+      if (appending.success) {
+        setCapturePartialTranscript("");
+        
+        setMicPartialTranscript("");
+      }
+      else{
+        console.log("Error appending conversation")
+        setWholeConversation(tempconv);
       }
     } catch (error) {
       console.error("AI Request failed:", error);
