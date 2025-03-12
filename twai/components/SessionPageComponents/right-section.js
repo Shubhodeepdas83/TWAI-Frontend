@@ -35,6 +35,7 @@ export default function RightSection() {
     copiedText,
     userInput,
     setUserInput,
+    setGraphImage
   } = useAppContext()
 
   const { sessionId } = useParams()

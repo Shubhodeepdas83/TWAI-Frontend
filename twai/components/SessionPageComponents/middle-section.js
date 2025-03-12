@@ -34,11 +34,10 @@ export default function MiddleSection() {
     setCapturePartialTranscript,
     setWholeConversation,
     setMicPartialTranscript,
-    copiedText,
+    copiedText,graphImage, setGraphImage
   } = useAppContext()
 
   const [image, setImage] = useState(null)
-  const [graphImage, setGraphImage] = useState(null)
   const [isGraphVisible, setIsGraphVisible] = useState(false)
 
   const { sessionId } = useParams()
@@ -50,20 +49,50 @@ export default function MiddleSection() {
   const handleAIAnswer = async (requestType) => {
     if (isProcessing) return;
     setIsProcessing(true);
-
     setChatMessages([...chatMessages, { text: "Thinking...", sender: "ai" }]);
 
     try {
-      // Save the conversation to the database
-      const tempconv = [...wholeConversation]
+      // Step 1: Extract the query using OpenAI on the frontend
+      const tempconv = [...wholeConversation];
       setWholeConversation([]);
-      
 
-      // Call the new API route
+      if (requestType === "help") {
+        const queryResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [
+              { role: "system", content: "You are an AI assistant optimized for generating precise, contextually relevant questions suitable for Retrieval-Augmented Generation (RAG) querying. Analyze the provided conversation, prioritize the lastest exchanges while using earlier messages for context, and extract a focused query. The question should be factual, specific, and well-suited for retrieving detailed information. Avoid ambiguous or conversational phrasing, and keep the query strictly relevant to the discussion topic." },
+              { role: "user", content: `Extract a short query from this conversation:\n\n${tempconv.map(obj => Object.values(obj).join(": ")).join("\n")}` },
+            ],
+            temperature: 0.7,
+            max_tokens: 700,
+            top_p: 0.9,
+          }),
+        });
+
+        if (!queryResponse.ok) throw new Error("Failed to extract query");
+
+        const queryData = await queryResponse.json();
+        const extractedQuery = queryData.choices?.[0]?.message?.content || "";
+        tempconv.push({ "user": extractedQuery })
+        setChatMessages((prev) => [
+          ...prev.filter((msg) => msg.text !== "Thinking..."),
+          { text: extractedQuery, sender: "user" },
+          { text: "Thinking...", sender: "ai" },
+        ]);
+
+      }
+    // Step 3: Send the extracted query to the backend for processing
       const response = await fetch("/api/get_AI_Help", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+
           conversation: tempconv,
           use_web: enableWebSearch,
           requestType,
@@ -87,30 +116,25 @@ export default function MiddleSection() {
 
         buffer += decoder.decode(value, { stream: true });
 
-        // Split buffer into lines to handle streamed JSON objects
         const lines = buffer.split("\n").filter((line) => line.trim() !== "");
-
-
-        console.log("Lines:", lines);
-        console.log("Remaining Buffer:", buffer);
-        console.log("Buffer split:", buffer.split("\n").filter(line => line.trim() !== ""))
 
         for (const line of lines) {
           try {
             const h = JSON.parse(line);
             buffer = lines.slice(1).join() || "";
 
-            if (h.query) {
+            if(h.query && requestType!="help"){
               setChatMessages((prev) => [
                 ...prev.filter((msg) => msg.text !== "Thinking..."),
-                { text: h.query, sender: "user" }, { text: "Thinking...", sender: "ai" },
+                { text: h.query, sender: "user" },
+                { text: "Thinking...", sender: "ai" },
               ]);
-
             }
 
             if (h.result) {
               setChatMessages((prev) => [
-                ...prev.filter((msg) => msg.text !== "Thinking..."), { text: h.result, sender: "ai" },
+                ...prev.filter((msg) => msg.text !== "Thinking..."),
+                { text: h.result, sender: "ai" },
               ]);
             }
 
@@ -128,17 +152,13 @@ export default function MiddleSection() {
         }
       }
 
-
       const appending = await appendConversation({ sessionId, newMessages: tempconv });
-
 
       if (appending.success) {
         setCapturePartialTranscript("");
-        
         setMicPartialTranscript("");
-      }
-      else{
-        console.log("Error appending conversation")
+      } else {
+        console.log("Error appending conversation");
         setWholeConversation(tempconv);
       }
     } catch (error) {
@@ -192,7 +212,7 @@ export default function MiddleSection() {
 
                   if (pageMatch) {
                     const pageNumber = pageMatch[1];
-                    modifiedDescription = modifiedDescription.replace(pageMatch[0], `#page=${parseInt(pageNumber)+1}`);
+                    modifiedDescription = modifiedDescription.replace(pageMatch[0], `#page=${parseInt(pageNumber) + 1}`);
                   }
 
                   return (
@@ -323,22 +343,27 @@ export default function MiddleSection() {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
+              {/* Graph Icon - Positioned Below AI Tools */}
+{graphImage && showGraph && (
+  <div className="flex justify-center mt-2">
+    <Button
+      variant="outline"
+      size="sm"
+      className="w-full flex items-center justify-start"
+      onClick={toggleGraphVisibility}
+    >
+      <Image className="h-4 w-4 mr-2" />
+      Show Graph
+    </Button>
+  </div>
+)}
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Graph Icon - Displayed Below the Chat Input */}
-      {graphImage && showGraph && (
-        <Button
-          variant="link"
-          size="icon"
-          className="absolute bottom-20 left-1/2 transform -translate-x-1/2 text-primary hover:text-primary/90"
-          onClick={toggleGraphVisibility}
-        >
-          <Image className="h-5 w-5" />
-        </Button>
-      )}
+
+
 
       {/* Display the Graph in a Pop-up or Modal */}
       {isGraphVisible && graphImage && (
