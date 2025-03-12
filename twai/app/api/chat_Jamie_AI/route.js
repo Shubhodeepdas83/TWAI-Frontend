@@ -93,7 +93,7 @@ export async function POST(req) {
     console.log(formData)
 
     // Call the FastAPI backend with the extracted data
-    const response = await fetch(`http://127.0.0.1:8000/chat_with_jamie`, {
+    const response = await fetch(`${process.env.BACKEND_URL}/chat_with_jamie`, {
       method: "POST",
       body: formData, // Forwarding the same FormData to FastAPI
     });
