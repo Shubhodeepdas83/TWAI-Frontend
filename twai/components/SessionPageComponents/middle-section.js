@@ -34,7 +34,7 @@ export default function MiddleSection() {
     setCapturePartialTranscript,
     setWholeConversation,
     setMicPartialTranscript,
-    copiedText,graphImage, setGraphImage
+    copiedText, graphImage, setGraphImage,setCopiedText
   } = useAppContext()
 
   const [image, setImage] = useState(null)
@@ -48,6 +48,7 @@ export default function MiddleSection() {
 
   const handleAIAnswer = async (requestType) => {
     if (isProcessing) return;
+    setGraphImage(null);
     setIsProcessing(true);
     setChatMessages([...chatMessages, { text: "Thinking...", sender: "ai" }]);
 
@@ -56,7 +57,7 @@ export default function MiddleSection() {
       const tempconv = [...wholeConversation];
       setWholeConversation([]);
 
-      if (requestType === "help") {
+      if (requestType === "help" && !useHighlightedText && copiedText !== "") {
         const queryResponse = await fetch("https://api.openai.com/v1/chat/completions", {
           method: "POST",
           headers: {
@@ -87,7 +88,7 @@ export default function MiddleSection() {
         ]);
 
       }
-    // Step 3: Send the extracted query to the backend for processing
+      // Step 3: Send the extracted query to the backend for processing
       const response = await fetch("/api/get_AI_Help", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -123,7 +124,8 @@ export default function MiddleSection() {
             const h = JSON.parse(line);
             buffer = lines.slice(1).join() || "";
 
-            if(h.query && requestType!="help"){
+            if (h.query && requestType != "help" || h.query && requestType == "help" && useHighlightedText && copiedText !== "") {
+              console.log("Setting chat messages")
               setChatMessages((prev) => [
                 ...prev.filter((msg) => msg.text !== "Thinking..."),
                 { text: h.query, sender: "user" },
@@ -151,6 +153,11 @@ export default function MiddleSection() {
           }
         }
       }
+
+      setCopiedText("");
+      setChatMessages((prev) => [
+        ...prev.filter((msg) => msg.text !== "Thinking...")
+      ]);
 
       const appending = await appendConversation({ sessionId, newMessages: tempconv });
 
@@ -344,19 +351,19 @@ export default function MiddleSection() {
                 </Tooltip>
               </TooltipProvider>
               {/* Graph Icon - Positioned Below AI Tools */}
-{graphImage && showGraph && (
-  <div className="flex justify-center mt-2">
-    <Button
-      variant="outline"
-      size="sm"
-      className="w-full flex items-center justify-start"
-      onClick={toggleGraphVisibility}
-    >
-      <Image className="h-4 w-4 mr-2" />
-      Show Graph
-    </Button>
-  </div>
-)}
+              {graphImage && showGraph && (
+                <div className="flex justify-center mt-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full flex items-center justify-start"
+                    onClick={toggleGraphVisibility}
+                  >
+                    <Image className="h-4 w-4 mr-2" />
+                    Show Graph
+                  </Button>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

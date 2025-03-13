@@ -46,6 +46,7 @@ export default function RightSection() {
 
 
   const handleSendMessage = async () => {
+    setGraphImage(null)
     if (userInput.trim()) {
       setIsProcessing(true)
       setChatMessages((prev) => [...prev, { text: userInput, sender: "user" }])
@@ -126,6 +127,9 @@ export default function RightSection() {
 
       
     }
+    setChatMessages((prev) => [
+      ...prev.filter((msg) => msg.text !== "Thinking...")
+    ]);
 
       // Update chat messages with AI response
       // setChatMessages((prev) => [
