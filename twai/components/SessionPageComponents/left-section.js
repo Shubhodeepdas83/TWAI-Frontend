@@ -3,8 +3,8 @@
 import { useAppContext } from "../../context/AppContext"
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { MessageSquare, ScrollText, Send, Trash, Keyboard, LogOut } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ScrollText, Send, Trash, Keyboard } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useParams, useRouter } from "next/navigation"
 import { appendConversation } from "../../app/session/[sessionId]/actions"
@@ -41,11 +41,6 @@ export default function LeftSection() {
     }
   }
 
-  const handleExit = async () => {
-    await appendConversation({ sessionId: sessionId, newMessages: wholeConversation })
-    router.push("/dashboard")
-  }
-
   // Auto-scroll effect
   useEffect(() => {
     if (autoScroll && conversationEndRef.current) {
@@ -54,69 +49,57 @@ export default function LeftSection() {
   }, [wholeConversation, autoScroll])
 
   return (
-    <div className="h-[calc(100vh-32px)] flex flex-col gap-4">
-      {/* Screen Capture Card */}
+    <div className="h-full flex flex-col gap-2">
+      {/* Screen Capture Card - Reduced padding, removed title */}
       <Card className="border shadow-sm">
-        <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between">
-          <CardTitle className="text-lg font-medium">Screen Capture</CardTitle>
-          <Button onClick={handleExit} variant="destructive" size="sm" className="flex items-center gap-1">
-            <LogOut className="h-4 w-4" />
-            Exit Session
-          </Button>
-        </CardHeader>
-        <CardContent className="p-4 pt-0">
+        <CardContent className="p-2">
           {/* Video Section */}
-          <div className="aspect-video bg-gray-800 rounded-lg overflow-hidden mb-3">
+          <div className="aspect-video bg-gray-800 rounded-lg overflow-hidden mb-2">
             <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
           </div>
 
-          {/* Buttons Section */}
-          <div className="flex flex-col sm:flex-row gap-2">
+          {/* Buttons Section - Reduced spacing */}
+          <div className="flex flex-col sm:flex-row gap-1">
             <MicrophoneButton />
             <CaptureScreenButton />
           </div>
         </CardContent>
       </Card>
 
-      {/* Conversation Card */}
-      <Card className="border shadow-sm flex-1 flex flex-col overflow-hidden">
-        <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between shrink-0">
-          <div className="flex items-center gap-2">
-            <MessageSquare className="h-4 w-4" />
-            <CardTitle className="text-lg font-medium">Conversation</CardTitle>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setAutoScroll(!autoScroll)}
-              className={cn("text-muted-foreground h-8", autoScroll && "bg-primary/10 text-primary")}
-            >
-              <ScrollText className="h-4 w-4 mr-1" />
-              {autoScroll ? "Auto-scroll On" : "Auto-scroll Off"}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleClearConversation}
-              className="text-red-500 h-8"
-              disabled={wholeConversation.length === 0}
-            >
-              <Trash className="h-4 w-4 mr-1" />
-              Clear
-            </Button>
-          </div>
-        </CardHeader>
+      {/* Conversation Card - Reduced padding, removed title */}
+      <Card className="border shadow-sm flex-1 flex flex-col overflow-hidden relative">
+        {/* Overlay buttons for auto-scroll and clear */}
+        <div className="absolute top-2 right-2 z-10 flex gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setAutoScroll(!autoScroll)}
+            className={cn("h-7 w-7 p-0", autoScroll && "bg-primary/10 text-primary")}
+            title={autoScroll ? "Auto-scroll On" : "Auto-scroll Off"}
+          >
+            <ScrollText className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleClearConversation}
+            className="text-red-500 h-7 w-7 p-0"
+            disabled={wholeConversation.length === 0}
+            title="Clear Conversation"
+          >
+            <Trash className="h-4 w-4" />
+          </Button>
+        </div>
 
-        <CardContent className="p-4 pt-0 flex-1 flex flex-col overflow-hidden">
+        <CardContent className="p-2 pt-8 flex-1 flex flex-col overflow-hidden">
           <div className="flex-1 min-h-0 overflow-hidden">
-            <ScrollArea className="h-full pr-3" ref={scrollAreaRef} id="conversation-container">
+            <ScrollArea className="h-full pr-2" ref={scrollAreaRef} id="conversation-container">
               {wholeConversation.length > 0 ? (
-                <div className="space-y-3 py-2">
+                <div className="space-y-2 py-1">
                   {wholeConversation.map((message, index) => (
                     <div key={index} className={`flex ${message.user ? "justify-end" : "justify-start"}`}>
                       <div
-                        className={`max-w-[80%] rounded-lg p-3 ${
+                        className={`max-w-[80%] rounded-lg p-2 text-sm ${
                           message.user
                             ? "bg-primary text-primary-foreground rounded-tr-none"
                             : "bg-muted rounded-tl-none"
@@ -129,9 +112,9 @@ export default function LeftSection() {
                   <div ref={conversationEndRef} />
                 </div>
               ) : (
-                <div className="text-center text-muted-foreground py-8">
-                  <p>No conversation recorded yet...</p>
-                  <p className="text-sm mt-2">Use the microphone or screen capture to start recording</p>
+                <div className="text-center text-muted-foreground py-4">
+                  <p className="text-sm">No conversation recorded yet...</p>
+                  <p className="text-xs mt-1">Use the microphone or screen capture to start recording</p>
                 </div>
               )}
             </ScrollArea>
@@ -139,7 +122,7 @@ export default function LeftSection() {
 
           {/* Add Message Button */}
           {!showInput && (
-            <Button variant="outline" className="mt-3" onClick={() => setShowInput(true)}>
+            <Button variant="outline" className="mt-2" onClick={() => setShowInput(true)}>
               <Keyboard className="h-4 w-4 mr-2" />
               Add Message
             </Button>
@@ -147,25 +130,25 @@ export default function LeftSection() {
 
           {/* Manual Input Section - Collapsible */}
           {showInput && (
-            <div className="border-t pt-3 mt-3 animate-in slide-in-from-bottom duration-200">
-              <div className="flex flex-col space-y-2">
+            <div className="border-t pt-2 mt-2 animate-in slide-in-from-bottom duration-200">
+              <div className="flex flex-col space-y-1">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="message-type" className="text-sm">
                     Message as: {isUser ? "You" : "Other"}
                   </Label>
                   <div className="flex items-center gap-2">
                     <Switch id="message-type" checked={isUser} onCheckedChange={setIsUser} />
-                    <Button variant="ghost" size="sm" onClick={() => setShowInput(false)} className="h-8 w-8 p-0">
+                    <Button variant="ghost" size="sm" onClick={() => setShowInput(false)} className="h-7 w-7 p-0">
                       <Trash className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
-                <div className="flex space-x-2">
+                <div className="flex space-x-1">
                   <Textarea
                     placeholder="Type message to add..."
                     value={manualInput}
                     onChange={(e) => setManualInput(e.target.value)}
-                    className="min-h-[60px] flex-1"
+                    className="min-h-[50px] flex-1 text-sm"
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && !e.shiftKey) {
                         e.preventDefault()

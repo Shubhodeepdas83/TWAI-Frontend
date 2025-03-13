@@ -6,7 +6,7 @@ import RightSection from "../../../components/SessionPageComponents/right-sectio
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
-import { isValidSession, appendConversation } from "./actions"
+import { isValidSession } from "./actions"
 import { useAppContext } from "../../../context/AppContext"
 
 export default function Home() {
@@ -72,30 +72,25 @@ export default function Home() {
     return () => document.removeEventListener("mouseup", handleMouseUp)
   }, [setCopiedText])
 
-  const handleExit = async () => {
-    await appendConversation({ sessionId: sessionId, newMessages: wholeConversation })
-    window.location.href = "/dashboard"
-  }
-
   if (isLoading) {
     return <div>Loading...</div>
   }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <main className="flex-1 w-full p-4 grid grid-cols-1 lg:grid-cols-12 gap-4 max-h-screen overflow-hidden">
+      <main className="flex-1 w-full p-2 grid grid-cols-1 lg:grid-cols-12 gap-2 max-h-screen overflow-hidden">
         {/* Left Section - Screen Capture + Conversation */}
-        <div className="lg:col-span-4 xl:col-span-4 overflow-hidden flex flex-col">
+        <div className="lg:col-span-4 xl:col-span-4 overflow-hidden flex flex-col max-h-[calc(100vh-16px)]">
           <LeftSection />
         </div>
 
         {/* Middle Section - AI Meeting Helper */}
-        <div className="lg:col-span-5 xl:col-span-5 overflow-hidden flex flex-col max-h-[calc(100vh-32px)]">
+        <div className="lg:col-span-5 xl:col-span-5 overflow-hidden flex flex-col max-h-[calc(100vh-16px)]">
           <MiddleSection />
         </div>
 
         {/* Right Section - AI Tools + Citations */}
-        <div className="lg:col-span-3 xl:col-span-3 overflow-hidden flex flex-col max-h-[calc(100vh-32px)]">
+        <div className="lg:col-span-3 xl:col-span-3 overflow-hidden flex flex-col max-h-[calc(100vh-16px)]">
           <RightSection />
         </div>
       </main>

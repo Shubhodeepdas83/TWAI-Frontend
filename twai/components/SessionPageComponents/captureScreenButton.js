@@ -6,7 +6,7 @@ import { MonitorSmartphone, StopCircle } from "lucide-react"
 import { useState } from "react"
 
 export default function CaptureScreenButton() {
-  const {  setWholeConversation, setStream, videoRef, stream } = useAppContext()
+  const { setWholeConversation, setStream, videoRef, stream } = useAppContext()
   const [isCapturing, setIsCapturing] = useState(false)
 
   let socket = null
@@ -104,35 +104,34 @@ export default function CaptureScreenButton() {
         reject(error)
       }
 
-      const MAX_MESSAGE_LENGTH = 200;
+      const MAX_MESSAGE_LENGTH = 200
 
       socket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
+        const data = JSON.parse(event.data)
         if (data.channel && data.channel.alternatives) {
-          const transcript = data.channel.alternatives[0].transcript;
+          const transcript = data.channel.alternatives[0].transcript
           if (transcript.trim()) {
             // Assuming messages could be from "user" or "other"
             setWholeConversation((prev) => {
-              const lastMessage = prev[prev.length - 1];
-      
+              const lastMessage = prev[prev.length - 1]
+
               if (lastMessage?.other) {
-                const updatedMessage = lastMessage.other + " " + transcript;
-      
+                const updatedMessage = lastMessage.other + " " + transcript
+
                 if (updatedMessage.length > MAX_MESSAGE_LENGTH) {
                   // If the message exceeds max length, start a new "other" message
-                  return [...prev, { other: transcript }];
+                  return [...prev, { other: transcript }]
                 } else {
                   // Otherwise, update the last message
-                  return [...prev.slice(0, -1), { other: updatedMessage }];
+                  return [...prev.slice(0, -1), { other: updatedMessage }]
                 }
               } else {
-                return [...prev, { other: transcript }];
+                return [...prev, { other: transcript }]
               }
-            });
+            })
           }
         }
-      };
-      
+      }
     })
   }
 
@@ -140,19 +139,20 @@ export default function CaptureScreenButton() {
     <Button
       onClick={isCapturing ? stopScreenShare : startScreenShare}
       variant={isCapturing ? "default" : "outline"}
-      className={`w-full ${isCapturing ? "bg-primary/90 hover:bg-primary/80" : ""}`}
+      className={`w-full py-1 h-auto text-xs ${isCapturing ? "bg-primary/90 hover:bg-primary/80" : ""}`}
     >
       {isCapturing ? (
         <>
-          <StopCircle className="h-4 w-4 mr-2" />
+          <StopCircle className="h-3 w-3 mr-1" />
           Stop Capture
         </>
       ) : (
         <>
-          <MonitorSmartphone className="h-4 w-4 mr-2" />
+          <MonitorSmartphone className="h-3 w-3 mr-1" />
           Capture Screen
         </>
       )}
     </Button>
   )
 }
+

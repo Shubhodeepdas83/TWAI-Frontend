@@ -3,10 +3,10 @@
 import { useAppContext } from "../../context/AppContext"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { BookOpen, FileText, Clock, BarChart2, X, ExternalLink } from "lucide-react"
+import { BookOpen, FileText, Clock, BarChart2, X, ExternalLink, LogOut } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { appendConversation } from "../../app/session/[sessionId]/actions"
 import { unstable_noStore as noStore } from "next/cache"
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
@@ -35,10 +35,19 @@ export default function RightSection() {
   } = useAppContext()
 
   const { sessionId } = useParams()
+  const router = useRouter()
   const [isGraphVisible, setIsGraphVisible] = useState(false)
+  const [enlargedImage, setEnlargedImage] = useState(null)
+  const [loadingExit,setLoadingExit] = useState(false)
 
   const toggleGraphVisibility = () => {
     setIsGraphVisible(!isGraphVisible)
+  }
+
+  const handleExit = async () => {
+    setLoadingExit(true)
+    await appendConversation({ sessionId: sessionId, newMessages: wholeConversation })
+    router.push("/dashboard")
   }
 
   const handleAIAnswer = async (requestType) => {
@@ -145,15 +154,29 @@ export default function RightSection() {
     }
   }
 
+  const handleImageClick = (imageData) => {
+    setEnlargedImage(imageData)
+  }
+
   return (
-    <div className="h-full flex flex-col gap-4">
+    <div className="h-full flex flex-col gap-2">
       {/* AI Tools Card */}
       <Card className="border shadow-sm">
-        <CardHeader className="p-3 pb-2">
-          <CardTitle className="text-lg font-medium">AI Tools</CardTitle>
+        <CardHeader className="p-2 pb-1 flex flex-row items-center justify-between">
+          <CardTitle className="text-base font-medium">AI Tools</CardTitle>
+          <Button
+            onClick={handleExit}
+            variant="destructive"
+            size="sm"
+            className="flex items-center gap-1 h-7 py-0 text-xs"
+            disabled={loadingExit}
+          >
+            <LogOut className="h-3 w-3" />
+            Exit
+          </Button>
         </CardHeader>
-        <CardContent className="p-3 pt-0">
-          <div className="grid grid-cols-1 gap-2">
+        <CardContent className="p-2 pt-0">
+          <div className="grid grid-cols-1 gap-1">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -161,15 +184,15 @@ export default function RightSection() {
                     disabled={isProcessing}
                     onClick={() => handleAIAnswer("help")}
                     variant="outline"
-                    className="justify-start"
+                    className="justify-start h-7 py-0 text-xs"
                     size="sm"
                   >
-                    <BookOpen className="w-4 h-4 mr-2" />
+                    <BookOpen className="mr-1 h-3 w-3" />
                     AI Answer
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Get AI assistance with your meeting questions</p>
+                  <p className="text-xs">Get AI assistance with your meeting questions</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -181,15 +204,15 @@ export default function RightSection() {
                     disabled={isProcessing}
                     onClick={() => handleAIAnswer("factcheck")}
                     variant="outline"
-                    className="justify-start"
+                    className="justify-start h-7 py-0 text-xs"
                     size="sm"
                   >
-                    <FileText className="w-4 h-4 mr-2" />
+                    <FileText className="mr-1 h-3 w-3" />
                     Fact Checking
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Verify facts in the conversation</p>
+                  <p className="text-xs">Verify facts in the conversation</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -201,15 +224,15 @@ export default function RightSection() {
                     disabled={isProcessing}
                     onClick={() => handleAIAnswer("summary")}
                     variant="outline"
-                    className="justify-start"
+                    className="justify-start h-7 py-0 text-xs"
                     size="sm"
                   >
-                    <Clock className="w-4 h-4 mr-2" />
+                    <Clock className="mr-1 h-3 w-3" />
                     Summarize
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Get a summary of the conversation so far</p>
+                  <p className="text-xs">Get a summary of the conversation so far</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -219,10 +242,10 @@ export default function RightSection() {
               <Button
                 variant="outline"
                 size="sm"
-                className="w-full flex items-center justify-start"
+                className="w-full flex items-center justify-start h-7 py-0 text-xs"
                 onClick={toggleGraphVisibility}
               >
-                <BarChart2 className="h-4 w-4 mr-2" />
+                <BarChart2 className="mr-1 h-3 w-3" />
                 {isGraphVisible ? "Hide Graph" : "Show Graph"}
               </Button>
             )}
@@ -232,102 +255,133 @@ export default function RightSection() {
 
       {/* Citations Section */}
       <Card className="border shadow-sm flex-1 flex flex-col overflow-hidden">
-        <CardHeader className="p-4 pb-2">
-          <CardTitle className="text-lg font-medium">Citations</CardTitle>
+        <CardHeader className="p-2 pb-1">
+          <CardTitle className="text-base font-medium">Citations</CardTitle>
         </CardHeader>
-        <CardContent className="p-4 pt-0 flex-1 overflow-hidden">
-  <ScrollArea className="h-full pr-3">
-    {usedCitations.length > 0 ? (
-      <div className="space-y-3">
-        {usedCitations.map((citation) => {
-          let modifiedDescription = citation.description;
-          const pageMatch = modifiedDescription.match(/, Page (\d+(\.\d+)?)/i);
+        <CardContent className="p-2 pt-0 flex-1 overflow-hidden">
+          <ScrollArea className="h-full pr-2">
+            {usedCitations.length > 0 ? (
+              <div className="space-y-2">
+                {usedCitations.map((citation) => {
+                  let modifiedDescription = citation.description
+                  const pageMatch = modifiedDescription.match(/, Page (\d+(\.\d+)?)/i)
 
-          if (pageMatch) {
-            const pageNumber = pageMatch[1];
-            modifiedDescription = modifiedDescription.replace(pageMatch[0], `#page=${parseInt(pageNumber) + 1}`);
-          }
+                  if (pageMatch) {
+                    const pageNumber = pageMatch[1]
+                    modifiedDescription = modifiedDescription.replace(
+                      pageMatch[0],
+                      `#page=${Number.parseInt(pageNumber) + 1}`,
+                    )
+                  }
 
-          return (
-          <div
-            key={citation.id}
-            className="border rounded-lg p-3 hover:bg-muted/50 transition-colors"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <div className="bg-primary/10 text-primary text-xs font-medium px-2 py-1 rounded">
-                Citation #{citation.id}
-              </div>
-              {citation.description.startsWith("http") && (
+                  return (
+                    <div key={citation.id} className="border rounded-lg p-2 hover:bg-muted/50 transition-colors">
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="bg-primary/10 text-primary text-xs font-medium px-1.5 py-0.5 rounded">
+                          #{citation.id}
+                        </div>
+                        {citation.description.startsWith("http") && (
                           <a
                             href={modifiedDescription}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-primary hover:text-primary/80"
                           >
-                            <ExternalLink className="h-4 w-4" />
+                            <ExternalLink className="h-3 w-3" />
                           </a>
                         )}
-            </div>
+                      </div>
 
-            {/* Truncate Long Links */}
-            <div className="text-sm w-full truncate">
-              
-              {citation.description.startsWith("http") && !citation.isimg && !citation.image_data ? (
-                <a
-                  href={modifiedDescription}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline w-full block truncate"
-                  style={{ display: "block", maxWidth: "100%" }}
-                  title={citation.description} // Show full link on hover
-                >
-                  {modifiedDescription.length > 50
-                    ? modifiedDescription.slice(0, 50) + "..."
-                    : modifiedDescription}
-                </a>
-              ) : (<></>)}
-            </div>
+                      {/* Truncate Long Links */}
+                      <div className="text-xs w-full truncate">
+                        {citation.description.startsWith("http") && !citation.isimg && !citation.image_data ? (
+                          <a
+                            href={modifiedDescription}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline w-full block truncate"
+                            style={{ display: "block", maxWidth: "100%" }}
+                            title={citation.description}
+                          >
+                            {modifiedDescription.length > 50
+                              ? modifiedDescription.slice(0, 50) + "..."
+                              : modifiedDescription}
+                          </a>
+                        ) : (
+                          <></>
+                        )}
+                      </div>
 
-            {/* Fixed Image Size */}
-            {citation.isimg && citation.image_data && (
-              <div className="mt-2 bg-white p-2 rounded border flex justify-center">
-                <img
-                  src={`data:image/png;base64,${citation.image_data}`}
-                  alt={`Citation ${citation.id}`}
-                  className="rounded-md object-contain"
-                  style={{ maxWidth: "100%", maxHeight: "150px" }} // Adjust height to fit properly
-                />
+                      {/* Fixed Image Size with click to enlarge */}
+                      {citation.isimg && citation.image_data && (
+                        <div
+                          className="mt-1 bg-white p-1 rounded border flex justify-center cursor-pointer"
+                          onClick={() => handleImageClick(citation.image_data)}
+                        >
+                          <img
+                            src={`data:image/png;base64,${citation.image_data}`}
+                            alt={`Citation ${citation.id}`}
+                            className="rounded-md object-contain"
+                            style={{ maxWidth: "100%", maxHeight: "120px" }}
+                          />
+                        </div>
+                      )}
+
+                    </div>
+                  )
+                })}
               </div>
+            ) : (
+              <p className="text-muted-foreground text-center text-xs">No citations available</p>
             )}
-          </div>
-        )})}
-      </div>
-    ) : (
-      <p className="text-muted-foreground text-center">No citations available</p>
-    )}
-  </ScrollArea>
-</CardContent>
-
+          </ScrollArea>
+        </CardContent>
       </Card>
 
       {/* Display the Graph in a Pop-up or Modal */}
       {isGraphVisible && graphImage && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-4 rounded-lg max-w-lg w-full relative">
-            {/* Close button positioned near the image */}
+          <div className="bg-white p-3 rounded-lg max-w-lg w-full relative">
             <Button
               variant="ghost"
               size="sm"
               onClick={toggleGraphVisibility}
-              className="absolute top-2 right-2 text-muted-foreground"
+              className="absolute top-1 right-1 text-muted-foreground h-6 w-6 p-0"
             >
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4" />
             </Button>
             <div className="flex justify-center">
               <img
                 src={`data:image/png;base64,${graphImage}`}
                 alt="Generated Graph"
                 className="rounded-md max-w-full"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Enlarged Image Slide-in Panel */}
+      {enlargedImage && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-end z-50"
+          onClick={() => setEnlargedImage(null)}
+        >
+          <div
+            className="bg-white p-3 rounded-lg max-h-screen max-w-md w-full h-full overflow-auto animate-in slide-in-from-right duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="text-sm font-medium">Image Preview</h3>
+              <Button variant="ghost" size="sm" onClick={() => setEnlargedImage(null)} className="h-6 w-6 p-0">
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="flex justify-center items-center h-[calc(100%-2rem)]">
+              <img
+                src={`data:image/png;base64,${enlargedImage}`}
+                alt="Enlarged Citation"
+                className="max-w-full max-h-full object-contain rounded-md"
               />
             </div>
           </div>

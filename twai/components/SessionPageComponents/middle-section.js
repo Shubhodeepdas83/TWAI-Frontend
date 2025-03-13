@@ -11,7 +11,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import ReactMarkdown from "react-markdown"
 import { unstable_noStore as noStore } from "next/cache"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default function MiddleSection() {
   noStore()
@@ -164,6 +163,8 @@ export default function MiddleSection() {
     setImage(null)
   }
 
+  console.log(image)
+
   // Auto-scroll effect for chat
   useEffect(() => {
     if (autoScroll && chatEndRef.current) {
@@ -172,191 +173,189 @@ export default function MiddleSection() {
   }, [chatMessages, autoScroll])
 
   return (
-    <div className="h-full flex flex-col gap-4">
+    <div className="h-full flex flex-col gap-2">
       <Card className="border shadow-sm flex-1 flex flex-col overflow-hidden">
-            <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between shrink-0">
-              <div className="flex items-center gap-2">
-                <Bot className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg font-medium">AI Meeting Helper</CardTitle>
-                {isProcessing && (
-                  <div className="flex space-x-2">
-                    <div className="w-2.5 h-2.5 bg-primary rounded-full animate-bounce"></div>
-                    <div className="w-2.5 h-2.5 bg-primary rounded-full animate-bounce delay-150"></div>
-                    <div className="w-2.5 h-2.5 bg-primary rounded-full animate-bounce delay-300"></div>
-                  </div>
-                )}
+        <CardHeader className="p-3 pb-1 flex flex-row items-center justify-between shrink-0">
+          <div className="flex items-center gap-1">
+            <Bot className="h-4 w-4 text-primary" />
+            <CardTitle className="text-base font-medium">AI Meeting Helper</CardTitle>
+            {isProcessing && (
+              <div className="flex space-x-1 ml-1">
+                <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-primary rounded-full animate-bounce delay-150"></div>
+                <div className="w-2 h-2 bg-primary rounded-full animate-bounce delay-300"></div>
               </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setAutoScroll(!autoScroll)}
-                  className={`text-muted-foreground h-8 ${autoScroll ? "bg-primary/10 text-primary" : ""}`}
-                >
-                  <ScrollText className="h-4 w-4 mr-1" />
-                  {autoScroll ? "Auto-scroll On" : "Auto-scroll Off"}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleClear}
-                  className="text-muted-foreground h-8"
-                  disabled={chatMessages.length === 0}
-                >
-                  <X className="h-4 w-4 mr-1" />
-                  Clear Chat
-                </Button>
-              </div>
-            </CardHeader>
+            )}
+          </div>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setAutoScroll(!autoScroll)}
+              className={`text-muted-foreground h-7 w-7 p-0 ${autoScroll ? "bg-primary/10 text-primary" : ""}`}
+              title={autoScroll ? "Auto-scroll On" : "Auto-scroll Off"}
+            >
+              <ScrollText className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClear}
+              className="text-red-500 h-7 w-7 p-0"
+              disabled={chatMessages.length === 0}
+              title="Clear Chat"
+            >
+              <Trash className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardHeader>
 
-            <CardContent className="p-4 pt-0 flex-1 flex flex-col overflow-hidden">
-              {/* Scrollable Messages Area */}
-              <div className="flex-1 overflow-hidden">
-                <ScrollArea className="h-full pr-3">
-                  {chatMessages.length === 0 ? (
-                    <div className="h-full flex items-center justify-center text-center p-8">
-                      <div className="max-w-sm">
-                        <Bot className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                        <h3 className="text-lg font-medium mb-2">Welcome to AI Meeting Helper</h3>
-                        <p className="text-muted-foreground text-sm">
-                          Ask questions or upload an image to get assistance with your meeting preparation.
-                        </p>
+        <CardContent className="p-3 pt-0 flex-1 flex flex-col overflow-hidden">
+          {/* Scrollable Messages Area */}
+          <div className="flex-1 overflow-hidden">
+            <ScrollArea className="h-full pr-2">
+              {chatMessages.length === 0 ? (
+                <div className="h-full flex items-center justify-center text-center p-4">
+                  <div className="max-w-sm">
+                    <Bot className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                    <h3 className="text-base font-medium mb-1">Welcome to AI Meeting Helper</h3>
+                    <p className="text-muted-foreground text-xs">
+                      Ask questions or upload an image to get assistance with your meeting preparation.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3 py-1">
+                  {chatMessages.map((message, index) => (
+                    <div key={index} className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}>
+                      <div
+                        className={`p-2 rounded-lg max-w-[85%] text-sm ${
+                          message.sender === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
+                        }`}
+                      >
+                        {message.text === "Thinking..." ? (
+                          <div className="flex items-center gap-1">
+                            <div className="animate-pulse">Thinking</div>
+                            <span className="animate-bounce">.</span>
+                            <span className="animate-bounce delay-100">.</span>
+                            <span className="animate-bounce delay-200">.</span>
+                          </div>
+                        ) : (
+                          <div className="text-sm">
+                            <ReactMarkdown>{message.text}</ReactMarkdown>
+                          </div>
+                        )}
                       </div>
                     </div>
-                  ) : (
-                    <div className="space-y-4 py-2">
-                      {chatMessages.map((message, index) => (
-                        <div
-                          key={index}
-                          className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
-                        >
-                          <div
-                            className={`p-3 rounded-lg max-w-[85%] ${
-                              message.sender === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
-                            }`}
-                          >
-                            {message.text === "Thinking..." ? (
-                              <div className="flex items-center gap-2">
-                                <div className="animate-pulse">Thinking</div>
-                                <span className="animate-bounce">.</span>
-                                <span className="animate-bounce delay-100">.</span>
-                                <span className="animate-bounce delay-200">.</span>
-                              </div>
-                            ) : (
-                              <div className="text-sm">
-                                <ReactMarkdown>{message.text}</ReactMarkdown>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                      <div ref={chatEndRef} />
-                    </div>
-                  )}
-                </ScrollArea>
-              </div>
-            </CardContent>
-
-            <CardFooter className="p-4 pt-2 border-t">
-              {image && (
-                <div className="mb-3 p-2 bg-muted rounded-lg flex items-center w-full">
-                  <img
-                    src={URL.createObjectURL(image) || "/placeholder.svg"}
-                    alt="Uploaded Preview"
-                    className="h-12 w-12 object-cover rounded-md"
-                  />
-                  <span className="text-sm ml-2 flex-1 truncate">{image.name}</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleRemoveImage}
-                    className="text-destructive hover:text-destructive/90 h-8 w-8 p-0"
-                  >
-                    <Trash className="h-4 w-4" />
-                  </Button>
+                  ))}
+                  <div ref={chatEndRef} />
                 </div>
               )}
+            </ScrollArea>
+          </div>
+        </CardContent>
+        {image && (
+            <div className="mb-2 p-1 bg-muted rounded-lg flex items-center w-full">
+              <img
+                src={URL.createObjectURL(image) || "/placeholder.svg"}
+                alt="Uploaded Preview"
+                className="h-10 w-10 object-cover rounded-md"
+              />
+              <span className="text-xs ml-2 flex-1 truncate">{image.name}</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleRemoveImage}
+                className="text-destructive hover:text-destructive/90 h-7 w-7 p-0"
+              >
+                
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          )}
+        <CardFooter className="p-3 pt-1 border-t">
+          
 
-              <div className="flex flex-col gap-2 w-full">
-                <div className="flex gap-2 w-full">
-                  <Textarea
-                    value={userInput}
-                    onChange={(e) => setUserInput(e.target.value)}
-                    placeholder="Type a message..."
-                    className="resize-none min-h-[80px] flex-1"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault()
-                        handleSendMessage()
-                      }
-                    }}
-                  />
-                  <div className="flex flex-col gap-2">
-                    <Button disabled={isProcessing || !userInput.trim()} onClick={handleSendMessage} className="flex-1">
-                      <Send className="h-4 w-4" />
-                    </Button>
-                    <Button variant="outline" size="icon" className="flex-1" onClick={triggerFileInput}>
-                      <CloudUpload className="h-4 w-4" />
-                    </Button>
-                    <input
-                      type="file"
-                      id="imageUpload"
-                      accept="image/png, image/jpeg, image/jpg"
-                      onChange={handleImageUpload}
-                      style={{ display: "none" }}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
-                  <div className="flex space-x-4">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <Checkbox
-                        checked={enableWebSearch}
-                        onCheckedChange={() => setEnableWebSearch(!enableWebSearch)}
-                        id="web-search"
-                        className={enableWebSearch ? "bg-primary text-primary-foreground" : ""}
-                      />
-                      <div className="flex items-center gap-1">
-                        <Search className={`h-4 w-4 ${enableWebSearch ? "text-primary" : "text-muted-foreground"}`} />
-                        <span className={enableWebSearch ? "text-primary font-medium" : ""}>Web Search</span>
-                      </div>
-                    </label>
-
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <Checkbox
-                        checked={showGraph}
-                        onCheckedChange={() => setShowGraph(!showGraph)}
-                        id="show-graph"
-                        className={showGraph ? "bg-primary text-primary-foreground" : ""}
-                      />
-                      <div className="flex items-center gap-1">
-                        <BarChart2 className={`h-4 w-4 ${showGraph ? "text-primary" : "text-muted-foreground"}`} />
-                        <span className={showGraph ? "text-primary font-medium" : ""}>Graph Visualization</span>
-                      </div>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <Checkbox
-                        checked={useHighlightedText}
-                        onCheckedChange={() => setUseHighlightedText(!useHighlightedText)}
-                        id="use-highlighted-text-toggle"
-                        className={useHighlightedText ? "bg-primary text-primary-foreground" : ""}
-                      />
-                      <div className="flex items-center gap-1">
-                        <Highlighter
-                          className={`h-4 w-4 ${useHighlightedText ? "text-primary" : "text-muted-foreground"}`}
-                        />
-                        <span className={useHighlightedText ? "text-primary font-medium" : ""}>Highlighted Text</span>
-                      </div>
-                    </label>
-                  </div>
-                  <span>Press Enter to send, Shift+Enter for new line</span>
-                </div>
+          <div className="flex flex-col gap-1 w-full">
+            <div className="flex gap-1 w-full">
+              <Textarea
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                placeholder="Type a message..."
+                className="resize-none min-h-[60px] flex-1 text-sm"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault()
+                    handleSendMessage()
+                  }
+                }}
+              />
+              <div className="flex flex-col gap-1">
+                <Button disabled={isProcessing || !userInput.trim()} onClick={handleSendMessage} className="flex-1">
+                  <Send className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" size="icon" className="flex-1" onClick={triggerFileInput}>
+                  <CloudUpload className="h-4 w-4" />
+                </Button>
+                <input
+                  type="file"
+                  id="imageUpload"
+                  accept="image/png, image/jpeg, image/jpg"
+                  onChange={handleImageUpload}
+                  style={{ display: "none" }}
+                />
               </div>
-            </CardFooter>
-          </Card>
+            </div>
 
+            <div className="flex items-center justify-between text-xs text-muted-foreground mt-1 flex-wrap">
+              <div className="flex flex-nowrap overflow-x-auto space-x-2 pb-1 max-w-full">
+                <label className="flex items-center gap-1 cursor-pointer whitespace-nowrap">
+                  <Checkbox
+                    checked={enableWebSearch}
+                    onCheckedChange={() => setEnableWebSearch(!enableWebSearch)}
+                    id="web-search"
+                    className={`h-3 w-3 ${enableWebSearch ? "bg-primary text-primary-foreground" : ""}`}
+                  />
+                  <div className="flex items-center gap-1">
+                    <Search className={`h-3 w-3 ${enableWebSearch ? "text-primary" : "text-muted-foreground"}`} />
+                    <span className={`text-xs ${enableWebSearch ? "text-primary font-medium" : ""}`}>Web Search</span>
+                  </div>
+                </label>
 
+                <label className="flex items-center gap-1 cursor-pointer whitespace-nowrap">
+                  <Checkbox
+                    checked={showGraph}
+                    onCheckedChange={() => setShowGraph(!showGraph)}
+                    id="show-graph"
+                    className={`h-3 w-3 ${showGraph ? "bg-primary text-primary-foreground" : ""}`}
+                  />
+                  <div className="flex items-center gap-1">
+                    <BarChart2 className={`h-3 w-3 ${showGraph ? "text-primary" : "text-muted-foreground"}`} />
+                    <span className={`text-xs ${showGraph ? "text-primary font-medium" : ""}`}>Graph</span>
+                  </div>
+                </label>
+                <label className="flex items-center gap-1 cursor-pointer whitespace-nowrap">
+                  <Checkbox
+                    checked={useHighlightedText}
+                    onCheckedChange={() => setUseHighlightedText(!useHighlightedText)}
+                    id="use-highlighted-text-toggle"
+                    className={`h-3 w-3 ${useHighlightedText ? "bg-primary text-primary-foreground" : ""}`}
+                  />
+                  <div className="flex items-center gap-1">
+                    <Highlighter
+                      className={`h-3 w-3 ${useHighlightedText ? "text-primary" : "text-muted-foreground"}`}
+                    />
+                    <span className={`text-xs ${useHighlightedText ? "text-primary font-medium" : ""}`}>
+                      Highlighted
+                    </span>
+                  </div>
+                </label>
+              </div>
+              <span className="text-xs">Shift+Enter for new line</span>
+            </div>
+          </div>
+        </CardFooter>
+      </Card>
     </div>
   )
 }

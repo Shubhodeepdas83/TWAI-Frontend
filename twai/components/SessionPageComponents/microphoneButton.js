@@ -3,7 +3,7 @@
 import { useAppContext } from "../../context/AppContext"
 import { Button } from "@/components/ui/button"
 import { Mic, MicOff } from "lucide-react"
-import {  useEffect,useState } from "react"
+import { useEffect, useState } from "react"
 
 let socket = null
 
@@ -15,10 +15,9 @@ export default function MicrophoneButton() {
     setMicStream,
     wholeConversation,
     setWholeConversation,
-    
   } = useAppContext()
 
-  const[isConnecting,setIsConnecting] = useState(false)
+  const [isConnecting, setIsConnecting] = useState(false)
 
   const openWebSocket = () => {
     return new Promise((resolve, reject) => {
@@ -47,36 +46,35 @@ export default function MicrophoneButton() {
         reject(error)
       }
 
-      const MAX_MESSAGE_LENGTH = 200;
+      const MAX_MESSAGE_LENGTH = 200
 
       socket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
+        const data = JSON.parse(event.data)
         if (data.channel && data.channel.alternatives) {
-          const transcript = data.channel.alternatives[0].transcript;
+          const transcript = data.channel.alternatives[0].transcript
           if (transcript.trim()) {
-            console.log(wholeConversation);
-      
+            console.log(wholeConversation)
+
             setWholeConversation((prev) => {
-              const lastMessage = prev[prev.length - 1];
-      
+              const lastMessage = prev[prev.length - 1]
+
               if (lastMessage?.user) {
-                const updatedMessage = lastMessage.user + " " + transcript;
-                
+                const updatedMessage = lastMessage.user + " " + transcript
+
                 if (updatedMessage.length > MAX_MESSAGE_LENGTH) {
                   // If the message exceeds max length, start a new message
-                  return [...prev, { user: transcript }];
+                  return [...prev, { user: transcript }]
                 } else {
                   // Otherwise, update the last message
-                  return [...prev.slice(0, -1), { user: updatedMessage }];
+                  return [...prev.slice(0, -1), { user: updatedMessage }]
                 }
               } else {
-                return [...prev, { user: transcript }];
+                return [...prev, { user: transcript }]
               }
-            });
+            })
           }
         }
-      };
-      
+      }
     })
   }
 
@@ -99,7 +97,6 @@ export default function MicrophoneButton() {
         await openWebSocket()
 
         const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" })
-        
 
         mediaRecorder.ondataavailable = (event) => {
           if (socket && socket.readyState === WebSocket.OPEN) {
@@ -126,10 +123,9 @@ export default function MicrophoneButton() {
     }
   }, [micStream])
 
-
   return (
     <Button
-      className={`flex items-center gap-2 w-full ${microphoneConnected ? "bg-primary/90 hover:bg-primary/80" : ""}`}
+      className={`flex items-center gap-1 w-full py-1 h-auto text-xs ${microphoneConnected ? "bg-primary/90 hover:bg-primary/80" : ""}`}
       onClick={handleConnectMicrophone}
       disabled={isConnecting}
       variant={microphoneConnected ? "default" : "outline"}
@@ -138,15 +134,16 @@ export default function MicrophoneButton() {
         "Connecting..."
       ) : microphoneConnected ? (
         <>
-          <MicOff className="h-4 w-4" />
+          <MicOff className="h-3 w-3" />
           Disconnect Mic
         </>
       ) : (
         <>
-          <Mic className="h-4 w-4" />
+          <Mic className="h-3 w-3" />
           Connect Mic
         </>
       )}
     </Button>
-  );
+  )
 }
+
