@@ -3,8 +3,6 @@
 import LeftSection from "../../../components/SessionPageComponents/left-section"
 import MiddleSection from "../../../components/SessionPageComponents/middle-section"
 import RightSection from "../../../components/SessionPageComponents/right-section"
-import { Button } from "../../../components/ui/button"
-import { LogOut } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
@@ -41,20 +39,20 @@ export default function Home() {
 
   useEffect(() => {
     const handleMouseUp = () => {
-      const selectedText = window.getSelection()?.toString().trim();
-      if (!selectedText) return;
-    
-      const selection = window.getSelection();
-      if (!selection) return;
-    
-      const anchorNode = selection.anchorNode;
-      const focusNode = selection.focusNode;
-    
-      if (!anchorNode || !focusNode) return;
-    
+      const selectedText = window.getSelection()?.toString().trim()
+      if (!selectedText) return
+
+      const selection = window.getSelection()
+      if (!selection) return
+
+      const anchorNode = selection.anchorNode
+      const focusNode = selection.focusNode
+
+      if (!anchorNode || !focusNode) return
+
       // Ensure BOTH the start and end of selection are inside the conversation container
-      const conversationContainer = document.getElementById("conversation-container");
-    
+      const conversationContainer = document.getElementById("conversation-container")
+
       if (
         conversationContainer &&
         conversationContainer.contains(anchorNode) &&
@@ -63,13 +61,12 @@ export default function Home() {
         navigator.clipboard
           .writeText(selectedText)
           .then(() => {
-            console.log("Copied:", selectedText);
-            setCopiedText(selectedText);
+            console.log("Copied:", selectedText)
+            setCopiedText(selectedText)
           })
-          .catch((err) => console.error("Copy failed:", err));
+          .catch((err) => console.error("Copy failed:", err))
       }
-    };
-    
+    }
 
     document.addEventListener("mouseup", handleMouseUp)
     return () => document.removeEventListener("mouseup", handleMouseUp)
@@ -86,38 +83,22 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="sticky top-0 z-10 flex items-center justify-between p-4 bg-gray-900 text-white shadow-md">
-        <h1 className="text-xl font-bold">AI Meeting Assistant</h1>
-        <Button
-          onClick={async () => {
-            await handleExit()
-          }}
-          variant="destructive"
-          className="flex items-center gap-2"
-        >
-          <LogOut className="h-4 w-4" />
-          Exit Session
-        </Button>
-      </header>
-
       <main className="flex-1 w-full p-4 grid grid-cols-1 lg:grid-cols-12 gap-4 max-h-screen overflow-hidden">
-  {/* Left Section */}
-  <div className="lg:col-span-4 xl:col-span-4 overflow-hidden flex flex-col">
-    <LeftSection />
-  </div>
+        {/* Left Section - Screen Capture + Conversation */}
+        <div className="lg:col-span-4 xl:col-span-4 overflow-hidden flex flex-col">
+          <LeftSection />
+        </div>
 
-  {/* Middle Section */}
-  <div className="lg:col-span-4 xl:col-span-4 overflow-hidden flex flex-col max-h-[calc(100vh-80px)]">
-    <MiddleSection />
-  </div>
+        {/* Middle Section - AI Meeting Helper */}
+        <div className="lg:col-span-5 xl:col-span-5 overflow-hidden flex flex-col max-h-[calc(100vh-32px)]">
+          <MiddleSection />
+        </div>
 
-  {/* Right Section */}
-  <div className="lg:col-span-4 xl:col-span-4 overflow-hidden flex flex-col">
-    <RightSection />
-  </div>
-</main>
-
-
+        {/* Right Section - AI Tools + Citations */}
+        <div className="lg:col-span-3 xl:col-span-3 overflow-hidden flex flex-col max-h-[calc(100vh-32px)]">
+          <RightSection />
+        </div>
+      </main>
     </div>
   )
 }
