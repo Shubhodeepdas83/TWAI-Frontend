@@ -38,7 +38,7 @@ export default function MiddleSection() {
     setCopiedText,
     graphImage,
     usedCitations,
-    setIsProcessing
+    setIsProcessing,
   } = useAppContext()
 
   const { sessionId } = useParams()
@@ -58,11 +58,14 @@ export default function MiddleSection() {
   }
 
   const handleSendMessage = async () => {
+    if (isProcessing) return
 
     if (userInput.trim()) {
       setChatMessages((prev) => [...prev, { text: userInput, sender: "user" }])
       setChatMessages((prev) => [...prev, { text: "Thinking...", sender: "ai" }])
       setUserInput("")
+      setUsedCitations([])
+      setGraphImage(null)
       setIsProcessing(true)
 
       const formData = new FormData()

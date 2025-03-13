@@ -15,6 +15,7 @@ export default function MicrophoneButton() {
     setMicStream,
     wholeConversation,
     setWholeConversation,
+    
   } = useAppContext()
 
   const[isConnecting,setIsConnecting] = useState(false)

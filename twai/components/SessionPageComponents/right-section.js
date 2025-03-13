@@ -45,6 +45,7 @@ export default function RightSection() {
     if (isProcessing) return
     setGraphImage(null)
     setIsProcessing(true)
+    setUsedCitations([])
     setChatMessages([...chatMessages, { text: "Thinking...", sender: "ai" }])
 
     try {
