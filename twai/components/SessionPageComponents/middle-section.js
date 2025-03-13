@@ -57,37 +57,6 @@ export default function MiddleSection() {
       const tempconv = [...wholeConversation];
       setWholeConversation([]);
 
-      if (requestType === "help" && !useHighlightedText && copiedText !== "") {
-        const queryResponse = await fetch("https://api.openai.com/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
-          },
-          body: JSON.stringify({
-            model: "gpt-4o-mini",
-            messages: [
-              { role: "system", content: "You are an AI assistant optimized for generating precise, contextually relevant questions suitable for Retrieval-Augmented Generation (RAG) querying. Analyze the provided conversation, prioritize the lastest exchanges while using earlier messages for context, and extract a focused query. The question should be factual, specific, and well-suited for retrieving detailed information. Avoid ambiguous or conversational phrasing, and keep the query strictly relevant to the discussion topic." },
-              { role: "user", content: `Extract a short query from this conversation:\n\n${tempconv.map(obj => Object.values(obj).join(": ")).join("\n")}` },
-            ],
-            temperature: 0.7,
-            max_tokens: 700,
-            top_p: 0.9,
-          }),
-        });
-
-        if (!queryResponse.ok) throw new Error("Failed to extract query");
-
-        const queryData = await queryResponse.json();
-        const extractedQuery = queryData.choices?.[0]?.message?.content || "";
-        tempconv.push({ "user": extractedQuery })
-        setChatMessages((prev) => [
-          ...prev.filter((msg) => msg.text !== "Thinking..."),
-          { text: extractedQuery, sender: "user" },
-          { text: "Thinking...", sender: "ai" },
-        ]);
-
-      }
       // Step 3: Send the extracted query to the backend for processing
       const response = await fetch("/api/get_AI_Help", {
         method: "POST",
@@ -124,8 +93,7 @@ export default function MiddleSection() {
             const h = JSON.parse(line);
             buffer = lines.slice(1).join() || "";
 
-            if (h.query && requestType != "help" || h.query && requestType == "help" && useHighlightedText && copiedText !== "") {
-              console.log("Setting chat messages")
+            if (h.query) {
               setChatMessages((prev) => [
                 ...prev.filter((msg) => msg.text !== "Thinking..."),
                 { text: h.query, sender: "user" },
