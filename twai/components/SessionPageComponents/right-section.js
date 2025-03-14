@@ -340,7 +340,7 @@ export default function RightSection() {
                 </Tooltip>
               </TooltipProvider>
 
-              {/* Explain Laymann Terms */}
+              {/* Explain Layman Terms */}
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -351,7 +351,7 @@ export default function RightSection() {
                       size="sm"
                     >
                       <Book className="mr-1 h-3 w-3" />
-                      Explain Laymann Terms
+                      Explain Layman Terms
                     </Button>
                   </TooltipTrigger>
                 </Tooltip>

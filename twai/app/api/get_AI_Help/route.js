@@ -26,7 +26,7 @@ export async function POST(req) {
 
     const Session = await prisma.session.findUnique({
       where: { userId: user.id, id: sessionId },
-      select: { templateId: true },
+      select: { templateId: true ,conversation:true},
     });
 
     if (!Session) {
@@ -49,7 +49,7 @@ export async function POST(req) {
       });
     }
 
-    const payload = {
+    let payload = {
       raw_conversation: conversation,
       use_web: use_web ?? true,
       userId: user.id,
@@ -58,6 +58,10 @@ export async function POST(req) {
       meetingTemplate: JSON.stringify(template),
       useRag:useRag
     };
+
+    if(Session.conversation.length>0 && requestType == "summary"){
+      payload.raw_conversation = [...Session.conversation,...conversation]
+    }
 
     const endpoints = {
       factcheck: "/process-ai-factcheck",
