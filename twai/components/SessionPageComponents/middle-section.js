@@ -178,7 +178,7 @@ export default function MiddleSection() {
         <CardHeader className="p-3 pb-1 flex flex-row items-center justify-between shrink-0">
           <div className="flex items-center gap-1">
             <Bot className="h-4 w-4 text-primary" />
-            <CardTitle className="text-base font-medium">AI Meeting Helper</CardTitle>
+            <CardTitle className="text-base font-medium">TalkWise AI</CardTitle>
             {isProcessing && (
               <div className="flex space-x-1 ml-1">
                 <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>

@@ -164,7 +164,7 @@ export default function RightSection() {
       {/* AI Tools Card */}
       <Card className="border shadow-sm">
         <CardHeader className="p-2 pb-1 flex flex-row items-center justify-between">
-          <CardTitle className="text-base font-medium">AI Tools</CardTitle>
+          <CardTitle className="text-base font-medium">Quick Action AI-Agents</CardTitle>
           <Button
             onClick={handleExit}
             variant="destructive"
@@ -400,7 +400,7 @@ export default function RightSection() {
       {/* Citations Section */}
       <Card className="border shadow-sm flex-1 flex flex-col overflow-hidden">
         <CardHeader className="p-2 pb-1">
-          <CardTitle className="text-base font-medium">Citations</CardTitle>
+          <CardTitle className="text-base font-medium">Artifacts</CardTitle>
         </CardHeader>
         <CardContent className="p-2 pt-0 flex-1 overflow-hidden">
           <ScrollArea className="h-full pr-2">
@@ -476,7 +476,9 @@ export default function RightSection() {
                 })}
               </div>
             ) : (
-              <p className="text-muted-foreground text-center text-xs">No citations available</p>
+              <div className="flex items-center justify-center h-full">
+                <p className="text-muted-foreground text-center text-xs">No Artifacts available</p>
+              </div>
             )}
           </ScrollArea>
         </CardContent>
