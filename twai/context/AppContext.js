@@ -20,6 +20,7 @@ export function AppProvider({ children }) {
   const [usedCitations, setUsedCitations] = useState([]);
   const [copiedText, setCopiedText] = useState("");
   const [useHighlightedText,setUseHighlightedText] = useState(false);
+  const [useRag,setUseRag] = useState(false);
   const [graphImage, setGraphImage] = useState(null)
   const micToken = useRef(null);
   const captureToken = useRef(null);
@@ -47,7 +48,7 @@ export function AppProvider({ children }) {
         enableWebSearch,
         setEnableWebSearch,
         showGraph,
-        setShowGraph,usedCitations, setUsedCitations,setCopiedText,copiedText,micToken,captureToken,setUseHighlightedText,useHighlightedText,graphImage,setGraphImage
+        setShowGraph,usedCitations, setUsedCitations,setCopiedText,copiedText,micToken,captureToken,setUseHighlightedText,useHighlightedText,graphImage,setGraphImage,useRag,setUseRag
       }}
     >
       {children}

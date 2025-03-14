@@ -13,7 +13,7 @@ export async function POST(req) {
       return NextResponse.json({ failure: "not authenticated" }, { status: 401 });
     }
 
-    const { conversation, use_web, requestType = "help", useHighlightedText, copiedText, sessionId } = await req.json();
+    const { conversation, use_web, requestType = "help", useHighlightedText, copiedText, sessionId,useRag } = await req.json();
     
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
@@ -56,6 +56,7 @@ export async function POST(req) {
       useHighlightedText,
       highlightedText: copiedText,
       meetingTemplate: JSON.stringify(template),
+      useRag:useRag
     };
 
     const endpoints = {

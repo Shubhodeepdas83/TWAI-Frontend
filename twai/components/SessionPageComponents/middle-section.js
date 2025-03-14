@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Bot, X, Send, CloudUpload, Trash, Search, BarChart2, Highlighter, ScrollText } from "lucide-react"
+import { Bot, X, Send, CloudUpload, Trash, Search, BarChart2, Highlighter, ScrollText, Database } from "lucide-react"
 import { useAppContext } from "../../context/AppContext"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -37,7 +37,7 @@ export default function MiddleSection() {
     setCopiedText,
     graphImage,
     usedCitations,
-    setIsProcessing,
+    setIsProcessing, useRag, setUseRag
   } = useAppContext()
 
   const { sessionId } = useParams()
@@ -72,6 +72,7 @@ export default function MiddleSection() {
       formData.append("use_web", enableWebSearch)
       formData.append("use_graph", showGraph)
       formData.append("sessionId", sessionId)
+      formData.append("useRag", useRag)
       if (image) {
         formData.append("uploaded_file", image)
       }
@@ -163,7 +164,6 @@ export default function MiddleSection() {
     setImage(null)
   }
 
-  console.log(image)
 
   // Auto-scroll effect for chat
   useEffect(() => {
@@ -229,9 +229,8 @@ export default function MiddleSection() {
                   {chatMessages.map((message, index) => (
                     <div key={index} className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}>
                       <div
-                        className={`p-2 rounded-lg max-w-[85%] text-sm ${
-                          message.sender === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
-                        }`}
+                        className={`p-2 rounded-lg max-w-[85%] text-sm ${message.sender === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
+                          }`}
                       >
                         {message.text === "Thinking..." ? (
                           <div className="flex items-center gap-1">
@@ -255,26 +254,26 @@ export default function MiddleSection() {
           </div>
         </CardContent>
         {image && (
-            <div className="mb-2 p-1 bg-muted rounded-lg flex items-center w-full">
-              <img
-                src={URL.createObjectURL(image) || "/placeholder.svg"}
-                alt="Uploaded Preview"
-                className="h-10 w-10 object-cover rounded-md"
-              />
-              <span className="text-xs ml-2 flex-1 truncate">{image.name}</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleRemoveImage}
-                className="text-destructive hover:text-destructive/90 h-7 w-7 p-0"
-              >
-                
-                <X className="h-3 w-3" />
-              </Button>
-            </div>
-          )}
+          <div className="mb-2 p-1 bg-muted rounded-lg flex items-center w-full">
+            <img
+              src={URL.createObjectURL(image) || "/placeholder.svg"}
+              alt="Uploaded Preview"
+              className="h-10 w-10 object-cover rounded-md"
+            />
+            <span className="text-xs ml-2 flex-1 truncate">{image.name}</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleRemoveImage}
+              className="text-destructive hover:text-destructive/90 h-7 w-7 p-0"
+            >
+
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+        )}
         <CardFooter className="p-3 pt-1 border-t">
-          
+
 
           <div className="flex flex-col gap-1 w-full">
             <div className="flex gap-1 w-full">
@@ -350,12 +349,25 @@ export default function MiddleSection() {
                     </span>
                   </div>
                 </label>
+                <label className="flex items-center gap-1 cursor-pointer whitespace-nowrap">
+                  <Checkbox
+                    checked={useRag}
+                    onCheckedChange={() => setUseRag(!useRag)}
+                    id="use-rag-toggle"
+                    className={`h-3 w-3 ${useRag ? "bg-primary text-primary-foreground" : ""}`}
+                  />
+                  <div className="flex items-center gap-1">
+                    <Database className={`h-3 w-3 ${useRag ? "text-primary" : "text-muted-foreground"}`} />
+                    <span className={`text-xs ${useRag ? "text-primary font-medium" : ""}`}>Use RAG</span>
+                  </div>
+                </label>
               </div>
               <span className="text-xs">Shift+Enter for new line</span>
             </div>
           </div>
         </CardFooter>
       </Card>
+
     </div>
   )
 }

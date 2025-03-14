@@ -31,7 +31,7 @@ export default function RightSection() {
     graphImage,
     setGraphImage,
     setShowGraph,
-    showGraph,
+    showGraph,useRag,setUseRag
   } = useAppContext()
 
   const { sessionId } = useParams()
@@ -73,6 +73,7 @@ export default function RightSection() {
           useHighlightedText,
           copiedText,
           sessionId,
+          useRag
         }),
       })
 
