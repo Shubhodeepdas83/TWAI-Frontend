@@ -13,7 +13,7 @@ export function AppProvider({ children }) {
   const [micPartialTranscript, setMicPartialTranscript] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [wholeConversation, setWholeConversation] = useState([]);
-  const [enableWebSearch, setEnableWebSearch] = useState(false);
+  const [enableWebSearch, setEnableWebSearch] = useState(true);
   const [showGraph, setShowGraph] = useState(false);
   const [stream,setStream] = useState(null);
   const videoRef = useRef(null);

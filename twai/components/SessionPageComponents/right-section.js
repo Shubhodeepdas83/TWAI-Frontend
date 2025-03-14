@@ -3,7 +3,7 @@
 import { useAppContext } from "../../context/AppContext"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { BookOpen, FileText, Clock, BarChart2, X, ExternalLink, LogOut } from "lucide-react"
+import { BookOpen, FileText, Clock, BarChart2, X, ExternalLink, LogOut, Smile, MessageCircle, Handshake, Star, Search, Book, List } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useParams, useRouter } from "next/navigation"
@@ -31,14 +31,14 @@ export default function RightSection() {
     graphImage,
     setGraphImage,
     setShowGraph,
-    showGraph,useRag,setUseRag
+    showGraph, useRag, setUseRag
   } = useAppContext()
 
   const { sessionId } = useParams()
   const router = useRouter()
   const [isGraphVisible, setIsGraphVisible] = useState(false)
   const [enlargedImage, setEnlargedImage] = useState(null)
-  const [loadingExit,setLoadingExit] = useState(false)
+  const [loadingExit, setLoadingExit] = useState(false)
 
   const toggleGraphVisibility = () => {
     setIsGraphVisible(!isGraphVisible)
@@ -177,81 +177,224 @@ export default function RightSection() {
           </Button>
         </CardHeader>
         <CardContent className="p-2 pt-0">
-          <div className="grid grid-cols-1 gap-1">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    disabled={isProcessing}
-                    onClick={() => handleAIAnswer("help")}
-                    variant="outline"
-                    className="justify-start h-7 py-0 text-xs"
-                    size="sm"
-                  >
-                    <BookOpen className="mr-1 h-3 w-3" />
-                    AI Answer
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="text-xs">Get AI assistance with your meeting questions</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+          <div className="grid grid-cols-2 gap-2">
+            {/* Left Column - 5 Buttons */}
+            <div className="flex flex-col gap-1">
+              {/* AI Answer */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      disabled={isProcessing}
+                      onClick={() => handleAIAnswer("help")}
+                      variant="outline"
+                      className="justify-start h-7 py-0 text-xs"
+                      size="sm"
+                    >
+                      <BookOpen className="mr-1 h-3 w-3" />
+                      AI Answer
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">Get AI assistance with your meeting questions</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
 
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    disabled={isProcessing}
-                    onClick={() => handleAIAnswer("factcheck")}
-                    variant="outline"
-                    className="justify-start h-7 py-0 text-xs"
-                    size="sm"
-                  >
-                    <FileText className="mr-1 h-3 w-3" />
-                    Fact Checking
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="text-xs">Verify facts in the conversation</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+              {/* Fact Checking */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      disabled={isProcessing}
+                      onClick={() => handleAIAnswer("factcheck")}
+                      variant="outline"
+                      className="justify-start h-7 py-0 text-xs"
+                      size="sm"
+                    >
+                      <FileText className="mr-1 h-3 w-3" />
+                      Fact Checking
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">Verify facts in the conversation</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
 
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    disabled={isProcessing}
-                    onClick={() => handleAIAnswer("summary")}
-                    variant="outline"
-                    className="justify-start h-7 py-0 text-xs"
-                    size="sm"
-                  >
-                    <Clock className="mr-1 h-3 w-3" />
-                    Summarize
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="text-xs">Get a summary of the conversation so far</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+              {/* Summarize */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      disabled={isProcessing}
+                      onClick={() => handleAIAnswer("summary")}
+                      variant="outline"
+                      className="justify-start h-7 py-0 text-xs"
+                      size="sm"
+                    >
+                      <Clock className="mr-1 h-3 w-3" />
+                      Summarize
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">Get a summary of the conversation so far</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
 
-            {/* Graph Icon - Positioned Below AI Tools */}
-            {graphImage && showGraph && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full flex items-center justify-start h-7 py-0 text-xs"
-                onClick={toggleGraphVisibility}
-              >
-                <BarChart2 className="mr-1 h-3 w-3" />
-                {isGraphVisible ? "Hide Graph" : "Show Graph"}
-              </Button>
-            )}
+              {/* Make Convincing */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      disabled={true}
+                      variant="outline"
+                      className="justify-start h-7 py-0 text-xs truncate"
+                      size="sm"
+                    >
+                      <Star className="mr-1 h-3 w-3" />
+                      Make Convincing
+                    </Button>
+                  </TooltipTrigger>
+                </Tooltip>
+              </TooltipProvider>
+
+              {/* Search CRM */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      disabled={true}
+                      variant="outline"
+                      className="justify-start h-7 py-0 text-xs truncate"
+                      size="sm"
+                    >
+                      <Search className="mr-1 h-3 w-3" />
+                      Search CRM
+                    </Button>
+                  </TooltipTrigger>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+
+            {/* Right Column - 5 Buttons */}
+            <div className="flex flex-col gap-1">
+              {/* Explain Like 5-Year-Old */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      disabled={true}
+                      variant="outline"
+                      className="justify-start h-7 py-0 text-xs truncate"
+                      size="sm"
+                    >
+                      <Smile className="mr-1 h-3 w-3" />
+                      Explain Like 5yr Old
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">Simplify the explanation</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              {/* Help Explain Better */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      disabled={true}
+                      variant="outline"
+                      className="justify-start h-7 py-0 text-xs truncate"
+                      size="sm"
+                    >
+                      <MessageCircle className="mr-1 h-3 w-3" />
+                      Help Explain Better
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">Get a clearer explanation</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              {/* Negotiation Tip */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      disabled={true}
+                      variant="outline"
+                      className="justify-start h-7 py-0 text-xs truncate"
+                      size="sm"
+                    >
+                      <Handshake className="mr-1 h-3 w-3" />
+                      Negotiation Tip
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">Get a useful negotiation tip</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              {/* Explain Laymann Terms */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      disabled={true}
+                      variant="outline"
+                      className="justify-start h-7 py-0 text-xs truncate"
+                      size="sm"
+                    >
+                      <Book className="mr-1 h-3 w-3" />
+                      Explain Laymann Terms
+                    </Button>
+                  </TooltipTrigger>
+                </Tooltip>
+              </TooltipProvider>
+
+              {/* Create Action Plan */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      disabled={true}
+                      variant="outline"
+                      className="justify-start h-7 py-0 text-xs truncate"
+                      size="sm"
+                    >
+                      <List className="mr-1 h-3 w-3" />
+                      Create Action Plan
+                    </Button>
+                  </TooltipTrigger>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
           </div>
         </CardContent>
+
+
+
+
+        {/* Graph Icon - Positioned Below AI Tools */}
+        {graphImage && showGraph && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full flex items-center justify-center h-7 py-0 text-xs mt-2 gap-1"
+            onClick={toggleGraphVisibility}
+          >
+            <BarChart2 className="h-3 w-3" />
+            <span>{isGraphVisible ? "Hide Graph" : "Show Graph"}</span>
+          </Button>
+        )}
+
+
+
       </Card>
 
       {/* Citations Section */}
