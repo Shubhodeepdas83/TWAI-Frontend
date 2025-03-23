@@ -7,9 +7,10 @@ import { BookOpen, FileText, Clock, BarChart2, X, ExternalLink, LogOut, Smile, M
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useParams, useRouter } from "next/navigation"
-import { appendConversation } from "../../app/session/[sessionId]/actions"
+import { appendConversation,appendChat } from "../../app/session/[sessionId]/actions"
 import { unstable_noStore as noStore } from "next/cache"
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import { v4 as uuidv4 } from "uuid";
 
 export default function RightSection() {
   noStore()
@@ -46,7 +47,12 @@ export default function RightSection() {
 
   const handleExit = async () => {
     setLoadingExit(true)
-    await appendConversation({ sessionId: sessionId, newMessages: wholeConversation })
+    await appendConversation({ sessionId: sessionId, newMessages: wholeConversation.filter((msg)=>msg.saved==false).map((message) =>
+      ["user", "other", "time"].reduce((acc, key) => {
+        if (message.hasOwnProperty(key)) acc[key] = message[key];
+        return acc;
+      }, {})
+    ) })
     router.push("/dashboard")
   }
 
@@ -55,12 +61,13 @@ export default function RightSection() {
     setGraphImage(null)
     setIsProcessing(true)
     setUsedCitations([])
-    setChatMessages([...chatMessages, { text: "Thinking...", sender: "ai" }])
+    setChatMessages([...chatMessages, { text: "Thinking...",hidden:false, sender: "ai" }])
 
     try {
       // Step 1: Extract the query using OpenAI on the frontend
       const tempconv = [...wholeConversation]
-      setWholeConversation([])
+      setWholeConversation((prev) => prev.map((msg) => ({ ...msg, saved: true,hidden:true })))
+      const id=uuidv4();
 
       // Step 3: Send the extracted query to the backend for processing
       const response = await fetch("/api/get_AI_Help", {
@@ -101,15 +108,15 @@ export default function RightSection() {
             if (h.query) {
               setChatMessages((prev) => [
                 ...prev.filter((msg) => msg.text !== "Thinking..."),
-                { text: h.query, sender: "user" },
-                { text: "Thinking...", sender: "ai" },
+                { text: h.query, sender: "user",id: id,time: new Date().toISOString(),action:requestType,latestConvoTime: tempconv.length > 0 ? tempconv[tempconv.length - 1].time : null, saved: false,hidden:false },
+                { text: "Thinking...",hidden:false, sender: "ai" },
               ])
             }
 
             if (h.result) {
               setChatMessages((prev) => [
                 ...prev.filter((msg) => msg.text !== "Thinking..."),
-                { text: h.result, sender: "ai" },
+                { text: h.result, sender: "ai",id:id,time: new Date().toISOString(),saved: false,hidden:false },
               ])
             }
 
@@ -135,20 +142,28 @@ export default function RightSection() {
       setCopiedText("")
       setChatMessages((prev) => [...prev.filter((msg) => msg.text !== "Thinking...")])
 
-      const appending = await appendConversation({ sessionId, newMessages: tempconv })
+      const appending = await appendConversation({ sessionId, newMessages: tempconv.filter((msg)=>msg.saved==false).map((message) =>
+        ["user", "other", "time"].reduce((acc, key) => {
+          if (message.hasOwnProperty(key)) acc[key] = message[key];
+          return acc;
+        }, {})
+      ) })
+
+
 
       if (appending.success) {
         setCapturePartialTranscript("")
         setMicPartialTranscript("")
+        
       } else {
         console.log("Error appending conversation")
-        setWholeConversation(tempconv)
+        setWholeConversation((prev) => [tempconv,...prev])
       }
     } catch (error) {
       console.error("AI Request failed:", error)
       setChatMessages((prev) => [
         ...prev.filter((msg) => msg.text !== "Thinking..."),
-        { text: "An error occurred while processing your request.", sender: "ai" },
+        { text: "An error occurred while processing your request.", sender: "ai",hidden:false },
       ])
     } finally {
       setIsProcessing(false)

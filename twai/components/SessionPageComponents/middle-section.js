@@ -11,6 +11,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import ReactMarkdown from "react-markdown"
 import { unstable_noStore as noStore } from "next/cache"
+import { v4 as uuidv4 } from "uuid";
+import {  appendChat } from "@/app/session/[sessionId]/actions"
 
 export default function MiddleSection() {
   noStore()
@@ -46,6 +48,8 @@ export default function MiddleSection() {
   const [image, setImage] = useState(null)
   const [isGraphVisible, setIsGraphVisible] = useState(false)
   const [activeTab, setActiveTab] = useState("chat")
+  const [lastUpdateTime, setLastUpdateTime] = useState(0);
+  const [showChat, setShowChat] = useState(true)
 
   const toggleGraphVisibility = () => {
     setIsGraphVisible(!isGraphVisible)
@@ -60,8 +64,10 @@ export default function MiddleSection() {
     if (isProcessing) return
 
     if (userInput.trim()) {
-      setChatMessages((prev) => [...prev, { text: userInput, sender: "user" }])
-      setChatMessages((prev) => [...prev, { text: "Thinking...", sender: "ai" }])
+      const id=uuidv4();
+
+      setChatMessages((prev) => [...prev, { text: userInput, sender: "user",id: id,time: new Date().toISOString(),action:"chat_Jamie_AI",latestConvoTime: wholeConversation.length > 0 ? wholeConversation[wholeConversation.length - 1].time : null,saved:false,hidden:false}])
+      setChatMessages((prev) => [...prev, { text: "Thinking...",hidden:false, sender: "ai" }])
       setUserInput("")
       setUsedCitations([])
       setGraphImage(null)
@@ -108,7 +114,7 @@ export default function MiddleSection() {
               if (h.result) {
                 setChatMessages((prev) => [
                   ...prev.filter((msg) => msg.text !== "Thinking..."),
-                  { text: h.result, sender: "ai" },
+                  { text: h.result, sender: "ai",id:id,time: new Date().toISOString(),saved:false,hidden:false },
                 ])
               }
               if (h.used_citations) {
@@ -130,12 +136,13 @@ export default function MiddleSection() {
         }
 
         setChatMessages((prev) => [...prev.filter((msg) => msg.text !== "Thinking...")])
+
         setIsProcessing(false)
       } catch (error) {
         console.error("Error sending message:", error)
         setChatMessages((prev) => [
           ...prev.filter((msg) => msg.text !== "Thinking..."),
-          { text: "An error occurred while processing your request.", sender: "ai" },
+          { text: "An error occurred while processing your request.", sender: "ai",hidden:false },
         ])
         setIsProcessing(false)
       }
@@ -172,6 +179,32 @@ export default function MiddleSection() {
     }
   }, [chatMessages, autoScroll])
 
+  useEffect(() => {
+    const now = Date.now();
+    if (now - lastUpdateTime >= 10000 && chatMessages.filter((msg)=>msg.saved==false).length>0) { // 10 seconds gap
+      appendChat({sessionId,newMessages:chatMessages.filter((msg)=>msg.saved==false).map(({ saved,hidden, ...rest }) => rest)})
+      setChatMessages((prev) =>
+        prev.map((msg) =>
+          msg.saved ? msg : { ...msg, saved: true } // Avoid filtering out messages
+        )
+      );
+      setLastUpdateTime(now);
+    }
+  }, [chatMessages]);
+
+  useEffect(() => {
+    setChatMessages((prev) =>
+      prev.map((message) =>
+        message.id
+          ? { ...message, hidden: showChat? false : true }
+          : message
+      )
+    );
+  }, [showChat]);
+  
+
+  
+
   return (
     <div className="h-full flex flex-col gap-2">
       <Card className="border shadow-sm flex-1 flex flex-col overflow-hidden">
@@ -197,7 +230,7 @@ export default function MiddleSection() {
             >
               <ScrollText className="h-4 w-4" />
             </Button>
-            <Button
+            {/* <Button
               variant="ghost"
               size="sm"
               onClick={handleClear}
@@ -206,7 +239,16 @@ export default function MiddleSection() {
               title="Clear Chat"
             >
               <Trash className="h-4 w-4" />
-            </Button>
+            </Button> */}
+            <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowChat((prev) => !prev)} // Toggle state
+            className="text-blue-500 h-7 w-7 p-0"
+            title={showChat ? "Hide Chat" : "Show Chat"}
+          >
+            {showChat ? "🙈" : "👀"} {/* Icon change */}
+          </Button>
           </div>
         </CardHeader>
 
@@ -226,7 +268,7 @@ export default function MiddleSection() {
                 </div>
               ) : (
                 <div className="space-y-3 py-1">
-                  {chatMessages.map((message, index) => (
+                  {chatMessages.filter((msg)=>msg.hidden==false).map((message, index) => (
                     <div key={index} className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}>
                       <div
                         className={`p-2 rounded-lg max-w-[85%] text-sm ${message.sender === "user" ? "bg-primary text-primary-foreground" : "bg-muted"

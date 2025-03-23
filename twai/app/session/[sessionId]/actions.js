@@ -5,7 +5,7 @@ import { authOptions } from "../../api/auth/[...nextauth]/route";
 import { getServerSession } from "next-auth";
 
 const prisma = new PrismaClient();
-
+// Make ZOD checks here
 export async function isValidSession({ sessionId }) {
     const session = await getServerSession(authOptions);
 
@@ -131,10 +131,54 @@ export async function appendConversation({ sessionId, newMessages }) {
     if (!foundSession) {
         return { failure: "Session not found" };
     }
+
+
     await prisma.session.update({
         where: { id: sessionId },
         data: {
             conversation: [...foundSession.conversation, ...newMessages],
+        },
+    });
+
+    return { success: foundSession };
+}
+
+export async function appendChat({ sessionId, newMessages }) {
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+        return { failure: "not authenticated" };
+    }
+
+    const user = await prisma.user.findUnique({
+        where: { email: session.user.email },
+        select: {
+            sessions: {
+                select: {
+                    id: true,
+                    chat: true,
+                    createdAt: true,
+                    summary: true,
+                },
+            },
+        },
+    });
+
+    if (!user) {
+        return { failure: "User not found" };
+    }
+
+    const foundSession = user.sessions.find((s) => s.id === sessionId);
+
+    if (!foundSession) {
+        return { failure: "Session not found" };
+    }
+    console.log(foundSession.chat)
+
+    await prisma.session.update({
+        where: { id: sessionId },
+        data: {
+            chat: [...foundSession.chat, ...newMessages],
         },
     });
 

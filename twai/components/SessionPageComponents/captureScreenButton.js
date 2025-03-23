@@ -107,31 +107,34 @@ export default function CaptureScreenButton() {
       const MAX_MESSAGE_LENGTH = 200
 
       socket.onmessage = (event) => {
-        const data = JSON.parse(event.data)
+        const data = JSON.parse(event.data);
         if (data.channel && data.channel.alternatives) {
-          const transcript = data.channel.alternatives[0].transcript
+          const transcript = data.channel.alternatives[0].transcript;
           if (transcript.trim()) {
-            // Assuming messages could be from "user" or "other"
+            const timestamp = new Date().toISOString(); // Universal UTC timestamp
+
+      
             setWholeConversation((prev) => {
-              const lastMessage = prev[prev.length - 1]
-
+              const lastMessage = prev[prev.length - 1];
+      
               if (lastMessage?.other) {
-                const updatedMessage = lastMessage.other + " " + transcript
-
+                const updatedMessage = lastMessage.other + " " + transcript;
+      
                 if (updatedMessage.length > MAX_MESSAGE_LENGTH) {
-                  // If the message exceeds max length, start a new "other" message
-                  return [...prev, { other: transcript }]
+                  // Start a new "other" message with timestamp
+                  return [...prev, { other: transcript, time:timestamp,saved:false,hidden:false }];
                 } else {
-                  // Otherwise, update the last message
-                  return [...prev.slice(0, -1), { other: updatedMessage }]
+                  // Update the last message
+                  return [...prev.slice(0, -1), { other: updatedMessage, time:timestamp,saved:false,hidden:false }];
                 }
               } else {
-                return [...prev, { other: transcript }]
+                return [...prev, { other: transcript, time:timestamp,saved:false,hidden:false }];
               }
-            })
+            });
           }
         }
-      }
+      };
+      
     })
   }
 

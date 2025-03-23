@@ -20,6 +20,7 @@ export default function LeftSection() {
   const { sessionId } = useParams()
   const router = useRouter()
   const [autoScroll, setAutoScroll] = useState(true)
+  const [showConversation, setShowConversation] = useState(true); // Toggle state
   const [manualInput, setManualInput] = useState("")
   const [isUser, setIsUser] = useState(false)
   const [showInput, setShowInput] = useState(false)
@@ -28,14 +29,24 @@ export default function LeftSection() {
 
   const handleClearConversation = async () => {
     const tempConversation = [...wholeConversation]
-    setWholeConversation([]) // Immediately clear UI
-    await appendConversation({ sessionId, newMessages: tempConversation })
+    setWholeConversation((prev) => prev.map((message) => ({ ...message, hidden: true })))
+    // setWholeConversation([]) // Immediately clear UI
+    await appendConversation({
+      sessionId, newMessages: tempConversation.filter((msg)=>msg.saved==false).map((message) =>
+        ["user", "other", "time"].reduce((acc, key) => {
+          if (message.hasOwnProperty(key)) acc[key] = message[key];
+          return acc;
+        }, {})
+      )
+    })
   }
 
   const handleAddConversation = () => {
+    const timestamp = new Date().toISOString(); // Universal UTC timestamp
+
     if (manualInput.trim()) {
-      const newMessage = isUser ? { user: manualInput } : { other: manualInput }
-      setWholeConversation([...wholeConversation, newMessage])
+      const newMessage = isUser ? { user: manualInput, time: timestamp, saved: false, hidden: false } : { other: manualInput, time: timestamp, saved: false, hidden: false }
+      setWholeConversation((prev) => [...prev, newMessage])
       setManualInput("")
       setShowInput(false) // Hide input after sending
     }
@@ -47,6 +58,19 @@ export default function LeftSection() {
       conversationEndRef.current.scrollIntoView({ behavior: "smooth" })
     }
   }, [wholeConversation, autoScroll])
+
+  useEffect(() => {
+    setWholeConversation((prev) =>
+      prev.map((message) =>
+        message.saved
+          ? { ...message, hidden: !showConversation } // Toggle `hidden` only for saved messages
+          : message // Keep unsaved messages unchanged
+      )
+    );
+  }, [showConversation]);
+
+
+
 
   return (
     <div className="h-full flex flex-col gap-2">
@@ -82,28 +106,26 @@ export default function LeftSection() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={handleClearConversation}
-            className="text-red-500 h-7 w-7 p-0"
-            disabled={wholeConversation.length === 0}
-            title="Clear Conversation"
+            onClick={() => setShowConversation((prev) => !prev)} // Toggle state
+            className="text-blue-500 h-7 w-7 p-0"
+            title={showConversation ? "Hide Conversation" : "Show Conversation"}
           >
-            <Trash className="h-4 w-4" />
+            {showConversation ? "🙈" : "👀"} {/* Icon change */}
           </Button>
         </div>
 
         <CardContent className="p-2 pt-8 flex-1 flex flex-col overflow-hidden">
           <div className="flex-1 min-h-0 overflow-hidden">
             <ScrollArea className="h-full pr-2" ref={scrollAreaRef} id="conversation-container">
-              {wholeConversation.length > 0 ? (
+              {wholeConversation?.filter((msg) => msg.hidden == false).length > 0 ? (
                 <div className="space-y-2 py-1">
-                  {wholeConversation.map((message, index) => (
+                  {wholeConversation.filter((msg) => msg.hidden == false).map((message, index) => (
                     <div key={index} className={`flex ${message.user ? "justify-end" : "justify-start"}`}>
                       <div
-                        className={`max-w-[80%] rounded-lg p-2 text-sm ${
-                          message.user
+                        className={`max-w-[80%] rounded-lg p-2 text-sm ${message.user
                             ? "bg-primary text-primary-foreground rounded-tr-none"
                             : "bg-muted rounded-tl-none"
-                        }`}
+                          }  ${message.saved === true ? "opacity-50 grayscale" : ""}`}
                       >
                         {message.user ? message.user : message.other}
                       </div>
