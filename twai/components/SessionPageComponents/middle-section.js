@@ -411,7 +411,7 @@ export default function MiddleSection() {
                           disabled={isProcessing}
                           onClick={() => regenerateQuery(message.id, message.sender === "user" ? "Query" : "Result")}
                           className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 
-    rounded-md ${isProcessing ? "" : "hover:bg-gray-200 transition-colors duration-200 border"}  border-gray-200 shadow-sm"
+    rounded-md ${isProcessing ? "" : "hover:bg-gray-200"} transition-colors duration-200 border  border-gray-200 shadow-sm"
                           title="Regenerate response`}
                         >
                           <svg
