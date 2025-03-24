@@ -20,7 +20,7 @@ export default function LeftSection() {
   const { sessionId } = useParams()
   const router = useRouter()
   const [autoScroll, setAutoScroll] = useState(true)
-  const [showConversation, setShowConversation] = useState(true); // Toggle state
+  const [showConversation, setShowConversation] = useState(false); // Toggle state
   const [manualInput, setManualInput] = useState("")
   const [isUser, setIsUser] = useState(false)
   const [showInput, setShowInput] = useState(false)

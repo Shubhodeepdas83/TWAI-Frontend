@@ -7,7 +7,7 @@ import { BookOpen, FileText, Clock, BarChart2, X, ExternalLink, LogOut, Smile, M
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useParams, useRouter } from "next/navigation"
-import { appendConversation,appendChat } from "../../app/session/[sessionId]/actions"
+import { appendConversation } from "../../app/session/[sessionId]/actions"
 import { unstable_noStore as noStore } from "next/cache"
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { v4 as uuidv4 } from "uuid";
@@ -32,7 +32,7 @@ export default function RightSection() {
     graphImage,
     setGraphImage,
     setShowGraph,
-    showGraph, useRag, setUseRag
+    showGraph, useRag, setSaveChatCounter
   } = useAppContext()
 
   const { sessionId } = useParams()
@@ -108,7 +108,7 @@ export default function RightSection() {
             if (h.query) {
               setChatMessages((prev) => [
                 ...prev.filter((msg) => msg.text !== "Thinking..."),
-                { text: h.query, sender: "user",id: id,time: new Date().toISOString(),action:requestType,latestConvoTime: tempconv.length > 0 ? tempconv[tempconv.length - 1].time : null, saved: false,hidden:false },
+                { text: h.query, sender: "user",id: id,time: new Date().toISOString(),action:requestType,latestConvoTime: tempconv.length > 0 ? tempconv[tempconv.length - 1].time : null, saved: false,hidden:false ,isWeb:enableWebSearch,isRag:useRag,useHighlightedText:useHighlightedText, copiedText:copiedText},
                 { text: "Thinking...",hidden:false, sender: "ai" },
               ])
             }
@@ -141,6 +141,8 @@ export default function RightSection() {
 
       setCopiedText("")
       setChatMessages((prev) => [...prev.filter((msg) => msg.text !== "Thinking...")])
+
+      setSaveChatCounter((prev)=>prev+1);
 
       const appending = await appendConversation({ sessionId, newMessages: tempconv.filter((msg)=>msg.saved==false).map((message) =>
         ["user", "other", "time"].reduce((acc, key) => {

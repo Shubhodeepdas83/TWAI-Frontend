@@ -37,54 +37,13 @@ export async function isValidSession({ sessionId }) {
         return { failure: "Session not found" };
     }
 
-    if (!foundSession.captureToken) {
-        const response = await fetch("https://api.assemblyai.com/v2/realtime/token", {
-            method: "POST",
-            headers: {
-                "Authorization": process.env.ASSEMBLYAI_API_KEY,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                "expires_in": 3600,
-            }),
-        });
-
-        if (!response.ok) {
-            return { failure: "Failed to get token" };
-        }
-        const data = await response.json();
-        await prisma.session.update({
-            where: { id: sessionId },
-            data: { captureToken: data.token },
-        });
-    }
-    if (!foundSession.micToken) {
-        const response = await fetch("https://api.assemblyai.com/v2/realtime/token", {
-            method: "POST",
-            headers: {
-                "Authorization": process.env.ASSEMBLYAI_API_KEY,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                "expires_in": 3600,
-            }),
-        });
-
-        if (!response.ok) {
-            return { failure: "Failed to get token" };
-        }
-        const data = await response.json();
-        await prisma.session.update({
-            where: { id: sessionId },
-            data: { micToken: data.token },
-        });
-    }
 
     const found = await prisma.session.findUnique({
         where: { id: sessionId },
         select: {
-            captureToken: true,
-            micToken:true
+            chat: true,
+            conversation:true,
+            
         },
     });
 
@@ -96,7 +55,7 @@ export async function isValidSession({ sessionId }) {
 
 
 
-    return { captureToken: found.captureToken,micToken:found.micToken };
+    return { chat: found.chat,conversation:found.conversation };
 
 
 }
@@ -173,7 +132,6 @@ export async function appendChat({ sessionId, newMessages }) {
     if (!foundSession) {
         return { failure: "Session not found" };
     }
-    console.log(foundSession.chat)
 
     await prisma.session.update({
         where: { id: sessionId },

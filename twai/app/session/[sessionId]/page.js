@@ -13,7 +13,7 @@ export default function Home() {
   const { sessionId } = useParams()
   const { status } = useSession()
 
-  const { wholeConversation, setCopiedText, micToken, captureToken } = useAppContext()
+  const { wholeConversation, setCopiedText,setWholeConversation,setChatMessages } = useAppContext()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(true)
 
@@ -28,14 +28,19 @@ export default function Home() {
       if (data.failure) {
         router.push("/")
       } else {
-        micToken.current = data.micToken
-        captureToken.current = data.captureToken
+        if(data.chat){
+          setChatMessages(data.chat.map((c) => ({ ...c, hidden: true,saved:true })))
+        }
+        if(data.conversation){
+          setWholeConversation(data.conversation.map((c)=> ({...c,hidden:true,saved:true})))
+        }
+
         setIsLoading(false)
       }
     }
 
     fetchData()
-  }, [status, sessionId, router, captureToken, micToken])
+  }, [status, sessionId, router])
 
   useEffect(() => {
     const handleMouseUp = () => {

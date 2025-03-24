@@ -12,7 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import ReactMarkdown from "react-markdown"
 import { unstable_noStore as noStore } from "next/cache"
 import { v4 as uuidv4 } from "uuid";
-import {  appendChat } from "@/app/session/[sessionId]/actions"
+import { appendChat, appendConversation } from "@/app/session/[sessionId]/actions"
 
 export default function MiddleSection() {
   noStore()
@@ -39,7 +39,7 @@ export default function MiddleSection() {
     setCopiedText,
     graphImage,
     usedCitations,
-    setIsProcessing, useRag, setUseRag
+    setIsProcessing, useRag, setUseRag, setSaveChatCounter, saveChatCounter, copiedText
   } = useAppContext()
 
   const { sessionId } = useParams()
@@ -49,25 +49,133 @@ export default function MiddleSection() {
   const [isGraphVisible, setIsGraphVisible] = useState(false)
   const [activeTab, setActiveTab] = useState("chat")
   const [lastUpdateTime, setLastUpdateTime] = useState(0);
-  const [showChat, setShowChat] = useState(true)
+  const [showChat, setShowChat] = useState(false)
 
   const toggleGraphVisibility = () => {
     setIsGraphVisible(!isGraphVisible)
   }
 
-  const handleAIAnswer = async (type) => {
-    // Placeholder function for AI tools
-    console.log(`AI Tool ${type} clicked`)
+  const regenerateQuery = async (mid, regenerate_Query_or_Result) => {
+
+    if (isProcessing) return
+    setGraphImage(null)
+    setIsProcessing(true)
+    setUsedCitations([])
+
+    const message = chatMessages.find((msg) => msg.id === mid && msg.sender === "user")
+    const answer = chatMessages.find((msg) => msg.id === mid && msg.sender === "ai") || ""
+
+    if (!message) {
+      console.error("Message or answer not found")
+      setIsProcessing(false)
+      return
+    }
+
+    try {
+      const id = uuidv4();
+      setChatMessages((prev) => [...prev, { text: "Thinking...", hidden: false, sender: "ai" }])
+
+      // Step 3: Send the extracted query to the backend for processing
+      const response = await fetch("/api/regenerate_Query", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          conversationTime: message.latestConvoTime,
+          use_web: message.isWeb,
+          requestType: message.action,
+          useHighlightedText: message.useHighlightedText,
+          copiedText: message.copiedText,
+          sessionId,
+          useRag: message.isRag,
+          prevQuery: message.text,
+          action: message.action,
+          prevAnswer: answer.text || "",
+          regenerate_Query_or_Result: regenerate_Query_or_Result
+        }),
+      })
+
+      if (!response.ok) throw new Error(`Server responded with ${response.status}`)
+
+      const reader = response.body?.getReader()
+      if (!reader) throw new Error("Streaming not supported")
+
+      const decoder = new TextDecoder()
+      let buffer = ""
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        buffer += decoder.decode(value, { stream: true })
+
+        const lines = buffer.split("\n").filter((line) => line.trim() !== "")
+
+        for (const line of lines) {
+          try {
+            const h = JSON.parse(line)
+            buffer = lines.slice(1).join() || ""
+
+            if (h.query) {
+              setChatMessages((prev) => [
+                ...prev.filter((msg) => msg.text !== "Thinking..."),
+                { text: h.query, sender: "user", id: id, time: new Date().toISOString(), action: message.action, latestConvoTime: message.latestConvoTime ? message.latestConvoTime : null, saved: false, hidden: false, isWeb: message.enableWebSearch, isRag: message.useRag, useHighlightedText: message.useHighlightedText, copiedText: message.copiedText },
+                { text: "Thinking...", hidden: false, sender: "ai" },
+              ])
+            }
+
+            if (h.result) {
+              setChatMessages((prev) => [
+                ...prev.filter((msg) => msg.text !== "Thinking..."),
+                { text: h.result, sender: "ai", id: id, time: new Date().toISOString(), saved: false, hidden: false },
+              ])
+            }
+
+            if (h.used_citations) {
+              setUsedCitations(
+                Object.entries(h.used_citations).map(([key, value]) => ({
+                  id: key,
+                  ...value,
+                })),
+              )
+            }
+
+            if (h.graph) {
+              setGraphImage(h.graph)
+              setShowGraph(true)
+            }
+          } catch (error) {
+            console.warn("Streaming JSON parse error:", error)
+          }
+        }
+      }
+
+      setCopiedText("")
+      setChatMessages((prev) => [...prev.filter((msg) => msg.text !== "Thinking...")])
+
+      setSaveChatCounter((prev) => prev + 1);
+
+
+    } catch (error) {
+      console.error("AI Request failed:", error)
+      setChatMessages((prev) => [
+        ...prev.filter((msg) => msg.text !== "Thinking..."),
+        { text: "An error occurred while processing your request.", sender: "ai", hidden: false },
+      ])
+    } finally {
+      setIsProcessing(false)
+    }
   }
+
+
 
   const handleSendMessage = async () => {
     if (isProcessing) return
 
     if (userInput.trim()) {
-      const id=uuidv4();
+      const id = uuidv4();
 
-      setChatMessages((prev) => [...prev, { text: userInput, sender: "user",id: id,time: new Date().toISOString(),action:"chat_Jamie_AI",latestConvoTime: wholeConversation.length > 0 ? wholeConversation[wholeConversation.length - 1].time : null,saved:false,hidden:false}])
-      setChatMessages((prev) => [...prev, { text: "Thinking...",hidden:false, sender: "ai" }])
+      setChatMessages((prev) => [...prev, { text: userInput, sender: "user", id: id, time: new Date().toISOString(), action: "chat_Jamie_AI", latestConvoTime: wholeConversation.length > 0 ? wholeConversation[wholeConversation.length - 1].time : null, saved: false, hidden: false, isWeb: enableWebSearch, isRag: useRag, useHighlightedText: useHighlightedText, copiedText: copiedText }])
+      setChatMessages((prev) => [...prev, { text: "Thinking...", hidden: false, sender: "ai" }])
       setUserInput("")
       setUsedCitations([])
       setGraphImage(null)
@@ -114,7 +222,7 @@ export default function MiddleSection() {
               if (h.result) {
                 setChatMessages((prev) => [
                   ...prev.filter((msg) => msg.text !== "Thinking..."),
-                  { text: h.result, sender: "ai",id:id,time: new Date().toISOString(),saved:false,hidden:false },
+                  { text: h.result, sender: "ai", id: id, time: new Date().toISOString(), saved: false, hidden: false },
                 ])
               }
               if (h.used_citations) {
@@ -136,13 +244,14 @@ export default function MiddleSection() {
         }
 
         setChatMessages((prev) => [...prev.filter((msg) => msg.text !== "Thinking...")])
+        setSaveChatCounter((prev) => prev + 1);
 
         setIsProcessing(false)
       } catch (error) {
         console.error("Error sending message:", error)
         setChatMessages((prev) => [
           ...prev.filter((msg) => msg.text !== "Thinking..."),
-          { text: "An error occurred while processing your request.", sender: "ai",hidden:false },
+          { text: "An error occurred while processing your request.", sender: "ai", hidden: false },
         ])
         setIsProcessing(false)
       }
@@ -180,9 +289,11 @@ export default function MiddleSection() {
   }, [chatMessages, autoScroll])
 
   useEffect(() => {
+    console.log("Trying saving?")
     const now = Date.now();
-    if (now - lastUpdateTime >= 10000 && chatMessages.filter((msg)=>msg.saved==false).length>0) { // 10 seconds gap
-      appendChat({sessionId,newMessages:chatMessages.filter((msg)=>msg.saved==false).map(({ saved,hidden, ...rest }) => rest)})
+    if (now - lastUpdateTime >= 10000 && chatMessages.filter((msg) => msg.saved == false).length > 0) { // 10 seconds gap
+      console.log("In  saving")
+      appendChat({ sessionId, newMessages: chatMessages.filter((msg) => msg.saved == false).map(({ saved, hidden, ...rest }) => rest) })
       setChatMessages((prev) =>
         prev.map((msg) =>
           msg.saved ? msg : { ...msg, saved: true } // Avoid filtering out messages
@@ -190,20 +301,24 @@ export default function MiddleSection() {
       );
       setLastUpdateTime(now);
     }
-  }, [chatMessages]);
+  }, [saveChatCounter]);
+
+
 
   useEffect(() => {
     setChatMessages((prev) =>
       prev.map((message) =>
         message.id
-          ? { ...message, hidden: showChat? false : true }
+          ? { ...message, hidden: showChat ? false : true }
           : message
       )
     );
   }, [showChat]);
-  
 
-  
+
+  const regenerateMessageIds = chatMessages
+    .filter((msg) => msg.sender === "user" && ["help", "factcheck"].includes(msg.action))
+    .map((msg) => msg.id);
 
   return (
     <div className="h-full flex flex-col gap-2">
@@ -241,14 +356,14 @@ export default function MiddleSection() {
               <Trash className="h-4 w-4" />
             </Button> */}
             <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowChat((prev) => !prev)} // Toggle state
-            className="text-blue-500 h-7 w-7 p-0"
-            title={showChat ? "Hide Chat" : "Show Chat"}
-          >
-            {showChat ? "🙈" : "👀"} {/* Icon change */}
-          </Button>
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowChat((prev) => !prev)} // Toggle state
+              className="text-blue-500 h-7 w-7 p-0"
+              title={showChat ? "Hide Chat" : "Show Chat"}
+            >
+              {showChat ? "🙈" : "👀"} {/* Icon change */}
+            </Button>
           </div>
         </CardHeader>
 
@@ -268,10 +383,11 @@ export default function MiddleSection() {
                 </div>
               ) : (
                 <div className="space-y-3 py-1">
-                  {chatMessages.filter((msg)=>msg.hidden==false).map((message, index) => (
-                    <div key={index} className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}>
+                  {chatMessages.filter((msg) => !msg.hidden).map((message, index) => (
+                    <div key={index} className={`flex flex-col gap-1 ${message.sender === "user" ? "items-end" : "items-start"}`}>
+                      {/* Chat Bubble */}
                       <div
-                        className={`p-2 rounded-lg max-w-[85%] text-sm ${message.sender === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
+                        className={`relative p-3 rounded-lg max-w-[85%] text-sm shadow-md ${message.sender === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
                           }`}
                       >
                         {message.text === "Thinking..." ? (
@@ -287,8 +403,37 @@ export default function MiddleSection() {
                           </div>
                         )}
                       </div>
+
+                      {/* Regenerate Button - No Overlap */}
+                      {message.id && regenerateMessageIds.includes(message.id) && (
+                        <button
+                          disabled={isProcessing}
+                          onClick={() => regenerateQuery(message.id, message.sender === "user" ? "Query" : "Result")}
+                          className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 
+    rounded-md ${isProcessing ? "" : "hover:bg-gray-200 transition-colors duration-200 border"}  border-gray-200 shadow-sm"
+                          title="Regenerate response`}
+                        >
+                          <svg
+                            className="w-3 h-3"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <path
+                              d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </button>
+                      )}
                     </div>
                   ))}
+
+
+
+
                   <div ref={chatEndRef} />
                 </div>
               )}

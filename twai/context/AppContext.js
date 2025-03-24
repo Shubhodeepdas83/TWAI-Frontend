@@ -24,6 +24,7 @@ export function AppProvider({ children }) {
   const [graphImage, setGraphImage] = useState(null)
   const micToken = useRef(null);
   const captureToken = useRef(null);
+  const [saveChatCounter,setSaveChatCounter] = useState(0);
 
   return (
     <AppContext.Provider
@@ -48,7 +49,8 @@ export function AppProvider({ children }) {
         enableWebSearch,
         setEnableWebSearch,
         showGraph,
-        setShowGraph,usedCitations, setUsedCitations,setCopiedText,copiedText,micToken,captureToken,setUseHighlightedText,useHighlightedText,graphImage,setGraphImage,useRag,setUseRag
+        setShowGraph,usedCitations, setUsedCitations,setCopiedText,copiedText,micToken,captureToken,setUseHighlightedText,useHighlightedText,graphImage,setGraphImage,useRag,setUseRag,setSaveChatCounter,
+        saveChatCounter
       }}
     >
       {children}
