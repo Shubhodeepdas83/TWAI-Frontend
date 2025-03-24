@@ -73,7 +73,7 @@ export default function MiddleSection() {
 
     try {
       const id = uuidv4();
-      setChatMessages((prev) => [...prev, { text: "Thinking...", hidden: false, sender: "ai" }])
+      setChatMessages((prev) => [...prev, { text: "Thinking...",  sender: "ai" }])
 
       // Step 3: Send the extracted query to the backend for processing
       const response = await fetch("/api/regenerate_Query", {
@@ -119,7 +119,7 @@ export default function MiddleSection() {
               setChatMessages((prev) => [
                 ...prev.filter((msg) => msg.text !== "Thinking..."),
                 { text: h.query, sender: "user", id: id, time: new Date().toISOString(), action: message.action, latestConvoTime: message.latestConvoTime ? message.latestConvoTime : null, saved: false, hidden: false, isWeb: message.enableWebSearch, isRag: message.useRag, useHighlightedText: message.useHighlightedText, copiedText: message.copiedText },
-                { text: "Thinking...", hidden: false, sender: "ai" },
+                { text: "Thinking...",  sender: "ai" },
               ])
             }
 
@@ -175,7 +175,7 @@ export default function MiddleSection() {
       const id = uuidv4();
 
       setChatMessages((prev) => [...prev, { text: userInput, sender: "user", id: id, time: new Date().toISOString(), action: "chat_Jamie_AI", latestConvoTime: wholeConversation.length > 0 ? wholeConversation[wholeConversation.length - 1].time : null, saved: false, hidden: false, isWeb: enableWebSearch, isRag: useRag, useHighlightedText: useHighlightedText, copiedText: copiedText }])
-      setChatMessages((prev) => [...prev, { text: "Thinking...", hidden: false, sender: "ai" }])
+      setChatMessages((prev) => [...prev, { text: "Thinking...",  sender: "ai" }])
       setUserInput("")
       setUsedCitations([])
       setGraphImage(null)
@@ -308,12 +308,13 @@ export default function MiddleSection() {
   useEffect(() => {
     setChatMessages((prev) =>
       prev.map((message) =>
-        message.id
+        message.hasOwnProperty('hidden')
           ? { ...message, hidden: showChat ? false : true }
           : message
       )
     );
   }, [showChat]);
+  
 
 
   const regenerateMessageIds = chatMessages

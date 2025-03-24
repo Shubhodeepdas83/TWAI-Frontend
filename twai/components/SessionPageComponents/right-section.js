@@ -61,7 +61,7 @@ export default function RightSection() {
     setGraphImage(null)
     setIsProcessing(true)
     setUsedCitations([])
-    setChatMessages([...chatMessages, { text: "Thinking...",hidden:false, sender: "ai" }])
+    setChatMessages([...chatMessages, { text: "Thinking...", sender: "ai" }])
 
     try {
       // Step 1: Extract the query using OpenAI on the frontend
@@ -109,7 +109,7 @@ export default function RightSection() {
               setChatMessages((prev) => [
                 ...prev.filter((msg) => msg.text !== "Thinking..."),
                 { text: h.query, sender: "user",id: id,time: new Date().toISOString(),action:requestType,latestConvoTime: tempconv.length > 0 ? tempconv[tempconv.length - 1].time : null, saved: false,hidden:false ,isWeb:enableWebSearch,isRag:useRag,useHighlightedText:useHighlightedText, copiedText:copiedText},
-                { text: "Thinking...",hidden:false, sender: "ai" },
+                { text: "Thinking...", sender: "ai" },
               ])
             }
 
