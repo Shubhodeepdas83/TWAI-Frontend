@@ -42,7 +42,7 @@ export async function POST(req) {
 
     const Session = await prisma.session.findUnique({
       where: { userId: user.id,id:sessionId },
-      select: { templateId:true },
+      select: { templateId:true,chat:true },
     });
 
     if (!Session) {
@@ -76,6 +76,15 @@ export async function POST(req) {
     else{
       formData.append("meetingTemplate",JSON.stringify({}))
     }
+
+    if(Session.chat){
+      formData.append("chat_Conversation",JSON.stringify(Session.chat))
+    }
+    else{
+      formData.append("chat_Conversation",JSON.stringify([]))
+    }
+
+
     
 
 

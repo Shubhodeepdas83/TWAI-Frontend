@@ -106,7 +106,7 @@ export async function appendChat({ sessionId, newMessages }) {
     const session = await getServerSession(authOptions);
 
     if (!session) {
-        return { failure: "not authenticated" };
+        return { failure: "Not authenticated" };
     }
 
     const user = await prisma.user.findUnique({
@@ -133,11 +133,26 @@ export async function appendChat({ sessionId, newMessages }) {
         return { failure: "Session not found" };
     }
 
+    // Clone existing chat to avoid modifying state directly
+    let updatedChat = [...foundSession.chat];
+
+    newMessages.forEach((newMsg) => {
+        const existingIndex = updatedChat.findIndex(
+            (msg) => msg.id === newMsg.id && msg.sender === newMsg.sender
+        );
+
+        if (existingIndex !== -1) {
+            // Update existing message's text
+            updatedChat[existingIndex].text = newMsg.text;
+        } else {
+            // Append as a new message
+            updatedChat.push(newMsg);
+        }
+    });
+
     await prisma.session.update({
         where: { id: sessionId },
-        data: {
-            chat: [...foundSession.chat, ...newMessages],
-        },
+        data: { chat: updatedChat },
     });
 
     return { success: foundSession };

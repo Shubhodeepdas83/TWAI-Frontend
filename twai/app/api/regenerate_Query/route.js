@@ -13,7 +13,7 @@ export async function POST(req) {
       return NextResponse.json({ failure: "not authenticated" }, { status: 401 });
     }
 
-    const {prevAnswer,regenerate_Query_or_Result, conversationTime, use_web, requestType = "help", useHighlightedText, copiedText, sessionId,useRag,prevQuery,action } = await req.json();
+    const {prevAnswer,regenerate_Query_or_Result_or_expandquestion, conversationTime, use_web, useHighlightedText, copiedText, sessionId,useRag,prevQuery,action } = await req.json();
     
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
@@ -66,7 +66,7 @@ export async function POST(req) {
       useRag:useRag,
       prevQuery:prevQuery,
       action:action,
-      regenerate_Query_or_Result:regenerate_Query_or_Result,
+      regenerate_Query_or_Result_or_expandquestion:regenerate_Query_or_Result_or_expandquestion,
       prevAnswer:prevAnswer,
     };
 

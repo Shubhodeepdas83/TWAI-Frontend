@@ -6,7 +6,7 @@ import { useAppContext } from "../../context/AppContext"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useParams } from "next/navigation"
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, act } from "react"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import ReactMarkdown from "react-markdown"
@@ -55,7 +55,7 @@ export default function MiddleSection() {
     setIsGraphVisible(!isGraphVisible)
   }
 
-  const regenerateQuery = async (mid, regenerate_Query_or_Result) => {
+  const regenerateQuery = async (mid, regenerate_Query_or_Result_or_expandquestion) => {
 
     if (isProcessing) return
     setGraphImage(null)
@@ -72,9 +72,18 @@ export default function MiddleSection() {
     }
 
     try {
-      const id = uuidv4();
-      setChatMessages((prev) => [...prev, { text: "Thinking...",  sender: "ai" }])
-
+      let id = uuidv4();
+      if(regenerate_Query_or_Result_or_expandquestion == "expandquestion" && message.id){
+        id = message.id;
+      }
+      
+      
+      if(regenerate_Query_or_Result_or_expandquestion!=="expandquestion"){
+      if(message.action=="chat_Jamie_AI"){
+        setChatMessages((prev) => [...prev, { text: message.text, sender: "user", id: id, time: new Date().toISOString(), action: message.action, latestConvoTime: message.latestConvoTime ? message.latestConvoTime : null, saved: false, hidden: false, isWeb: message.enableWebSearch, isRag: message.useRag, useHighlightedText: message.useHighlightedText, copiedText: message.copiedText }])
+      }else{
+      setChatMessages((prev) => [...prev, { text: "Thinking...", sender: "ai" }])}
+      }
       // Step 3: Send the extracted query to the backend for processing
       const response = await fetch("/api/regenerate_Query", {
         method: "POST",
@@ -90,7 +99,7 @@ export default function MiddleSection() {
           prevQuery: message.text,
           action: message.action,
           prevAnswer: answer.text || "",
-          regenerate_Query_or_Result: regenerate_Query_or_Result
+          regenerate_Query_or_Result_or_expandquestion: regenerate_Query_or_Result_or_expandquestion
         }),
       })
 
@@ -115,19 +124,42 @@ export default function MiddleSection() {
             const h = JSON.parse(line)
             buffer = lines.slice(1).join() || ""
 
-            if (h.query) {
-              setChatMessages((prev) => [
+            if (h.query && message.action !== "chat_Jamie_AI" && regenerate_Query_or_Result_or_expandquestion !== "expandquestion") {
+              setChatMessages((prev) => {
+                const usermessageIndex = prev.findIndex((msg) => msg.id === id && msg.sender === "user")
+                if(usermessageIndex!=-1){
+                  return prev.filter((msg) => msg.text !== "Thinking...").map((msg) =>
+                    (msg.id === id && msg.sender==="user") ? { ...msg, text: h.query,saved:false } : msg
+                  )
+                }
+                else{
+                  return [
                 ...prev.filter((msg) => msg.text !== "Thinking..."),
                 { text: h.query, sender: "user", id: id, time: new Date().toISOString(), action: message.action, latestConvoTime: message.latestConvoTime ? message.latestConvoTime : null, saved: false, hidden: false, isWeb: message.enableWebSearch, isRag: message.useRag, useHighlightedText: message.useHighlightedText, copiedText: message.copiedText },
-                { text: "Thinking...",  sender: "ai" },
-              ])
+                { text: "Thinking...", sender: "ai" },
+              ]
+                }
+                
+                })
             }
 
             if (h.result) {
-              setChatMessages((prev) => [
-                ...prev.filter((msg) => msg.text !== "Thinking..."),
-                { text: h.result, sender: "ai", id: id, time: new Date().toISOString(), saved: false, hidden: false },
-              ])
+              setChatMessages((prev) => {
+                const aiMessageIndex = prev.findIndex((msg) => msg.id === id && msg.sender === "ai")
+                if(aiMessageIndex!=-1){
+                  return prev.filter((msg) => msg.text !== "Thinking...").map((msg) =>
+                    (msg.id === id && msg.sender==="ai") ? { ...msg, text: h.result ,saved:false} : msg
+                  )
+                }
+                else{
+                  return [
+                    ...prev.filter((msg) => msg.text !== "Thinking..."),
+                    { text: h.result, sender: "ai", id: id, time: new Date().toISOString(), saved: false, hidden: false },
+                  ]
+                }
+                
+                })
+
             }
 
             if (h.used_citations) {
@@ -175,7 +207,7 @@ export default function MiddleSection() {
       const id = uuidv4();
 
       setChatMessages((prev) => [...prev, { text: userInput, sender: "user", id: id, time: new Date().toISOString(), action: "chat_Jamie_AI", latestConvoTime: wholeConversation.length > 0 ? wholeConversation[wholeConversation.length - 1].time : null, saved: false, hidden: false, isWeb: enableWebSearch, isRag: useRag, useHighlightedText: useHighlightedText, copiedText: copiedText }])
-      setChatMessages((prev) => [...prev, { text: "Thinking...",  sender: "ai" }])
+      setChatMessages((prev) => [...prev, { text: "Thinking...", sender: "ai" }])
       setUserInput("")
       setUsedCitations([])
       setGraphImage(null)
@@ -314,12 +346,14 @@ export default function MiddleSection() {
       )
     );
   }, [showChat]);
-  
+
 
 
   const regenerateMessageIds = chatMessages
     .filter((msg) => msg.sender === "user" && ["help", "factcheck"].includes(msg.action))
     .map((msg) => msg.id);
+
+  const chatwithjamieIds = chatMessages.filter((msg) => msg.sender === "user" && msg.action === "chat_Jamie_AI").map((msg) => msg.id);
 
   return (
     <div className="h-full flex flex-col gap-2">
@@ -383,60 +417,83 @@ export default function MiddleSection() {
                   </div>
                 </div>
               ) : (
-                <div className="space-y-3 py-1">
-                  {chatMessages.filter((msg) => !msg.hidden).map((message, index) => (
-                    <div key={index} className={`flex flex-col gap-1 ${message.sender === "user" ? "items-end" : "items-start"}`}>
-                      {/* Chat Bubble */}
-                      <div
-                        className={`relative p-3 rounded-lg max-w-[85%] text-sm shadow-md ${message.sender === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
-                          }`}
-                      >
-                        {message.text === "Thinking..." ? (
-                          <div className="flex items-center gap-1">
-                            <div className="animate-pulse">Thinking</div>
-                            <span className="animate-bounce">.</span>
-                            <span className="animate-bounce delay-100">.</span>
-                            <span className="animate-bounce delay-200">.</span>
-                          </div>
-                        ) : (
-                          <div className="text-sm">
-                            <ReactMarkdown>{message.text}</ReactMarkdown>
-                          </div>
-                        )}
-                      </div>
+<div className="space-y-3 py-1">
+  {chatMessages.filter((msg) => !msg.hidden).map((message, index) => (
+    <div key={index} className={`flex flex-col gap-1 ${message.sender === "user" ? "items-end" : "items-start"}`}>
+      
+      {/* Chat Bubble */}
+      <div className={`relative p-3 rounded-lg max-w-[85%] text-sm shadow-md ${message.sender === "user" ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
+        {message.text === "Thinking..." ? (
+          <div className="flex items-center gap-1">
+            <div className="animate-pulse">Thinking</div>
+            <span className="animate-bounce">.</span>
+            <span className="animate-bounce delay-100">.</span>
+            <span className="animate-bounce delay-200">.</span>
+          </div>
+        ) : (
+          <div className="text-sm">
+            <ReactMarkdown>{message.text}</ReactMarkdown>
+          </div>
+        )}
+      </div>
 
-                      {/* Regenerate Button - No Overlap */}
-                      {message.id && regenerateMessageIds.includes(message.id) && (
-                        <button
-                          disabled={isProcessing}
-                          onClick={() => regenerateQuery(message.id, message.sender === "user" ? "Query" : "Result")}
-                          className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 
-    rounded-md ${isProcessing ? "" : "hover:bg-gray-200"} transition-colors duration-200 border  border-gray-200 shadow-sm"
-                          title="Regenerate response`}
-                        >
-                          <svg
-                            className="w-3 h-3"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                          >
-                            <path
-                              d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </button>
-                      )}
-                    </div>
-                  ))}
+      {/* Buttons Container */}
+      {message.id && (
+        <div className="flex gap-2">
+          {/* Regenerate Button */}
+          {(regenerateMessageIds.includes(message.id) || (chatwithjamieIds.includes(message.id) && message.sender === "ai")) && (
+            <button
+              disabled={isProcessing}
+              onClick={() => regenerateQuery(message.id, message.sender === "user" ? "Query" : "Result")}
+              className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded-md 
+                ${isProcessing ? "" : "hover:bg-gray-200"} transition-colors duration-200 border border-gray-200 shadow-sm`}
+              title="Regenerate response"
+            >
+              <svg
+                className="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path
+                  d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              Regenerate
+            </button>
+          )}
 
+          {/* Expand Answer Button */}
+          {message.sender === "ai" && (
+            <button
+              disabled={isProcessing}
+              onClick={() => regenerateQuery(message.id, "expandquestion")}
+              className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded-md 
+                ${isProcessing ? "" : "hover:bg-gray-200"} transition-colors duration-200 border border-gray-200 shadow-sm`}
+              title="Expand response"
+            >
+              <svg
+                className="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M4 12h16M12 4v16M4 12l4-4m-4 4l4 4m12-4l-4-4m4 4l-4 4" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Expand
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  ))}
+  <div ref={chatEndRef} />
+</div>
 
-
-
-                  <div ref={chatEndRef} />
-                </div>
               )}
             </ScrollArea>
           </div>
