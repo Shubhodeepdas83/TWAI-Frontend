@@ -350,7 +350,7 @@ export default function MiddleSection() {
 
 
   const regenerateMessageIds = chatMessages
-    .filter((msg) => msg.sender === "user" && ["help", "factcheck"].includes(msg.action))
+    .filter((msg) => msg.sender === "user" && ["help"].includes(msg.action))
     .map((msg) => msg.id);
 
   const chatwithjamieIds = chatMessages.filter((msg) => msg.sender === "user" && msg.action === "chat_Jamie_AI").map((msg) => msg.id);
@@ -442,6 +442,7 @@ export default function MiddleSection() {
         <div className="flex gap-2">
           {/* Regenerate Button */}
           {(regenerateMessageIds.includes(message.id) || (chatwithjamieIds.includes(message.id) && message.sender === "ai")) && (
+            <>
             <button
               disabled={isProcessing}
               onClick={() => regenerateQuery(message.id, message.sender === "user" ? "Query" : "Result")}
@@ -464,10 +465,6 @@ export default function MiddleSection() {
               </svg>
               Regenerate
             </button>
-          )}
-
-          {/* Expand Answer Button */}
-          {message.sender === "ai" && (
             <button
               disabled={isProcessing}
               onClick={() => regenerateQuery(message.id, "expandquestion")}
@@ -486,7 +483,9 @@ export default function MiddleSection() {
               </svg>
               Expand
             </button>
+            </>
           )}
+
         </div>
       )}
     </div>

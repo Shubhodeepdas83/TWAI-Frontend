@@ -59,10 +59,6 @@ export async function POST(req) {
       useRag:useRag
     };
 
-    if(Session.conversation.length>0 && requestType == "summary"){
-      payload.raw_conversation = [...Session.conversation,...conversation]
-    }
-
     const endpoints = {
       factcheck: "/process-ai-factcheck",
       summary: "/process-ai-summary",
