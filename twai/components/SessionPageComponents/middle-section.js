@@ -442,7 +442,6 @@ export default function MiddleSection() {
         <div className="flex gap-2">
           {/* Regenerate Button */}
           {(regenerateMessageIds.includes(message.id) || (chatwithjamieIds.includes(message.id) && message.sender === "ai")) && (
-            <>
             <button
               disabled={isProcessing}
               onClick={() => regenerateQuery(message.id, message.sender === "user" ? "Query" : "Result")}
@@ -465,6 +464,10 @@ export default function MiddleSection() {
               </svg>
               Regenerate
             </button>
+          )}
+
+          {/* Expand Answer Button */}
+          {(message.sender === "ai" && (regenerateMessageIds.includes(message.id) || chatwithjamieIds.includes(message.id))) && (
             <button
               disabled={isProcessing}
               onClick={() => regenerateQuery(message.id, "expandquestion")}
@@ -483,9 +486,7 @@ export default function MiddleSection() {
               </svg>
               Expand
             </button>
-            </>
           )}
-
         </div>
       )}
     </div>
