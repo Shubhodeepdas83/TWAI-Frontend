@@ -63,7 +63,9 @@ export default function CaptureScreenButton() {
   const stopScreenShare = () => {
     if (stream) {
       stream.getTracks().forEach((track) => track.stop())
-      setStream(null)
+      
+    }
+    setStream(null)
       setIsCapturing(false)
 
       if (videoRef.current) {
@@ -73,7 +75,6 @@ export default function CaptureScreenButton() {
       if (socket && socket.readyState === WebSocket.OPEN) {
         socket.close()
       }
-    }
   }
 
   const openWebSocket = () => {
