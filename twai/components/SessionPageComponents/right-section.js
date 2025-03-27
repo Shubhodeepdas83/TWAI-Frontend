@@ -57,120 +57,215 @@ export default function RightSection() {
   }
 
   const handleAIAnswer = async (requestType) => {
-    if (isProcessing) return
-    setGraphImage(null)
-    setIsProcessing(true)
-    setUsedCitations([])
-    setChatMessages([...chatMessages, { text: "Thinking...", sender: "ai" }])
+    if (isProcessing) return;
+    setGraphImage(null);
+    setIsProcessing(true);
+    setUsedCitations([]);
+    setChatMessages([...chatMessages, { text: "Thinking...", sender: "ai" }]);
 
     try {
-      // Step 1: Extract the query using OpenAI on the frontend
-      const tempconv = [...wholeConversation]
-      setWholeConversation((prev) => prev.map((msg) => ({ ...msg, saved: true,hidden:true })))
-      const id=uuidv4();
+        const tempconv = [...wholeConversation];
+        setWholeConversation((prev) =>
+            prev.map((msg) => ({ ...msg, saved: true, hidden: true }))
+        );
+        const id = uuidv4();
 
-      // Step 3: Send the extracted query to the backend for processing
-      const response = await fetch("/api/get_AI_Help", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          conversation: tempconv,
-          use_web: enableWebSearch,
-          requestType,
-          useHighlightedText,
-          copiedText,
-          sessionId,
-          useRag
-        }),
-      })
+        const response = await fetch("/api/get_AI_Help", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                conversation: tempconv,
+                use_web: enableWebSearch,
+                requestType,
+                useHighlightedText,
+                copiedText,
+                sessionId,
+                useRag,
+            }),
+        });
 
-      if (!response.ok) throw new Error(`Server responded with ${response.status}`)
+        if (!response.ok) throw new Error(`Server responded with ${response.status}`);
 
-      const reader = response.body?.getReader()
-      if (!reader) throw new Error("Streaming not supported")
+        const reader = response.body?.getReader();
+        if (!reader) throw new Error("Streaming not supported");
 
-      const decoder = new TextDecoder()
-      let buffer = ""
+        const decoder = new TextDecoder();
+        let buffer = "";
 
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
 
-        buffer += decoder.decode(value, { stream: true })
+            buffer += decoder.decode(value, { stream: true });
+            let lines = buffer.split("\n");
 
-        const lines = buffer.split("\n").filter((line) => line.trim() !== "")
+            // 🟣 Keep incomplete JSON line for next iteration
+            buffer = lines.pop() || "";
 
-        for (const line of lines) {
-          try {
-            const h = JSON.parse(line)
-            buffer = lines.slice(1).join() || ""
+            for (const line of lines) {
+                if (!line.trim()) continue;
+                try {
+                    const h = JSON.parse(line);
 
-            if (h.query) {
-              setChatMessages((prev) => [
-                ...prev.filter((msg) => msg.text !== "Thinking..."),
-                { text: h.query, sender: "user",id: id,time: new Date().toISOString(),action:requestType,latestConvoTime: tempconv.length > 0 ? tempconv[tempconv.length - 1].time : null, saved: false,hidden:false ,isWeb:enableWebSearch,isRag:useRag,useHighlightedText:useHighlightedText, copiedText:copiedText},
-                { text: "Thinking...", sender: "ai" },
-              ])
+                    if (h.query) {
+                        setChatMessages((prev) => {
+                            const filteredMessages = prev.filter((msg) => msg.text !== "Thinking...");
+                            const existingMessageIndex = filteredMessages.findIndex(
+                                (msg) => msg.id === id && msg.sender === "user"
+                            );
+
+                            if (existingMessageIndex !== -1) {
+                                const updatedMessages = [...filteredMessages];
+                                updatedMessages[existingMessageIndex] = {
+                                    ...updatedMessages[existingMessageIndex],
+                                    text: h.query,
+                                    saved: false,
+                                };
+                                return [...updatedMessages, { text: "Thinking...", sender: "ai" }];
+                            } else {
+                                return [
+                                    ...filteredMessages,
+                                    {
+                                        text: h.query,
+                                        sender: "user",
+                                        id: id,
+                                        time: new Date().toISOString(),
+                                        action: requestType,
+                                        latestConvoTime:
+                                            tempconv.length > 0
+                                                ? tempconv[tempconv.length - 1].time
+                                                : null,
+                                        saved: false,
+                                        hidden: false,
+                                        isWeb: enableWebSearch,
+                                        isRag: useRag,
+                                        useHighlightedText: useHighlightedText,
+                                        copiedText: copiedText,
+                                    },
+                                    { text: "Thinking...", sender: "ai" },
+                                ];
+                            }
+                        });
+                    }
+
+                    if (h.result) {
+                        setChatMessages((prev) => {
+                            const aiMessageIndex = prev.findIndex(
+                                (msg) => msg.id === id && msg.sender === "ai"
+                            );
+                            if (aiMessageIndex !== -1) {
+                                return prev
+                                    .filter((msg) => msg.text !== "Thinking...")
+                                    .map((msg) =>
+                                        msg.id === id && msg.sender === "ai"
+                                            ? { ...msg, text: h.result, saved: false }
+                                            : msg
+                                    );
+                            } else {
+                                return [
+                                    ...prev.filter((msg) => msg.text !== "Thinking..."),
+                                    {
+                                        text: h.result,
+                                        sender: "ai",
+                                        id: id,
+                                        time: new Date().toISOString(),
+                                        saved: false,
+                                        hidden: false,
+                                    },
+                                ];
+                            }
+                        });
+                    }
+
+                    if (h.used_citations) {
+                        console.log("Used Citations:", h.used_citations);
+                        setUsedCitations(
+                            Object.entries(h.used_citations).map(([key, value]) => ({
+                                id: key,
+                                ...value,
+                            }))
+                        );
+                    }
+
+                    if (h.graph) {
+                        setGraphImage(h.graph);
+                        setShowGraph(true);
+                    }
+                } catch (error) {
+                    console.warn("Streaming JSON parse error:", error);
+                }
             }
-
-            if (h.result) {
-              setChatMessages((prev) => [
-                ...prev.filter((msg) => msg.text !== "Thinking..."),
-                { text: h.result, sender: "ai",id:id,time: new Date().toISOString(),saved: false,hidden:false },
-              ])
-            }
-
-            if (h.used_citations) {
-              setUsedCitations(
-                Object.entries(h.used_citations).map(([key, value]) => ({
-                  id: key,
-                  ...value,
-                })),
-              )
-            }
-
-            if (h.graph) {
-              setGraphImage(h.graph)
-              setShowGraph(true)
-            }
-          } catch (error) {
-            console.warn("Streaming JSON parse error:", error)
-          }
         }
-      }
 
-      setCopiedText("")
-      setChatMessages((prev) => [...prev.filter((msg) => msg.text !== "Thinking...")])
+        // ✅ Handle any remaining data in buffer after stream ends
+        if (buffer.trim() !== "") {
+            try {
+                const h = JSON.parse(buffer);
+                if (h.result) {
+                    setChatMessages((prev) => [
+                        ...prev.filter((msg) => msg.text !== "Thinking..."),
+                        {
+                            text: h.result,
+                            sender: "ai",
+                            id: id,
+                            time: new Date().toISOString(),
+                            saved: false,
+                            hidden: false,
+                        },
+                    ]);
+                }
+                if (h.used_citations) {
+                    setUsedCitations(
+                        Object.entries(h.used_citations).map(([key, value]) => ({
+                            id: key,
+                            ...value,
+                        }))
+                    );
+                }
+                if (h.graph) {
+                    setGraphImage(h.graph);
+                    setShowGraph(true);
+                }
+            } catch (err) {
+                console.warn("Final JSON parse error:", err);
+            }
+        }
 
-      setSaveChatCounter((prev)=>prev+1);
+        setCopiedText("");
+        setChatMessages((prev) => [...prev.filter((msg) => msg.text !== "Thinking...")]);
 
-      const appending = await appendConversation({ sessionId, newMessages: tempconv.filter((msg)=>msg.saved==false).map((message) =>
-        ["user", "other", "time"].reduce((acc, key) => {
-          if (message.hasOwnProperty(key)) acc[key] = message[key];
-          return acc;
-        }, {})
-      ) })
+        setSaveChatCounter((prev) => prev + 1);
 
+        const appending = await appendConversation({
+            sessionId,
+            newMessages: tempconv
+                .filter((msg) => msg.saved === false)
+                .map((message) =>
+                    ["user", "other", "time"].reduce((acc, key) => {
+                        if (message.hasOwnProperty(key)) acc[key] = message[key];
+                        return acc;
+                    }, {})
+                ),
+        });
 
-
-      if (appending.success) {
-        setCapturePartialTranscript("")
-        setMicPartialTranscript("")
-        
-      } else {
-        console.log("Error appending conversation")
-        setWholeConversation((prev) => [tempconv,...prev])
-      }
+        if (appending.success) {
+            setCapturePartialTranscript("");
+            setMicPartialTranscript("");
+        } else {
+            console.log("Error appending conversation");
+            setWholeConversation((prev) => [tempconv, ...prev]);
+        }
     } catch (error) {
-      console.error("AI Request failed:", error)
-      setChatMessages((prev) => [
-        ...prev.filter((msg) => msg.text !== "Thinking..."),
-        { text: "An error occurred while processing your request.", sender: "ai",hidden:false },
-      ])
+        console.error("AI Request failed:", error);
+        setChatMessages((prev) => [
+            ...prev.filter((msg) => msg.text !== "Thinking..."),
+            { text: "An error occurred while processing your request.", sender: "ai", hidden: false },
+        ]);
     } finally {
-      setIsProcessing(false)
+        setIsProcessing(false);
     }
-  }
+};
+
 
   const handleImageClick = (imageData) => {
     setEnlargedImage(imageData)
