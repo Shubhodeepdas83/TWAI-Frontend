@@ -70,7 +70,7 @@ const BenefitsSection = () => {
             </div>
             <h3 className="text-2xl font-bold text-white mb-3">Boost Confidence</h3>
             <p className="text-gray-300 mb-4">
-              Instant access to data means you're always prepared, even for unexpected questions or discussion topics.
+              Instant access to data means you&apos;re always prepared, even for unexpected questions or discussion topics.
             </p>
             <ul className="space-y-3">
               <li className="flex items-start">

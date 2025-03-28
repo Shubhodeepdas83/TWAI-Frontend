@@ -56,7 +56,7 @@ const FAQSection = () => {
           </Accordion>
 
           <div className="mt-12 text-center">
-            <p className="text-gray-300 mb-4">Still have questions? We're here to help.</p>
+            <p className="text-gray-300 mb-4">Still have questions? We&apos;re here to help.</p>
             <a href="#" className="text-[#FF00D6] hover:text-[#D600B1] font-medium underline">
               Contact our support team
             </a>
