@@ -47,8 +47,8 @@ export async function POST(req) {
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 })
     }
-    if (file.size > 10 * 1024 * 1024) {
-      return NextResponse.json({ error: "File must be under 10MB" }, { status: 400 });
+    if (file.size > 20 * 1024 * 1024) {
+      return NextResponse.json({ error: "File must be under 20MB" }, { status: 400 });
     }
 
     // Check if the file is a PDF based on the MIME type
@@ -111,3 +111,12 @@ export async function POST(req) {
   }
 }
 
+
+
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: "20mb",
+    },
+  },
+};
