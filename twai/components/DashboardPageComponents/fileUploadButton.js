@@ -5,7 +5,8 @@ import { useState } from "react";
 export default function FileUploadButton() {
   const [file, setFile] = useState(null);
   const [addEmbedding, setAddEmbedding] = useState(false);
-  const [isLoading, setIsLoading] = useState(false); // Track loading state
+  const [isLoading, setIsLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -22,33 +23,73 @@ export default function FileUploadButton() {
       return;
     }
 
-    // Create form data to send the file and checkbox value
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("add_embedding", addEmbedding);
-
-    setIsLoading(true); // Start loading
+    setIsLoading(true);
+    setUploadProgress(0);
 
     try {
-      // Send the file and checkbox value to the server via the API route
-      const response = await fetch("/api/file_upload", {
+      // 1. Get a signed URL from the server
+      const signedUrlResponse = await fetch("/api/get_signed_url", {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          filename: file.name,
+          contentType: file.type,
+        }),
       });
 
-      const data = await response.json();
+      if (!signedUrlResponse.ok) {
+        throw new Error("Failed to get signed URL");
+      }
 
-      if (response.ok) {
+      const { signedUrl, fileUrl } = await signedUrlResponse.json();
+
+      // 2. Upload the file directly to S3 using the signed URL
+      const uploadResponse = await fetch(signedUrl, {
+        method: "PUT",
+        body: file,
+        headers: {
+          "Content-Type": file.type,
+        },
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error("Failed to upload file to S3");
+      }
+
+      // Update progress visually
+      setUploadProgress(50);
+
+      // 3. Save the document metadata to our database
+      const metadataResponse = await fetch("/api/file_upload", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fileUrl,
+          add_embedding: addEmbedding,
+          fileName: file.name,
+        }),
+      });
+
+      setUploadProgress(100);
+
+      const data = await metadataResponse.json();
+
+      if (metadataResponse.ok) {
         // Reload the page after successful upload
         window.location.reload();
       } else {
-        alert(data.error || "File upload failed.");
+        alert(data.error || "Failed to save document metadata.");
       }
     } catch (error) {
       alert("An error occurred while uploading the file.");
       console.error("Upload error:", error);
     } finally {
-      setIsLoading(false); // End loading
+      setIsLoading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -76,6 +117,19 @@ export default function FileUploadButton() {
           />
           <label className="text-sm text-gray-700">Add Embedding</label>
         </div>
+
+        {/* Upload progress bar */}
+        {isLoading && uploadProgress > 0 && (
+          <div className="w-full">
+            <div className="h-2 w-full bg-gray-200 rounded-full">
+              <div 
+                className="h-full bg-blue-600 rounded-full" 
+                style={{ width: `${uploadProgress}%` }}
+              ></div>
+            </div>
+            <p className="text-xs text-center mt-1">{uploadProgress}% uploaded</p>
+          </div>
+        )}
 
         {/* Submit Button */}
         <div className="flex justify-center">
