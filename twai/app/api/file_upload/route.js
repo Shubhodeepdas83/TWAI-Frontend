@@ -5,10 +5,6 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3"
 import { randomUUID } from "crypto"
 import { NextResponse } from "next/server"
 
-export const maxDuration = 60;
-
-const prisma = new PrismaClient()
-
 // AWS S3 Configuration
 const s3 = new S3Client({
   region: process.env.AWS_S3_BUCKET_REGION,
@@ -17,6 +13,12 @@ const s3 = new S3Client({
     secretAccessKey: process.env.AWS_S3_SECRET_KEY,
   },
 })
+
+const prisma = new PrismaClient()
+
+export const config = {
+  runtime: 'edge', // Ensure that you use the correct runtime
+};
 
 export async function POST(req) {
   try {
@@ -110,13 +112,3 @@ export async function POST(req) {
     return NextResponse.json({ error: "File upload failed" }, { status: 500 })
   }
 }
-
-
-
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: "20mb",
-    },
-  },
-};
