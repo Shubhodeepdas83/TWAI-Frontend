@@ -58,7 +58,7 @@ const TestimonialsSection = () => {
             </div>
 
             <blockquote className="text-xl md:text-2xl text-center text-gray-300 italic mb-8">
-              "{testimonials[activeIndex].quote}"
+              &quot;{testimonials[activeIndex].quote}&quot;
             </blockquote>
 
             <div className="flex flex-col items-center">

@@ -17,7 +17,7 @@ const HeroSection = () => {
     }, 2500) // Slightly slower transition for better readability
 
     return () => clearInterval(interval)
-  }, [])
+  }, [suffixes.length]) // Added missing dependency
 
   return (
     <section className="pt-32 pb-20 md:py-40 px-4 bg-[#0f1217] text-white relative overflow-hidden">
@@ -32,7 +32,7 @@ const HeroSection = () => {
           <div className="bg-jarwiz-500 rounded-full h-6 w-6 flex items-center justify-center animate-pulse">
             <span className="text-sm">🚀</span>
           </div>
-          <span className="text-sm font-medium text-gray-200">We're launching on Product Hunt soon!</span>
+          <span className="text-sm font-medium text-gray-200">We&apos;re launching on Product Hunt soon!</span>
           <div className="bg-white/10 h-6 w-6 rounded-full flex items-center justify-center ml-2 border border-white/20">
             <span className="text-xs font-bold">PH</span>
           </div>

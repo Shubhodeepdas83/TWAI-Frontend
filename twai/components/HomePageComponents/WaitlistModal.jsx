@@ -61,7 +61,7 @@ const WaitlistModal = ({ isOpen, onClose }) => {
               </svg>
             </div>
             <h3 className="text-xl font-medium text-white mb-2">Thank You!</h3>
-            <p className="text-gray-300 mb-6">You've been added to our waitlist. We'll notify you when we launch.</p>
+            <p className="text-gray-400 mb-6">We&apos;ll let you know when we&apos;re ready to launch!</p>
             <Button onClick={onClose} className="bg-[#242936] hover:bg-[#2f3646] text-white">
               Close
             </Button>
@@ -69,8 +69,8 @@ const WaitlistModal = ({ isOpen, onClose }) => {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <p className="text-gray-300 mb-4">
-                Be the first to know when Jarwiz AI launches. We'll send you an invitation as soon as we're ready.
+              <p className="text-gray-400 mb-4">
+                We&apos;re excited to have you on our waitlist! We&apos;ll be in touch soon.
               </p>
               <div className="space-y-2">
                 <label htmlFor="email" className="block text-sm font-medium text-gray-300">
