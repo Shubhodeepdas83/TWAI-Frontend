@@ -216,7 +216,6 @@ export async function getSummary(sessionId) {
   if (!s) {
     return { failure: "Summary not found or user not linked to the summary" }
   }
-  console.log(s)
 
   if (!s.summary) {
     const response = await fetch(`${process.env.BACKEND_URL}/process-ai-summary`, {
@@ -225,32 +224,55 @@ export async function getSummary(sessionId) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ raw_conversation: s.conversation }),
-    })
-
+    });
+    
     if (!response.ok) {
-      const data = await response.json()
-      console.log(data)
+      const text = await response.text(); // Read raw text (since streaming JSON might be malformed)
+      console.error("Error Response:", text);
       return {
         failure: "Sorry, I couldn't process the summary of this meeting at this time.",
-      }
-    } else {
-      const data = await response.json()
-
-      const _ = await prisma.session.update({
-        where: { id: sessionId },
-        data: { summary: data.result },
-      })
-
-      return {
-        summary: data.result,
-        createdAt: s.createdAt,
+      };
+    }
+    
+    // Process the streaming response manually
+    const reader = response.body?.getReader();
+    if (!reader) {
+      return { failure: "Error reading summary stream." };
+    }
+    
+    let fullResponse = "";
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      
+      // Convert chunk to text
+      const chunkText = new TextDecoder().decode(value);
+      
+      try {
+        const chunkData = JSON.parse(chunkText);
+        if (chunkData.result) {
+          fullResponse = chunkData.result; // Store the cumulative response
+        }
+      } catch (err) {
+        console.error("Error parsing stream chunk:", chunkText);
       }
     }
-  } else {
+    
+    // Store summary in Prisma
+    await prisma.session.update({
+      where: { id: sessionId },
+      data: { summary: fullResponse },
+    });
+    
+    return {
+      summary: fullResponse,
+      createdAt: s.createdAt,
+    };
+  }else{
     return {
       summary: s.summary,
       createdAt: s.createdAt,
-    }
+    };
   }
 }
 

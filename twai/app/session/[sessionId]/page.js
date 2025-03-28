@@ -3,6 +3,7 @@
 import LeftSection from "../../../components/SessionPageComponents/left-section"
 import MiddleSection from "../../../components/SessionPageComponents/middle-section"
 import RightSection from "../../../components/SessionPageComponents/right-section"
+import WelcomeModal from "../../../components/SessionPageComponents/WelcomeModal"
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
@@ -13,7 +14,7 @@ export default function Home() {
   const { sessionId } = useParams()
   const { status } = useSession()
 
-  const { wholeConversation, setCopiedText,setWholeConversation,setChatMessages } = useAppContext()
+  const { wholeConversation, setCopiedText, setWholeConversation, setChatMessages } = useAppContext()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(true)
 
@@ -28,11 +29,11 @@ export default function Home() {
       if (data.failure) {
         router.push("/")
       } else {
-        if(data.chat){
-          setChatMessages(data.chat.map((c) => ({ ...c, hidden: true,saved:true })))
+        if (data.chat) {
+          setChatMessages(data.chat.map((c) => ({ ...c, hidden: true, saved: true })))
         }
-        if(data.conversation){
-          setWholeConversation(data.conversation.map((c)=> ({...c,hidden:true,saved:true})))
+        if (data.conversation) {
+          setWholeConversation(data.conversation.map((c) => ({ ...c, hidden: true, saved: true })))
         }
 
         setIsLoading(false)
@@ -99,6 +100,9 @@ export default function Home() {
           <RightSection />
         </div>
       </main>
+
+      {/* Welcome Modal */}
+      <WelcomeModal />
     </div>
   )
 }
