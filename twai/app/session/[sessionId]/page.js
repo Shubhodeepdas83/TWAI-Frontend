@@ -3,7 +3,7 @@
 import LeftSection from "../../../components/SessionPageComponents/left-section"
 import MiddleSection from "../../../components/SessionPageComponents/middle-section"
 import RightSection from "../../../components/SessionPageComponents/right-section"
-import WelcomeModal from "../../../components/SessionPageComponents/WelcomeModal"
+import WelcomeModal from "@/components/SessionPageComponents/welcomeModal";
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
