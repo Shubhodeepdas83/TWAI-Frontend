@@ -16,11 +16,10 @@ const s3 = new S3Client({
 
 const prisma = new PrismaClient()
 
-export const config = {
-  runtime: 'edge', // Ensure that you use the correct runtime
-};
+// Replace deprecated config export with runtime for edge function
+export const runtime = "edge";
 
-export async function POST(req) {
+export async function POST(req: Request) {
   try {
     // Step 1: Validate User Authentication
     const session = await getServerSession(authOptions)
