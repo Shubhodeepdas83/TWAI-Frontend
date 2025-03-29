@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Bot, X, Send, CloudUpload, Search, BarChart2, Highlighter, ScrollText, Database } from "lucide-react"
 import { useAppContext } from "../../context/AppContext"
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useParams } from "next/navigation"
 import { useState, useRef, useEffect } from "react"
@@ -351,190 +351,190 @@ export default function MiddleSection() {
     }
   }
 
-  const handleSendMessage = async () => {
-    if (isProcessing) return
+  // const handleSendMessage = async () => {
+  //   if (isProcessing) return
 
-    if (userInput.trim()) {
-      const id = uuidv4()
-      setCopiedText("")
-      setUseHighlightedText(false)
+  //   if (userInput.trim()) {
+  //     const id = uuidv4()
+  //     setCopiedText("")
+  //     setUseHighlightedText(false)
 
-      setChatMessages((prev) => [
-        ...prev,
-        {
-          text: userInput,
-          sender: "user",
-          id: id,
-          time: new Date().toISOString(),
-          action: "chat_Jamie_AI",
-          latestConvoTime: wholeConversation.length > 0 ? wholeConversation[wholeConversation.length - 1].time : null,
-          saved: false,
-          hidden: false,
-          isWeb: enableWebSearch,
-          isRag: useRag,
-          useHighlightedText: false,
-          copiedText: "",
-        },
-        { text: "Thinking...", sender: "ai" },
-      ])
+  //     setChatMessages((prev) => [
+  //       ...prev,
+  //       {
+  //         text: userInput,
+  //         sender: "user",
+  //         id: id,
+  //         time: new Date().toISOString(),
+  //         action: "chat_Jamie_AI",
+  //         latestConvoTime: wholeConversation.length > 0 ? wholeConversation[wholeConversation.length - 1].time : null,
+  //         saved: false,
+  //         hidden: false,
+  //         isWeb: enableWebSearch,
+  //         isRag: useRag,
+  //         useHighlightedText: false,
+  //         copiedText: "",
+  //       },
+  //       { text: "Thinking...", sender: "ai" },
+  //     ])
 
-      setUserInput("")
-      setUsedCitations([])
-      setGraphImage(null)
-      setIsProcessing(true)
+  //     setUserInput("")
+  //     setUsedCitations([])
+  //     setGraphImage(null)
+  //     setIsProcessing(true)
 
-      const formData = new FormData()
-      formData.append("user_input", userInput)
-      formData.append("use_web", enableWebSearch)
-      formData.append("use_graph", showGraph)
-      formData.append("sessionId", sessionId)
-      formData.append("useRag", useRag)
+  //     const formData = new FormData()
+  //     formData.append("user_input", userInput)
+  //     formData.append("use_web", enableWebSearch)
+  //     formData.append("use_graph", showGraph)
+  //     formData.append("sessionId", sessionId)
+  //     formData.append("useRag", useRag)
 
-      if (image) {
-        formData.append("uploaded_file", image)
-      }
+  //     if (image) {
+  //       formData.append("uploaded_file", image)
+  //     }
 
-      if (wholeConversation) {
-        formData.append("raw_Conversation", JSON.stringify(wholeConversation))
-      }
+  //     if (wholeConversation) {
+  //       formData.append("raw_Conversation", JSON.stringify(wholeConversation))
+  //     }
 
-      try {
-        const response = await fetch("/api/chat_Jamie_AI", {
-          method: "POST",
-          body: formData,
-        })
+  //     try {
+  //       const response = await fetch("/api/chat_Jamie_AI", {
+  //         method: "POST",
+  //         body: formData,
+  //       })
 
-        if (!response || !response.ok) throw new Error(`Server responded with ${response.status}`)
+  //       if (!response || !response.ok) throw new Error(`Server responded with ${response.status}`)
 
-        const reader = response.body?.getReader()
-        if (!reader) throw new Error("Streaming not supported")
+  //       const reader = response.body?.getReader()
+  //       if (!reader) throw new Error("Streaming not supported")
 
-        const decoder = new TextDecoder()
-        let buffer = ""
+  //       const decoder = new TextDecoder()
+  //       let buffer = ""
 
-        while (true) {
-          const { done, value } = await reader.read()
-          if (done) break
+  //       while (true) {
+  //         const { done, value } = await reader.read()
+  //         if (done) break
 
-          buffer += decoder.decode(value, { stream: true })
+  //         buffer += decoder.decode(value, { stream: true })
 
-          // Split on newlines and keep potentially incomplete last line
-          const lines = buffer.split("\n")
+  //         // Split on newlines and keep potentially incomplete last line
+  //         const lines = buffer.split("\n")
 
-          // Save the last line which might be incomplete for next iteration
-          buffer = lines.pop() || ""
+  //         // Save the last line which might be incomplete for next iteration
+  //         buffer = lines.pop() || ""
 
-          for (const line of lines) {
-            if (!line.trim()) continue
-            try {
-              const h = JSON.parse(line)
+  //         for (const line of lines) {
+  //           if (!line.trim()) continue
+  //           try {
+  //             const h = JSON.parse(line)
 
-              if (h.result) {
-                setChatMessages((prev) => {
-                  const filteredMessages = prev.filter((msg) => msg.text !== "Thinking...")
-                  const existingMessageIndex = filteredMessages.findIndex((msg) => msg.id === id && msg.sender === "ai")
+  //             if (h.result) {
+  //               setChatMessages((prev) => {
+  //                 const filteredMessages = prev.filter((msg) => msg.text !== "Thinking...")
+  //                 const existingMessageIndex = filteredMessages.findIndex((msg) => msg.id === id && msg.sender === "ai")
 
-                  if (existingMessageIndex !== -1) {
-                    return filteredMessages.map((msg) =>
-                      msg.id === id && msg.sender === "ai" ? { ...msg, text: h.result, saved: false } : msg,
-                    )
-                  } else {
-                    return [
-                      ...filteredMessages,
-                      {
-                        text: h.result,
-                        sender: "ai",
-                        id: id,
-                        time: new Date().toISOString(),
-                        saved: false,
-                        hidden: false,
-                      },
-                    ]
-                  }
-                })
-              }
+  //                 if (existingMessageIndex !== -1) {
+  //                   return filteredMessages.map((msg) =>
+  //                     msg.id === id && msg.sender === "ai" ? { ...msg, text: h.result, saved: false } : msg,
+  //                   )
+  //                 } else {
+  //                   return [
+  //                     ...filteredMessages,
+  //                     {
+  //                       text: h.result,
+  //                       sender: "ai",
+  //                       id: id,
+  //                       time: new Date().toISOString(),
+  //                       saved: false,
+  //                       hidden: false,
+  //                     },
+  //                   ]
+  //                 }
+  //               })
+  //             }
 
-              if (h.used_citations) {
-                setUsedCitations(
-                  Object.entries(h.used_citations).map(([key, value]) => ({
-                    id: key,
-                    ...value,
-                  })),
-                )
-              }
+  //             if (h.used_citations) {
+  //               setUsedCitations(
+  //                 Object.entries(h.used_citations).map(([key, value]) => ({
+  //                   id: key,
+  //                   ...value,
+  //                 })),
+  //               )
+  //             }
 
-              if (h.graph) {
-                setGraphImage(h.graph)
-                setShowGraph(true)
-              }
-            } catch (error) {
-              console.warn("JSON parse error for line:", line, error)
-            }
-          }
-        }
+  //             if (h.graph) {
+  //               setGraphImage(h.graph)
+  //               setShowGraph(true)
+  //             }
+  //           } catch (error) {
+  //             console.warn("JSON parse error for line:", line, error)
+  //           }
+  //         }
+  //       }
 
-        // Process any remaining data in the buffer after the stream completes
-        if (buffer.trim()) {
-          try {
-            const h = JSON.parse(buffer)
+  //       // Process any remaining data in the buffer after the stream completes
+  //       if (buffer.trim()) {
+  //         try {
+  //           const h = JSON.parse(buffer)
 
-            if (h.result) {
-              setChatMessages((prev) => {
-                const filteredMessages = prev.filter((msg) => msg.text !== "Thinking...")
-                const existingMessageIndex = filteredMessages.findIndex((msg) => msg.id === id && msg.sender === "ai")
+  //           if (h.result) {
+  //             setChatMessages((prev) => {
+  //               const filteredMessages = prev.filter((msg) => msg.text !== "Thinking...")
+  //               const existingMessageIndex = filteredMessages.findIndex((msg) => msg.id === id && msg.sender === "ai")
 
-                if (existingMessageIndex !== -1) {
-                  return filteredMessages.map((msg) =>
-                    msg.id === id && msg.sender === "ai" ? { ...msg, text: h.result, saved: false } : msg,
-                  )
-                } else {
-                  return [
-                    ...filteredMessages,
-                    {
-                      text: h.result,
-                      sender: "ai",
-                      id: id,
-                      time: new Date().toISOString(),
-                      saved: false,
-                      hidden: false,
-                    },
-                  ]
-                }
-              })
-            }
+  //               if (existingMessageIndex !== -1) {
+  //                 return filteredMessages.map((msg) =>
+  //                   msg.id === id && msg.sender === "ai" ? { ...msg, text: h.result, saved: false } : msg,
+  //                 )
+  //               } else {
+  //                 return [
+  //                   ...filteredMessages,
+  //                   {
+  //                     text: h.result,
+  //                     sender: "ai",
+  //                     id: id,
+  //                     time: new Date().toISOString(),
+  //                     saved: false,
+  //                     hidden: false,
+  //                   },
+  //                 ]
+  //               }
+  //             })
+  //           }
 
-            if (h.used_citations) {
-              setUsedCitations(
-                Object.entries(h.used_citations).map(([key, value]) => ({
-                  id: key,
-                  ...value,
-                })),
-              )
-            }
+  //           if (h.used_citations) {
+  //             setUsedCitations(
+  //               Object.entries(h.used_citations).map(([key, value]) => ({
+  //                 id: key,
+  //                 ...value,
+  //               })),
+  //             )
+  //           }
 
-            if (h.graph) {
-              setGraphImage(h.graph)
-              setShowGraph(true)
-            }
-          } catch (error) {
-            console.warn("Final buffer parse error:", error)
-          }
-        }
+  //           if (h.graph) {
+  //             setGraphImage(h.graph)
+  //             setShowGraph(true)
+  //           }
+  //         } catch (error) {
+  //           console.warn("Final buffer parse error:", error)
+  //         }
+  //       }
 
-        setChatMessages((prev) => [...prev.filter((msg) => msg.text !== "Thinking...")])
+  //       setChatMessages((prev) => [...prev.filter((msg) => msg.text !== "Thinking...")])
 
-        setSaveChatCounter((prev) => prev + 1)
-      } catch (error) {
-        console.error("Error sending message:", error)
-        setChatMessages((prev) => [
-          ...prev.filter((msg) => msg.text !== "Thinking..."),
-          { text: "An error occurred while processing your request.", sender: "ai", hidden: false },
-        ])
-      } finally {
-        setIsProcessing(false)
-      }
-    }
-  }
+  //       setSaveChatCounter((prev) => prev + 1)
+  //     } catch (error) {
+  //       console.error("Error sending message:", error)
+  //       setChatMessages((prev) => [
+  //         ...prev.filter((msg) => msg.text !== "Thinking..."),
+  //         { text: "An error occurred while processing your request.", sender: "ai", hidden: false },
+  //       ])
+  //     } finally {
+  //       setIsProcessing(false)
+  //     }
+  //   }
+  // }
 
   const handleClear = () => {
     setChatMessages([])
@@ -755,116 +755,6 @@ export default function MiddleSection() {
             </ScrollArea>
           </div>
         </CardContent>
-        {image && (
-          <div className="mb-2 p-1 bg-muted rounded-lg flex items-center w-full">
-            <img
-              src={URL.createObjectURL(image) || "/placeholder.svg"}
-              alt="Uploaded Preview"
-              className="h-10 w-10 object-cover rounded-md"
-            />
-            <span className="text-xs ml-2 flex-1 truncate">{image.name}</span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleRemoveImage}
-              className="text-destructive hover:text-destructive/90 h-7 w-7 p-0"
-            >
-              <X className="h-3 w-3" />
-            </Button>
-          </div>
-        )}
-        <CardFooter className="p-3 pt-1 border-t">
-          <div className="flex flex-col gap-1 w-full">
-            <div className="flex gap-1 w-full">
-              <Textarea
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                placeholder="Type a message..."
-                className="resize-none min-h-[60px] flex-1 text-sm"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault()
-                    handleSendMessage()
-                  }
-                }}
-              />
-              <div className="flex flex-col gap-1">
-                <Button disabled={isProcessing || !userInput.trim()} onClick={handleSendMessage} className="flex-1">
-                  <Send className="h-4 w-4" />
-                </Button>
-                {/* <Button variant="outline" size="icon" className="flex-1" onClick={triggerFileInput}>
-                  <CloudUpload className="h-4 w-4" />
-                </Button>
-                <input
-                  type="file"
-                  id="imageUpload"
-                  accept="image/png, image/jpeg, image/jpg"
-                  onChange={handleImageUpload}
-                  style={{ display: "none" }}
-                /> */}
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between text-xs text-muted-foreground mt-1 flex-wrap">
-              <div className="flex flex-nowrap overflow-x-auto space-x-2 pb-1 max-w-full">
-                <label className="flex items-center gap-1 cursor-pointer whitespace-nowrap">
-                  <Checkbox
-                    checked={enableWebSearch}
-                    onCheckedChange={() => setEnableWebSearch(!enableWebSearch)}
-                    id="web-search"
-                    className={`h-3 w-3 ${enableWebSearch ? "bg-primary text-primary-foreground" : ""}`}
-                  />
-                  <div className="flex items-center gap-1">
-                    <Search className={`h-3 w-3 ${enableWebSearch ? "text-primary" : "text-muted-foreground"}`} />
-                    <span className={`text-xs ${enableWebSearch ? "text-primary font-medium" : ""}`}>Web Search</span>
-                  </div>
-                </label>
-
-                <label className="flex items-center gap-1 cursor-pointer whitespace-nowrap">
-                  <Checkbox
-                    checked={showGraph}
-                    onCheckedChange={() => setShowGraph(!showGraph)}
-                    id="show-graph"
-                    className={`h-3 w-3 ${showGraph ? "bg-primary text-primary-foreground" : ""}`}
-                  />
-                  <div className="flex items-center gap-1">
-                    <BarChart2 className={`h-3 w-3 ${showGraph ? "text-primary" : "text-muted-foreground"}`} />
-                    <span className={`text-xs ${showGraph ? "text-primary font-medium" : ""}`}>Graph</span>
-                  </div>
-                </label>
-                {/* <label className="flex items-center gap-1 cursor-pointer whitespace-nowrap">
-                  <Checkbox
-                    checked={useHighlightedText}
-                    onCheckedChange={() => setUseHighlightedText(!useHighlightedText)}
-                    id="use-highlighted-text-toggle"
-                    className={`h-3 w-3 ${useHighlightedText ? "bg-primary text-primary-foreground" : ""}`}
-                  />
-                  <div className="flex items-center gap-1">
-                    <Highlighter
-                      className={`h-3 w-3 ${useHighlightedText ? "text-primary" : "text-muted-foreground"}`}
-                    />
-                    <span className={`text-xs ${useHighlightedText ? "text-primary font-medium" : ""}`}>
-                      Highlighted
-                    </span>
-                  </div>
-                </label> */}
-                <label className="flex items-center gap-1 cursor-pointer whitespace-nowrap">
-                  <Checkbox
-                    checked={useRag}
-                    onCheckedChange={() => setUseRag(!useRag)}
-                    id="use-rag-toggle"
-                    className={`h-3 w-3 ${useRag ? "bg-primary text-primary-foreground" : ""}`}
-                  />
-                  <div className="flex items-center gap-1">
-                    <Database className={`h-3 w-3 ${useRag ? "text-primary" : "text-muted-foreground"}`} />
-                    <span className={`text-xs ${useRag ? "text-primary font-medium" : ""}`}>Use RAG</span>
-                  </div>
-                </label>
-              </div>
-              <span className="text-xs">Shift+Enter for new line</span>
-            </div>
-          </div>
-        </CardFooter>
       </Card>
     </div>
   )

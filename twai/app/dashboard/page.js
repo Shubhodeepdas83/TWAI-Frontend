@@ -167,36 +167,32 @@ export default function DashboardPage() {
         <nav className="mb-6 space-y-1">
           <button
             onClick={() => setActiveTab("sessions")}
-            className={`flex w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-              activeTab === "sessions" ? "bg-blue-100 text-blue-700" : "text-gray-700 hover:bg-gray-100"
-            }`}
+            className={`flex w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors ${activeTab === "sessions" ? "bg-blue-100 text-blue-700" : "text-gray-700 hover:bg-gray-100"
+              }`}
           >
             <Calendar className="mr-2 h-5 w-5" />
             Sessions
           </button>
           <button
             onClick={() => setActiveTab("documents")}
-            className={`flex w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-              activeTab === "documents" ? "bg-blue-100 text-blue-700" : "text-gray-700 hover:bg-gray-100"
-            }`}
+            className={`flex w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors ${activeTab === "documents" ? "bg-blue-100 text-blue-700" : "text-gray-700 hover:bg-gray-100"
+              }`}
           >
             <FileText className="mr-2 h-5 w-5" />
             Documents
           </button>
           <button
             onClick={() => setActiveTab("templates")}
-            className={`flex w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-              activeTab === "templates" ? "bg-blue-100 text-blue-700" : "text-gray-700 hover:bg-gray-100"
-            }`}
+            className={`flex w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors ${activeTab === "templates" ? "bg-blue-100 text-blue-700" : "text-gray-700 hover:bg-gray-100"
+              }`}
           >
             <Folder className="mr-2 h-5 w-5" />
             Meeting Templates
           </button>
           <button
             onClick={() => setActiveTab("agentStore")}
-            className={`flex w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-              activeTab === "agentStore" ? "bg-blue-100 text-blue-700" : "text-gray-700 hover:bg-gray-100"
-            }`}
+            className={`flex w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors ${activeTab === "agentStore" ? "bg-blue-100 text-blue-700" : "text-gray-700 hover:bg-gray-100"
+              }`}
           >
             <Store className="mr-2 h-5 w-5" />
             Agent Store
@@ -320,59 +316,61 @@ export default function DashboardPage() {
               </div>
 
               {user?.documents?.length > 0 ? (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <div className="w-full border rounded-lg overflow-hidden">
+                  <div className="grid grid-cols-[1.5fr_2fr_1fr_1fr_2fr] gap-4 p-2 text-gray-700 font-medium bg-gray-100">
+                    <span>Title</span>
+                    <span>Description</span>
+                    <span>Date</span>
+                    <span>Status</span>
+                    <span>Actions</span>
+                  </div>
+
                   {user.documents.map((doc) => (
                     <div
                       key={doc.id}
-                      className="rounded-lg border bg-white p-5 shadow-sm transition-shadow hover:shadow-md h-[220px] flex flex-col"
+                      className="grid grid-cols-[1.5fr_2fr_1fr_1fr_2fr] gap-4 p-2 border-b items-center"
                     >
-                      <div className="mb-2 flex items-center justify-between">
-                        <h3 className="font-medium text-blue-600 truncate max-w-[200px]">
-                          {doc.title || "Untitled Document"}
-                        </h3>
-                        <div className="flex items-center gap-2 ml-2">
-                          {doc.isEmbedded ? (
-                            <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full whitespace-nowrap">
-                              Embedded
-                            </span>
-                          ) : (
-                            <span className="text-xs px-2 py-1 bg-gray-100 text-gray-800 rounded-full whitespace-nowrap">
-                              Not Embedded
-                            </span>
-                          )}
-                        </div>
+                      {/* Document Title */}
+                      <span className="truncate text-blue-600">{doc.title || "Untitled Document"}</span>
+
+                      {/* Document Description (truncated) */}
+                      <span className="truncate text-gray-600">{doc.description || "No description"}</span>
+
+                      {/* Upload Date */}
+                      <span className="text-xs text-gray-500">{new Date(doc.uploadedAt).toLocaleDateString()}</span>
+
+                      {/* Status Badge */}
+                      <div className="text-left">
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full inline-block ${
+                            doc.isEmbedded ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
+                          {doc.isEmbedded ? "Embedded" : "Not Embedded"}
+                        </span>
                       </div>
-                      <div className="flex items-center text-xs text-gray-500 mb-2">
-                        <span>{new Date(doc.uploadedAt).toLocaleDateString()}</span>
-                      </div>
-                      {doc.description && (
-                        <p className="mb-3 text-sm text-gray-600 line-clamp-2 flex-grow">{doc.description}</p>
-                      )}
-                      <p className="mb-3 text-xs text-gray-500 truncate">{doc.fileUrl}</p>
-                      <div className="mt-auto flex justify-between">
-                        <div className="flex gap-2">
-                          <a
-                            href={doc.fileUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="rounded-md bg-blue-100 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-200 transition-colors"
-                          >
-                            View
-                          </a>
-                          <button
-                            onClick={() => handleEditDocument(doc)}
-                            className="rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200 transition-colors"
-                          >
-                            <Edit className="mr-1 inline-block h-3 w-3" />
-                            Edit
-                          </button>
-                        </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => window.open(doc.fileUrl, "_blank")}
+                          className="rounded-md bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 hover:bg-blue-200 transition-colors"
+                        >
+                          View
+                        </button>
+                        <button
+                          onClick={() => handleEditDocument(doc)}
+                          className="rounded-md bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-200 transition-colors"
+                        >
+                          <Edit className="mr-1 inline-block h-3 w-3" />
+                          Edit
+                        </button>
                         <SpinnerButton
                           onClick={() => handleDeleteDocument(doc.id)}
                           disabled={isDeleting && deletingId === doc.id}
                           loading={isDeleting && deletingId === doc.id}
                           loadingText="Deleting..."
-                          className="rounded-md bg-red-100 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-200 disabled:bg-gray-100 disabled:text-gray-400 transition-colors"
+                          className="rounded-md bg-red-100 px-3 py-1 text-xs font-medium text-red-700 hover:bg-red-200 disabled:bg-gray-100 disabled:text-gray-400 transition-colors"
                           size="sm"
                           variant="outline"
                         >

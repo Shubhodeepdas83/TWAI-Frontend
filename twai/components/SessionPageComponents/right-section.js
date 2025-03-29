@@ -18,14 +18,18 @@ import {
   Search,
   Book,
   List,
+  Send,
+  Database,
 } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useParams, useRouter } from "next/navigation"
 import { appendConversation } from "../../app/session/[sessionId]/actions"
 import { unstable_noStore as noStore } from "next/cache"
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { v4 as uuidv4 } from "uuid"
+import { Textarea } from "@/components/ui/textarea"
+import { Checkbox } from "@/components/ui/checkbox"
 
 export default function RightSection() {
   noStore()
@@ -50,7 +54,12 @@ export default function RightSection() {
     useRag,
     setSaveChatCounter,
     setUseHighlightedText,
-    useHighlightedText
+    useHighlightedText,
+    setEnableWebSearch,
+    videoRef,
+    stream,
+    setUseRag,
+    saveChatCounter,
   } = useAppContext()
 
   const { sessionId } = useParams()
@@ -59,6 +68,7 @@ export default function RightSection() {
   const [enlargedImage, setEnlargedImage] = useState(null)
   const [loadingExit, setLoadingExit] = useState(false)
   const [zoomLevel, setZoomLevel] = useState(1)
+  const [userInput, setUserInput] = useState("")
 
   const toggleGraphVisibility = () => {
     setIsGraphVisible(!isGraphVisible)
@@ -103,8 +113,8 @@ export default function RightSection() {
           conversation: tempconv,
           use_web: enableWebSearch,
           requestType,
-          useHighlightedText:USEHIGHLIGHTEDTEXT,
-          copiedText:COPIEDTEXT,
+          useHighlightedText: USEHIGHLIGHTEDTEXT,
+          copiedText: COPIEDTEXT,
           sessionId,
           useRag,
         }),
@@ -248,7 +258,6 @@ export default function RightSection() {
         }
       }
 
-      
       setChatMessages((prev) => [...prev.filter((msg) => msg.text !== "Thinking...")])
 
       setSaveChatCounter((prev) => prev + 1)
@@ -287,6 +296,129 @@ export default function RightSection() {
     setEnlargedImage(imageData)
   }
 
+  const handleSendMessage = async () => {
+    if (isProcessing || !userInput.trim()) return
+
+    const id = uuidv4()
+    setIsProcessing(true)
+    setCopiedText("")
+    setUseHighlightedText(false)
+
+    setChatMessages((prev) => [
+      ...prev,
+      {
+        text: userInput,
+        sender: "user",
+        id: id,
+        time: new Date().toISOString(),
+        action: "chat_Jamie_AI",
+        latestConvoTime: wholeConversation.length > 0 ? wholeConversation[wholeConversation.length - 1].time : null,
+        saved: false,
+        hidden: false,
+        isWeb: enableWebSearch,
+        isRag: useRag,
+        useHighlightedText: false,
+        copiedText: "",
+      },
+      { text: "Thinking...", sender: "ai" },
+    ])
+
+    setUserInput("")
+    setUsedCitations([])
+    setGraphImage(null)
+
+    const formData = new FormData()
+    formData.append("user_input", userInput)
+    formData.append("use_web", enableWebSearch)
+    formData.append("use_graph", showGraph)
+    formData.append("sessionId", sessionId)
+    formData.append("useRag", useRag)
+
+    try {
+      const response = await fetch("/api/chat_Jamie_AI", {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!response.ok) throw new Error(`Server responded with ${response.status}`)
+
+      const reader = response.body?.getReader()
+      if (!reader) throw new Error("Streaming not supported")
+
+      const decoder = new TextDecoder()
+      let buffer = ""
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        buffer += decoder.decode(value, { stream: true })
+
+        const lines = buffer.split("\n")
+        buffer = lines.pop() || ""
+
+        for (const line of lines) {
+          if (!line.trim()) continue
+          try {
+            const h = JSON.parse(line)
+
+            if (h.result) {
+              setChatMessages((prev) => {
+                const filteredMessages = prev.filter((msg) => msg.text !== "Thinking...")
+                const existingMessageIndex = filteredMessages.findIndex((msg) => msg.id === id && msg.sender === "ai")
+
+                if (existingMessageIndex !== -1) {
+                  return filteredMessages.map((msg) =>
+                    msg.id === id && msg.sender === "ai" ? { ...msg, text: h.result, saved: false } : msg,
+                  )
+                } else {
+                  return [
+                    ...filteredMessages,
+                    {
+                      text: h.result,
+                      sender: "ai",
+                      id: id,
+                      time: new Date().toISOString(),
+                      saved: false,
+                      hidden: false,
+                    },
+                  ]
+                }
+              })
+            }
+
+            if (h.used_citations) {
+              setUsedCitations(
+                Object.entries(h.used_citations).map(([key, value]) => ({
+                  id: key,
+                  ...value,
+                })),
+              )
+            }
+
+            if (h.graph) {
+              setGraphImage(h.graph)
+              setShowGraph(true)
+            }
+          } catch (error) {
+            console.warn("JSON parse error for line:", line, error)
+          }
+        }
+      }
+
+      setChatMessages((prev) => [...prev.filter((msg) => msg.text !== "Thinking...")])
+      setSaveChatCounter((prev) => prev + 1)
+    } catch (error) {
+      console.error("Error sending message:", error)
+      setChatMessages((prev) => [
+        ...prev.filter((msg) => msg.text !== "Thinking..."),
+        { text: "An error occurred while processing your request.", sender: "ai", hidden: false },
+      ])
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
   return (
     <div className="h-full flex flex-col gap-2">
       {/* AI Tools Card */}
@@ -313,10 +445,53 @@ export default function RightSection() {
             )}
           </Button>
         </CardHeader>
-        <CardContent className="p-2 pt-0">
-          <div className="grid grid-cols-2 gap-2">
-            {/* Left Column - 5 Buttons */}
-            <div className="flex flex-col gap-1">
+
+        <CardContent className="p-2 pt-0 flex flex-col gap-3">
+          {/* Checkboxes Section - Moved to top */}
+          <div className="flex flex-wrap gap-2">
+            <label className="flex items-center gap-1 cursor-pointer whitespace-nowrap">
+              <Checkbox
+                checked={enableWebSearch}
+                onCheckedChange={() => setEnableWebSearch(!enableWebSearch)}
+                id="web-search"
+                className={`h-3 w-3 ${enableWebSearch ? "bg-primary text-primary-foreground" : ""}`}
+              />
+              <div className="flex items-center gap-1">
+                <Search className={`h-3 w-3 ${enableWebSearch ? "text-primary" : "text-muted-foreground"}`} />
+                <span className={`text-xs ${enableWebSearch ? "text-primary font-medium" : ""}`}>Web Search</span>
+              </div>
+            </label>
+
+            <label className="flex items-center gap-1 cursor-pointer whitespace-nowrap">
+              <Checkbox
+                checked={showGraph}
+                onCheckedChange={() => setShowGraph(!showGraph)}
+                id="show-graph"
+                className={`h-3 w-3 ${showGraph ? "bg-primary text-primary-foreground" : ""}`}
+              />
+              <div className="flex items-center gap-1">
+                <BarChart2 className={`h-3 w-3 ${showGraph ? "text-primary" : "text-muted-foreground"}`} />
+                <span className={`text-xs ${showGraph ? "text-primary font-medium" : ""}`}>Graph</span>
+              </div>
+            </label>
+
+            <label className="flex items-center gap-1 cursor-pointer whitespace-nowrap">
+              <Checkbox
+                checked={useRag}
+                onCheckedChange={() => setUseRag(!useRag)}
+                id="use-rag-toggle"
+                className={`h-3 w-3 ${useRag ? "bg-primary text-primary-foreground" : ""}`}
+              />
+              <div className="flex items-center gap-1">
+                <Database className={`h-3 w-3 ${useRag ? "text-primary" : "text-muted-foreground"}`} />
+                <span className={`text-xs ${useRag ? "text-primary font-medium" : ""}`}>Use RAG</span>
+              </div>
+            </label>
+          </div>
+
+          {/* Vertically Scrollable Buttons Section (2 per row) */}
+          <div className="overflow-y-auto max-h-[120px] pr-1" style={{ scrollSnapType: "y mandatory" }}>
+            <div className="grid grid-cols-2 gap-1">
               {/* AI Answer */}
               <TooltipProvider>
                 <Tooltip>
@@ -325,8 +500,9 @@ export default function RightSection() {
                       disabled={isProcessing}
                       onClick={() => handleAIAnswer("help")}
                       variant="outline"
-                      className="justify-start h-7 py-0 text-xs"
+                      className="justify-start h-7 py-0 text-xs whitespace-nowrap"
                       size="sm"
+                      style={{ scrollSnapAlign: "start" }}
                     >
                       <BookOpen className="mr-1 h-3 w-3" />
                       AI Answer
@@ -346,8 +522,9 @@ export default function RightSection() {
                       disabled={isProcessing}
                       onClick={() => handleAIAnswer("factcheck")}
                       variant="outline"
-                      className="justify-start h-7 py-0 text-xs"
+                      className="justify-start h-7 py-0 text-xs whitespace-nowrap"
                       size="sm"
+                      style={{ scrollSnapAlign: "start" }}
                     >
                       <FileText className="mr-1 h-3 w-3" />
                       Fact Checking
@@ -367,8 +544,9 @@ export default function RightSection() {
                       disabled={isProcessing}
                       onClick={() => handleAIAnswer("summary")}
                       variant="outline"
-                      className="justify-start h-7 py-0 text-xs"
+                      className="justify-start h-7 py-0 text-xs whitespace-nowrap"
                       size="sm"
+                      style={{ scrollSnapAlign: "start" }}
                     >
                       <Clock className="mr-1 h-3 w-3" />
                       Summarize
@@ -380,6 +558,48 @@ export default function RightSection() {
                 </Tooltip>
               </TooltipProvider>
 
+              {/* Create Action Plan */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      disabled={true}
+                      variant="outline"
+                      className="justify-start h-7 py-0 text-xs whitespace-nowrap"
+                      size="sm"
+                      style={{ scrollSnapAlign: "start" }}
+                    >
+                      <List className="mr-1 h-3 w-3" />
+                      Create Action Plan
+                    </Button>
+                  </TooltipTrigger>
+                </Tooltip>
+              </TooltipProvider>
+
+
+
+              {/* Explain Like 5-Year-Old */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      disabled={true}
+                      variant="outline"
+                      className="justify-start h-7 py-0 text-xs whitespace-nowrap"
+                      size="sm"
+                      style={{ scrollSnapAlign: "start" }}
+                    >
+                      <Smile className="mr-1 h-3 w-3" />
+                      Explain Like 5yr Old
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">Simplify the explanation</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+
               {/* Make Convincing */}
               <TooltipProvider>
                 <Tooltip>
@@ -387,8 +607,9 @@ export default function RightSection() {
                     <Button
                       disabled={true}
                       variant="outline"
-                      className="justify-start h-7 py-0 text-xs truncate"
+                      className="justify-start h-7 py-0 text-xs whitespace-nowrap"
                       size="sm"
+                      style={{ scrollSnapAlign: "start" }}
                     >
                       <Star className="mr-1 h-3 w-3" />
                       Make Convincing
@@ -404,36 +625,14 @@ export default function RightSection() {
                     <Button
                       disabled={true}
                       variant="outline"
-                      className="justify-start h-7 py-0 text-xs truncate"
+                      className="justify-start h-7 py-0 text-xs whitespace-nowrap"
                       size="sm"
+                      style={{ scrollSnapAlign: "start" }}
                     >
                       <Search className="mr-1 h-3 w-3" />
                       Search CRM
                     </Button>
                   </TooltipTrigger>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-
-            {/* Right Column - 5 Buttons */}
-            <div className="flex flex-col gap-1">
-              {/* Explain Like 5-Year-Old */}
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      disabled={true}
-                      variant="outline"
-                      className="justify-start h-7 py-0 text-xs truncate"
-                      size="sm"
-                    >
-                      <Smile className="mr-1 h-3 w-3" />
-                      Explain Like 5yr Old
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="text-xs">Simplify the explanation</p>
-                  </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
 
@@ -444,8 +643,9 @@ export default function RightSection() {
                     <Button
                       disabled={true}
                       variant="outline"
-                      className="justify-start h-7 py-0 text-xs truncate"
+                      className="justify-start h-7 py-0 text-xs whitespace-nowrap"
                       size="sm"
+                      style={{ scrollSnapAlign: "start" }}
                     >
                       <MessageCircle className="mr-1 h-3 w-3" />
                       Help Explain Better
@@ -464,8 +664,9 @@ export default function RightSection() {
                     <Button
                       disabled={true}
                       variant="outline"
-                      className="justify-start h-7 py-0 text-xs truncate"
+                      className="justify-start h-7 py-0 text-xs whitespace-nowrap"
                       size="sm"
+                      style={{ scrollSnapAlign: "start" }}
                     >
                       <Handshake className="mr-1 h-3 w-3" />
                       Negotiation Tip
@@ -484,8 +685,9 @@ export default function RightSection() {
                     <Button
                       disabled={true}
                       variant="outline"
-                      className="justify-start h-7 py-0 text-xs truncate"
+                      className="justify-start h-7 py-0 text-xs whitespace-nowrap"
                       size="sm"
+                      style={{ scrollSnapAlign: "start" }}
                     >
                       <Book className="mr-1 h-3 w-3" />
                       Explain Layman Terms
@@ -494,22 +696,34 @@ export default function RightSection() {
                 </Tooltip>
               </TooltipProvider>
 
-              {/* Create Action Plan */}
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      disabled={true}
-                      variant="outline"
-                      className="justify-start h-7 py-0 text-xs truncate"
-                      size="sm"
-                    >
-                      <List className="mr-1 h-3 w-3" />
-                      Create Action Plan
-                    </Button>
-                  </TooltipTrigger>
-                </Tooltip>
-              </TooltipProvider>
+
+            </div>
+          </div>
+
+          {/* Text Input and Send Button */}
+          <div className="flex flex-col gap-1 w-full mt-1">
+            <div className="flex gap-1 w-full">
+              <Textarea
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                placeholder="Type a message..."
+                className="resize-none min-h-[60px] flex-1 text-sm"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault()
+                    handleSendMessage()
+                  }
+                }}
+              />
+              <div className="flex flex-col gap-1">
+                <Button disabled={isProcessing || !userInput.trim()} onClick={handleSendMessage} className="flex-1">
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex justify-end">
+              <span className="text-xs text-muted-foreground">Shift+Enter for new line</span>
             </div>
           </div>
         </CardContent>
