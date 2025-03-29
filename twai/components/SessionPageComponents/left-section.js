@@ -124,8 +124,7 @@ export default function LeftSection() {
           })
           .catch((err) => console.error("Copy failed:", err));
       }
-    };
-  
+    };  
     document.addEventListener("mouseup", handleMouseUp);
     return () => document.removeEventListener("mouseup", handleMouseUp);
   }, []);
