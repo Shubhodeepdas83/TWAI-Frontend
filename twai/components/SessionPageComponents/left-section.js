@@ -111,13 +111,16 @@ export default function LeftSection() {
             setCopiedText(selectedText);
             setUseHighlightedText(true); // Set highlighted text state to true
   
-            // Show toast notification with a unique ID to prevent overwriting
+            // Show toast notification
             toast({
               title: "Text Selected",
               description: selectedText.length > 50 ? `"${selectedText.substring(0, 50)}..."` : `"${selectedText}"`,
               className: "bg-primary text-primary-foreground",
               duration: 1000,
             });
+  
+            // Deselect text after copying
+            selection.removeAllRanges();
           })
           .catch((err) => console.error("Copy failed:", err));
       }
@@ -126,6 +129,7 @@ export default function LeftSection() {
     document.addEventListener("mouseup", handleMouseUp);
     return () => document.removeEventListener("mouseup", handleMouseUp);
   }, []);
+  
   
   
   
