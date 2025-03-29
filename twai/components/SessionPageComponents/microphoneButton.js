@@ -53,8 +53,7 @@ export default function MicrophoneButton() {
         if (data.channel && data.channel.alternatives) {
           const transcript = data.channel.alternatives[0].transcript
           if (transcript.trim()) {
-            const timestamp = new Date().toISOString(); // Universal UTC timestamp
-
+            const timestamp = new Date().toISOString() // Universal UTC timestamp
 
             setWholeConversation((prev) => {
               const lastMessage = prev[prev.length - 1]
@@ -64,13 +63,13 @@ export default function MicrophoneButton() {
 
                 if (updatedMessage.length > MAX_MESSAGE_LENGTH) {
                   // If the message exceeds max length, start a new message
-                  return [...prev, { user: transcript,time:timestamp,saved:false,hidden:false }]
+                  return [...prev, { user: transcript, time: timestamp, saved: false, hidden: false }]
                 } else {
                   // Otherwise, update the last message
-                  return [...prev.slice(0, -1), { user: updatedMessage,time:timestamp,saved:false,hidden:false }]
+                  return [...prev.slice(0, -1), { user: updatedMessage, time: timestamp, saved: false, hidden: false }]
                 }
               } else {
-                return [...prev, { user: transcript,time:timestamp,saved:false,hidden:false }]
+                return [...prev, { user: transcript, time: timestamp, saved: false, hidden: false }]
               }
             })
           }
@@ -136,12 +135,12 @@ export default function MicrophoneButton() {
       ) : microphoneConnected ? (
         <>
           <MicOff className="h-3 w-3" />
-          Disconnect Mic
+          Disconnect Microphone
         </>
       ) : (
         <>
           <Mic className="h-3 w-3" />
-          Connect Mic
+          Connect to Microphone
         </>
       )}
     </Button>

@@ -63,18 +63,17 @@ export default function CaptureScreenButton() {
   const stopScreenShare = () => {
     if (stream) {
       stream.getTracks().forEach((track) => track.stop())
-      
     }
     setStream(null)
-      setIsCapturing(false)
+    setIsCapturing(false)
 
-      if (videoRef.current) {
-        videoRef.current.srcObject = null
-      }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null
+    }
 
-      if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.close()
-      }
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.close()
+    }
   }
 
   const openWebSocket = () => {
@@ -108,34 +107,32 @@ export default function CaptureScreenButton() {
       const MAX_MESSAGE_LENGTH = 200
 
       socket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
+        const data = JSON.parse(event.data)
         if (data.channel && data.channel.alternatives) {
-          const transcript = data.channel.alternatives[0].transcript;
+          const transcript = data.channel.alternatives[0].transcript
           if (transcript.trim()) {
-            const timestamp = new Date().toISOString(); // Universal UTC timestamp
+            const timestamp = new Date().toISOString() // Universal UTC timestamp
 
-      
             setWholeConversation((prev) => {
-              const lastMessage = prev[prev.length - 1];
-      
+              const lastMessage = prev[prev.length - 1]
+
               if (lastMessage?.other) {
-                const updatedMessage = lastMessage.other + " " + transcript;
-      
+                const updatedMessage = lastMessage.other + " " + transcript
+
                 if (updatedMessage.length > MAX_MESSAGE_LENGTH) {
                   // Start a new "other" message with timestamp
-                  return [...prev, { other: transcript, time:timestamp,saved:false,hidden:false }];
+                  return [...prev, { other: transcript, time: timestamp, saved: false, hidden: false }]
                 } else {
                   // Update the last message
-                  return [...prev.slice(0, -1), { other: updatedMessage, time:timestamp,saved:false,hidden:false }];
+                  return [...prev.slice(0, -1), { other: updatedMessage, time: timestamp, saved: false, hidden: false }]
                 }
               } else {
-                return [...prev, { other: transcript, time:timestamp,saved:false,hidden:false }];
+                return [...prev, { other: transcript, time: timestamp, saved: false, hidden: false }]
               }
-            });
+            })
           }
         }
-      };
-      
+      }
     })
   }
 
@@ -148,12 +145,12 @@ export default function CaptureScreenButton() {
       {isCapturing ? (
         <>
           <StopCircle className="h-3 w-3 mr-1" />
-          Stop Capture
+          Disconnect Meeting
         </>
       ) : (
         <>
           <MonitorSmartphone className="h-3 w-3 mr-1" />
-          Capture Screen
+          Connect to Live Meeting
         </>
       )}
     </Button>

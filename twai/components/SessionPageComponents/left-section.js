@@ -1,5 +1,5 @@
 "use client"
-
+import { useCallback } from "react";
 import { useAppContext } from "../../context/AppContext"
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
@@ -15,37 +15,49 @@ import { cn } from "@/lib/utils"
 import MicrophoneButton from "@/components/SessionPageComponents/microphoneButton"
 import CaptureScreenButton from "@/components/SessionPageComponents/captureScreenButton"
 
+// 4. Toast Notification for Text Selection
+// First, import the toast component
+import { useToast } from "@/hooks/use-toast";
+
 export default function LeftSection() {
-  const { wholeConversation, setWholeConversation, videoRef, stream } = useAppContext()
+  const { wholeConversation, setWholeConversation, videoRef, stream,setUseHighlightedText,setCopiedText } = useAppContext()
   const { sessionId } = useParams()
   const router = useRouter()
   const [autoScroll, setAutoScroll] = useState(true)
-  const [showConversation, setShowConversation] = useState(false); // Toggle state
+  const [showConversation, setShowConversation] = useState(false) // Toggle state
   const [manualInput, setManualInput] = useState("")
   const [isUser, setIsUser] = useState(false)
   const [showInput, setShowInput] = useState(false)
   const scrollAreaRef = useRef(null)
   const conversationEndRef = useRef(null)
 
+  // Add this inside the component function
+  const { toast } = useToast()
+
   const handleClearConversation = async () => {
     const tempConversation = [...wholeConversation]
     setWholeConversation((prev) => prev.map((message) => ({ ...message, hidden: true })))
     // setWholeConversation([]) // Immediately clear UI
     await appendConversation({
-      sessionId, newMessages: tempConversation.filter((msg)=>msg.saved==false).map((message) =>
-        ["user", "other", "time"].reduce((acc, key) => {
-          if (message.hasOwnProperty(key)) acc[key] = message[key];
-          return acc;
-        }, {})
-      )
+      sessionId,
+      newMessages: tempConversation
+        .filter((msg) => msg.saved == false)
+        .map((message) =>
+          ["user", "other", "time"].reduce((acc, key) => {
+            if (message.hasOwnProperty(key)) acc[key] = message[key]
+            return acc
+          }, {}),
+        ),
     })
   }
 
   const handleAddConversation = () => {
-    const timestamp = new Date().toISOString(); // Universal UTC timestamp
+    const timestamp = new Date().toISOString() // Universal UTC timestamp
 
     if (manualInput.trim()) {
-      const newMessage = isUser ? { user: manualInput, time: timestamp, saved: false, hidden: false } : { other: manualInput, time: timestamp, saved: false, hidden: false }
+      const newMessage = isUser
+        ? { user: manualInput, time: timestamp, saved: false, hidden: false }
+        : { other: manualInput, time: timestamp, saved: false, hidden: false }
       setWholeConversation((prev) => [...prev, newMessage])
       setManualInput("")
       setShowInput(false) // Hide input after sending
@@ -61,16 +73,62 @@ export default function LeftSection() {
 
   useEffect(() => {
     setWholeConversation((prev) =>
-      prev.map((message) =>
-        message.saved
-          ? { ...message, hidden: !showConversation } // Toggle `hidden` only for saved messages
-          : message // Keep unsaved messages unchanged
-      )
-    );
-  }, [showConversation]);
+      prev.map(
+        (message) =>
+          message.saved
+            ? { ...message, hidden: !showConversation } // Toggle `hidden` only for saved messages
+            : message, // Keep unsaved messages unchanged
+      ),
+    )
+  }, [showConversation])
 
 
 
+  useEffect(() => {
+    const handleMouseUp = () => {
+      const selectedText = window.getSelection()?.toString().trim();
+      if (!selectedText) return;
+  
+      const selection = window.getSelection();
+      if (!selection) return;
+  
+      const anchorNode = selection.anchorNode;
+      const focusNode = selection.focusNode;
+  
+      if (!anchorNode || !focusNode) return;
+  
+      const conversationContainer = document.getElementById("conversation-container");
+  
+      if (
+        conversationContainer &&
+        conversationContainer.contains(anchorNode) &&
+        conversationContainer.contains(focusNode)
+      ) {
+        navigator.clipboard
+          .writeText(selectedText)
+          .then(() => {
+            console.log("Copied:", selectedText);
+            setCopiedText(selectedText);
+            setUseHighlightedText(true); // Set highlighted text state to true
+  
+            // Show toast notification with a unique ID to prevent overwriting
+            toast({
+              title: "Text Selected",
+              description: selectedText.length > 50 ? `"${selectedText.substring(0, 50)}..."` : `"${selectedText}"`,
+              className: "bg-primary text-primary-foreground",
+              duration: 1000,
+            });
+          })
+          .catch((err) => console.error("Copy failed:", err));
+      }
+    };
+  
+    document.addEventListener("mouseup", handleMouseUp);
+    return () => document.removeEventListener("mouseup", handleMouseUp);
+  }, []);
+  
+  
+  
 
   return (
     <div className="h-full flex flex-col gap-2">
@@ -84,8 +142,8 @@ export default function LeftSection() {
 
           {/* Buttons Section - Reduced spacing */}
           <div className="flex flex-col sm:flex-row gap-1">
-            <MicrophoneButton />
             <CaptureScreenButton />
+            <MicrophoneButton />
           </div>
         </CardContent>
       </Card>
@@ -119,18 +177,21 @@ export default function LeftSection() {
             <ScrollArea className="h-full pr-2" ref={scrollAreaRef} id="conversation-container">
               {wholeConversation?.filter((msg) => msg.hidden == false).length > 0 ? (
                 <div className="space-y-2 py-1">
-                  {wholeConversation.filter((msg) => msg.hidden == false).map((message, index) => (
-                    <div key={index} className={`flex ${message.user ? "justify-end" : "justify-start"}`}>
-                      <div
-                        className={`max-w-[80%] rounded-lg p-2 text-sm ${message.user
-                            ? "bg-primary text-primary-foreground rounded-tr-none"
-                            : "bg-muted rounded-tl-none"
-                          }  ${message.saved === true ? "opacity-50 grayscale" : ""}`}
-                      >
-                        {message.user ? message.user : message.other}
+                  {wholeConversation
+                    .filter((msg) => msg.hidden == false)
+                    .map((message, index) => (
+                      <div key={index} className={`flex ${message.user ? "justify-end" : "justify-start"}`}>
+                        <div
+                          className={`max-w-[80%] rounded-lg p-2 text-sm ${
+                            message.user
+                              ? "bg-primary text-primary-foreground rounded-tr-none"
+                              : "bg-muted rounded-tl-none"
+                          }`}
+                        >
+                          {message.user ? message.user : message.other}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
                   <div ref={conversationEndRef} />
                 </div>
               ) : (

@@ -3,12 +3,14 @@
 import LeftSection from "../../../components/SessionPageComponents/left-section"
 import MiddleSection from "../../../components/SessionPageComponents/middle-section"
 import RightSection from "../../../components/SessionPageComponents/right-section"
-import WelcomeModal from "@/components/SessionPageComponents/welcomeModal";
+import WelcomeModal from "@/components/SessionPageComponents/welcomeModal"
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { isValidSession } from "./actions"
 import { useAppContext } from "../../../context/AppContext"
+// Import the Toaster component for toast notifications
+import { Toaster } from "@/components/ui/toaster"
 
 export default function Home() {
   const { sessionId } = useParams()
@@ -43,40 +45,40 @@ export default function Home() {
     fetchData()
   }, [status, sessionId, router])
 
-  useEffect(() => {
-    const handleMouseUp = () => {
-      const selectedText = window.getSelection()?.toString().trim()
-      if (!selectedText) return
+  // useEffect(() => {
+  //   const handleMouseUp = () => {
+  //     const selectedText = window.getSelection()?.toString().trim()
+  //     if (!selectedText) return
 
-      const selection = window.getSelection()
-      if (!selection) return
+  //     const selection = window.getSelection()
+  //     if (!selection) return
 
-      const anchorNode = selection.anchorNode
-      const focusNode = selection.focusNode
+  //     const anchorNode = selection.anchorNode
+  //     const focusNode = selection.focusNode
 
-      if (!anchorNode || !focusNode) return
+  //     if (!anchorNode || !focusNode) return
 
-      // Ensure BOTH the start and end of selection are inside the conversation container
-      const conversationContainer = document.getElementById("conversation-container")
+  //     // Ensure BOTH the start and end of selection are inside the conversation container
+  //     const conversationContainer = document.getElementById("conversation-container")
 
-      if (
-        conversationContainer &&
-        conversationContainer.contains(anchorNode) &&
-        conversationContainer.contains(focusNode)
-      ) {
-        navigator.clipboard
-          .writeText(selectedText)
-          .then(() => {
-            console.log("Copied:", selectedText)
-            setCopiedText(selectedText)
-          })
-          .catch((err) => console.error("Copy failed:", err))
-      }
-    }
+  //     if (
+  //       conversationContainer &&
+  //       conversationContainer.contains(anchorNode) &&
+  //       conversationContainer.contains(focusNode)
+  //     ) {
+  //       navigator.clipboard
+  //         .writeText(selectedText)
+  //         .then(() => {
+  //           console.log("Copied:", selectedText)
+  //           setCopiedText(selectedText)
+  //         })
+  //         .catch((err) => console.error("Copy failed:", err))
+  //     }
+  //   }
 
-    document.addEventListener("mouseup", handleMouseUp)
-    return () => document.removeEventListener("mouseup", handleMouseUp)
-  }, [setCopiedText])
+  //   document.addEventListener("mouseup", handleMouseUp)
+  //   return () => document.removeEventListener("mouseup", handleMouseUp)
+  // }, [setCopiedText])
 
   if (isLoading) {
     return <div>Loading...</div>
@@ -103,6 +105,9 @@ export default function Home() {
 
       {/* Welcome Modal */}
       <WelcomeModal />
+
+      {/* Toast notifications */}
+      <Toaster />
     </div>
   )
 }
