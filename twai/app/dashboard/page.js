@@ -4,12 +4,14 @@ import { useSession, signOut } from "next-auth/react"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { getUserDetails, removeDocument, getSummary, deleteMeetingTemplate, getAgentStore } from "./actions"
-import { Calendar, FileText, Folder, LogOut, Plus, Trash, User, Edit, Store, ExternalLink } from "lucide-react"
+import { Calendar, FileText, Folder, LogOut, Plus, Trash, User, Edit, Store } from "lucide-react"
 import CreateSessionModal from "../../components/DashboardPageComponents/CreateSessionModal"
 import DocumentUploadModal from "../../components/DashboardPageComponents/DocumentUploadModal"
 import CreateTemplateModal from "../../components/DashboardPageComponents/CreateTemplateModal"
 import EditDocumentModal from "../../components/DashboardPageComponents/EditDocumentModal"
 import EditTemplateModal from "../../components/DashboardPageComponents/EditTemplateModal"
+import { DashboardSkeleton, LoadingOverlay } from "@/components/loading-page"
+import { SpinnerButton } from "@/components/ui/spinnerButton"
 
 export default function DashboardPage() {
   const { data: session, status } = useSession()
@@ -24,6 +26,8 @@ export default function DashboardPage() {
   const [isDeleting, setIsDeleting] = useState(false)
   const [deletingId, setDeletingId] = useState(null)
   const [agents, setAgents] = useState([])
+  const [isLoadingSummary, setIsLoadingSummary] = useState(false)
+  const [isOpeningSession, setIsOpeningSession] = useState(false)
   const router = useRouter()
 
   // Add these state variables in the DashboardPage component
@@ -39,7 +43,6 @@ export default function DashboardPage() {
   }, [status, router])
 
   useEffect(() => {
-
     fetchAgentStore()
     fetchUserData()
   }, [])
@@ -51,7 +54,6 @@ export default function DashboardPage() {
       setUser(data.user)
       setIsLoading(false)
     }
-
   }
 
   const fetchAgentStore = async () => {
@@ -59,11 +61,9 @@ export default function DashboardPage() {
     const data = await getAgentStore()
     if (data.agents) {
       setAgents(data.agents)
-    }
-    else{
+    } else {
       alert("Failed to fetch agents")
     }
-
   }
 
   const handleDeleteDocument = async (documentId) => {
@@ -110,13 +110,23 @@ export default function DashboardPage() {
     }
   }
 
+  const handleOpenSession = (sessionId) => {
+    setIsOpeningSession(true)
+    router.push(`/session/${sessionId}`)
+  }
+
   const handleGenerateSummary = async (sessionId) => {
-    const data = await getSummary(sessionId)
-    if (data.summary) {
-      setSelectedSessionSummary(data.summary)
-      setIsSummaryModalOpen(true)
-    } else {
-      alert("Failed to generate summary")
+    setIsLoadingSummary(true)
+    try {
+      const data = await getSummary(sessionId)
+      if (data.summary) {
+        setSelectedSessionSummary(data.summary)
+        setIsSummaryModalOpen(true)
+      } else {
+        alert("Failed to generate summary")
+      }
+    } finally {
+      setIsLoadingSummary(false)
     }
   }
 
@@ -132,11 +142,14 @@ export default function DashboardPage() {
   }
 
   if (status === "loading" || isLoading) {
-    return <div className="h-screen flex items-center justify-center">Loading...</div>
+    return <DashboardSkeleton />
   }
 
   return (
     <div className="flex h-screen bg-gray-50">
+      {/* Loading overlays */}
+      <LoadingOverlay message="Opening session" isOpen={isOpeningSession} />
+
       {/* Sidebar */}
       <div className="flex h-full w-64 flex-col border-r bg-white px-4 py-6 shadow-sm">
         {/* User Info */}
@@ -256,18 +269,27 @@ export default function DashboardPage() {
                         <p className="mb-3 text-sm text-gray-600 line-clamp-2 flex-grow">{session.description}</p>
                       )}
                       <div className="mt-auto flex items-center justify-between">
-                        <button
-                          onClick={() => router.push(`/session/${session.id}`)}
+                        <SpinnerButton
+                          onClick={() => handleOpenSession(session.id)}
                           className="rounded-md bg-blue-100 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-200 transition-colors"
+                          loadingText="Opening..."
+                          loading={isOpeningSession}
+                          size="sm"
+                          variant="secondary"
                         >
                           Open Session
-                        </button>
-                        <button
+                        </SpinnerButton>
+
+                        <SpinnerButton
                           onClick={() => handleGenerateSummary(session.id)}
                           className="rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200 transition-colors"
+                          loading={isLoadingSummary}
+                          loadingText="Loading..."
+                          size="sm"
+                          variant="outline"
                         >
                           View Summary
-                        </button>
+                        </SpinnerButton>
                       </div>
                     </div>
                   ))}
@@ -345,20 +367,18 @@ export default function DashboardPage() {
                             Edit
                           </button>
                         </div>
-                        <button
+                        <SpinnerButton
                           onClick={() => handleDeleteDocument(doc.id)}
                           disabled={isDeleting && deletingId === doc.id}
+                          loading={isDeleting && deletingId === doc.id}
+                          loadingText="Deleting..."
                           className="rounded-md bg-red-100 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-200 disabled:bg-gray-100 disabled:text-gray-400 transition-colors"
+                          size="sm"
+                          variant="outline"
                         >
-                          {isDeleting && deletingId === doc.id ? (
-                            "Deleting..."
-                          ) : (
-                            <>
-                              <Trash className="mr-1 inline-block h-3 w-3" />
-                              Delete
-                            </>
-                          )}
-                        </button>
+                          <Trash className="mr-1 inline-block h-3 w-3" />
+                          Delete
+                        </SpinnerButton>
                       </div>
                     </div>
                   ))}
@@ -437,20 +457,18 @@ export default function DashboardPage() {
                             <Edit className="mr-1 inline-block h-3 w-3" />
                             Edit
                           </button>
-                          <button
+                          <SpinnerButton
                             onClick={() => handleDeleteTemplate(template.id)}
                             disabled={isDeleting && deletingId === template.id}
+                            loading={isDeleting && deletingId === template.id}
+                            loadingText="Deleting..."
                             className="rounded-md bg-red-100 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-200 disabled:bg-gray-100 disabled:text-gray-400 transition-colors"
+                            size="sm"
+                            variant="outline"
                           >
-                            {isDeleting && deletingId === template.id ? (
-                              "Deleting..."
-                            ) : (
-                              <>
-                                <Trash className="mr-1 inline-block h-3 w-3" />
-                                Delete
-                              </>
-                            )}
-                          </button>
+                            <Trash className="mr-1 inline-block h-3 w-3" />
+                            Delete
+                          </SpinnerButton>
                         </div>
                       </div>
                     </div>
@@ -512,16 +530,6 @@ export default function DashboardPage() {
                               </span>
                             ))}
                           </div>
-                        </div>
-
-                        <div className="flex justify-end">
-                          {/* <button
-                            className="rounded-md bg-blue-100 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-200 transition-colors flex items-center"
-                            disabled
-                          >
-                            <ExternalLink className="mr-1 h-3 w-3" />
-                            Coming Soon
-                          </button> */}
                         </div>
                       </div>
                     </div>
