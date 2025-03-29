@@ -331,7 +331,7 @@ export default function RightSection() {
                       AI Answer
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>
+                  <TooltipContent className="pointer-events-none">
                     <p className="text-xs">Get AI assistance with your meeting questions</p>
                   </TooltipContent>
                 </Tooltip>
@@ -352,7 +352,7 @@ export default function RightSection() {
                       Fact Checking
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>
+                  <TooltipContent className="pointer-events-none">
                     <p className="text-xs">Verify facts in the conversation</p>
                   </TooltipContent>
                 </Tooltip>
@@ -373,7 +373,7 @@ export default function RightSection() {
                       Summarize
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>
+                  <TooltipContent className="pointer-events-none">
                     <p className="text-xs">Get a summary of the conversation so far</p>
                   </TooltipContent>
                 </Tooltip>

@@ -618,29 +618,20 @@ export default function MiddleSection() {
               variant="ghost"
               size="sm"
               onClick={() => setAutoScroll(!autoScroll)}
-              className={`text-muted-foreground h-7 w-7 p-0 ${autoScroll ? "bg-primary/10 text-primary" : ""}`}
+              className={`text-muted-foreground h-7 px-2 ${autoScroll ? "bg-primary/10 text-primary" : ""}`}
               title={autoScroll ? "Auto-scroll On" : "Auto-scroll Off"}
             >
-              <ScrollText className="h-4 w-4" />
+              <ScrollText className="h-4 w-4 mr-1" />
+              {autoScroll ? "Auto-scroll On" : "Auto-scroll Off"}
             </Button>
-            {/* <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleClear}
-            className="text-red-500 h-7 w-7 p-0"
-            disabled={chatMessages.length === 0}
-            title="Clear Chat"
-          >
-            <Trash className="h-4 w-4" />
-          </Button> */}
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowChat((prev) => !prev)} // Toggle state
-              className="text-blue-500 h-7 w-7 p-0"
+              className={`text-muted-foreground h-7 px-2 ${showChat ? "bg-primary/10 text-primary" : ""}`}
               title={showChat ? "Hide Chat" : "Show Chat"}
             >
-              {showChat ? "H" : "S"} {/* Icon change */}
+              {showChat ? "Hide Chat" : "Show Chat"}
             </Button>
           </div>
         </CardHeader>

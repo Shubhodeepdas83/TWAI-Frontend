@@ -156,19 +156,20 @@ export default function LeftSection() {
             variant="ghost"
             size="sm"
             onClick={() => setAutoScroll(!autoScroll)}
-            className={cn("h-7 w-7 p-0", autoScroll && "bg-primary/10 text-primary")}
+            className={cn("h-7 px-2", autoScroll && "bg-primary/10 text-primary")}
             title={autoScroll ? "Auto-scroll On" : "Auto-scroll Off"}
           >
-            <ScrollText className="h-4 w-4" />
+            <ScrollText className="h-4 w-4 mr-1" />
+            {autoScroll ? "Auto-scroll On" : "Auto-scroll Off"}
           </Button>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setShowConversation((prev) => !prev)} // Toggle state
-            className="text-blue-500 h-7 w-7 p-0"
+            className={cn("h-7 px-2", showConversation && "bg-primary/10 text-primary")}
             title={showConversation ? "Hide Conversation" : "Show Conversation"}
           >
-            {showConversation ? "🙈" : "👀"} {/* Icon change */}
+            {showConversation ? "Hide Conversation" : "Show Conversation"}
           </Button>
         </div>
 
