@@ -64,6 +64,8 @@ export default function MiddleSection() {
     if (isProcessing) return
     setGraphImage(null)
     setIsProcessing(true)
+    setCopiedText("")
+    setUseHighlightedText(false)
     setUsedCitations([])
 
     const message = chatMessages.find((msg) => msg.id === mid && msg.sender === "user")
@@ -335,8 +337,7 @@ export default function MiddleSection() {
           .filter((msg) => msg.text !== "Thinking..."),
       )
 
-      setCopiedText("")
-      setUseHighlightedText(false)
+      
       setChatMessages((prev) => [...prev.filter((msg) => msg.text !== "Thinking...")])
       setSaveChatCounter((prev) => prev + 1)
     } catch (error) {
@@ -355,6 +356,8 @@ export default function MiddleSection() {
 
     if (userInput.trim()) {
       const id = uuidv4()
+      setCopiedText("")
+      setUseHighlightedText(false)
 
       setChatMessages((prev) => [
         ...prev,
@@ -369,8 +372,8 @@ export default function MiddleSection() {
           hidden: false,
           isWeb: enableWebSearch,
           isRag: useRag,
-          useHighlightedText: useHighlightedText,
-          copiedText: copiedText,
+          useHighlightedText: false,
+          copiedText: "",
         },
         { text: "Thinking...", sender: "ai" },
       ])
@@ -519,8 +522,7 @@ export default function MiddleSection() {
         }
 
         setChatMessages((prev) => [...prev.filter((msg) => msg.text !== "Thinking...")])
-        setCopiedText("")
-        setUseHighlightedText(false)
+
         setSaveChatCounter((prev) => prev + 1)
       } catch (error) {
         console.error("Error sending message:", error)

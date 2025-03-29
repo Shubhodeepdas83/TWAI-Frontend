@@ -41,7 +41,6 @@ export default function RightSection() {
     enableWebSearch,
     usedCitations,
     setUsedCitations,
-    useHighlightedText,
     copiedText,
     setCopiedText,
     graphImage,
@@ -50,7 +49,8 @@ export default function RightSection() {
     showGraph,
     useRag,
     setSaveChatCounter,
-    setUseHighlightedText
+    setUseHighlightedText,
+    useHighlightedText
   } = useAppContext()
 
   const { sessionId } = useParams()
@@ -86,6 +86,10 @@ export default function RightSection() {
     setIsProcessing(true)
     setUsedCitations([])
     setChatMessages([...chatMessages, { text: "Thinking...", sender: "ai" }])
+    const COPIEDTEXT = copiedText.trim()
+    const USEHIGHLIGHTEDTEXT = useHighlightedText
+    setCopiedText("")
+    setUseHighlightedText(false)
 
     try {
       const tempconv = [...wholeConversation]
@@ -99,8 +103,8 @@ export default function RightSection() {
           conversation: tempconv,
           use_web: enableWebSearch,
           requestType,
-          useHighlightedText,
-          copiedText,
+          useHighlightedText:USEHIGHLIGHTEDTEXT,
+          copiedText:COPIEDTEXT,
           sessionId,
           useRag,
         }),
@@ -156,8 +160,8 @@ export default function RightSection() {
                       hidden: false,
                       isWeb: enableWebSearch,
                       isRag: useRag,
-                      useHighlightedText: useHighlightedText,
-                      copiedText: copiedText,
+                      useHighlightedText: USEHIGHLIGHTEDTEXT,
+                      copiedText: COPIEDTEXT,
                     },
                     { text: "Thinking...", sender: "ai" },
                   ]
@@ -244,8 +248,7 @@ export default function RightSection() {
         }
       }
 
-      setCopiedText("")
-      setUseHighlightedText(false)
+      
       setChatMessages((prev) => [...prev.filter((msg) => msg.text !== "Thinking...")])
 
       setSaveChatCounter((prev) => prev + 1)
@@ -276,8 +279,6 @@ export default function RightSection() {
         { text: "An error occurred while processing your request.", sender: "ai", hidden: false },
       ])
     } finally {
-      setCopiedText("")
-      setUseHighlightedText(false)
       setIsProcessing(false)
     }
   }
