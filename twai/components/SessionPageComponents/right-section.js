@@ -563,7 +563,8 @@ export default function RightSection() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      disabled={true}
+                      disabled={isProcessing}
+                      onClick={() => handleAIAnswer("createactionplan")}
                       variant="outline"
                       className="justify-start h-7 py-0 text-xs whitespace-nowrap"
                       size="sm"
@@ -583,7 +584,8 @@ export default function RightSection() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      disabled={true}
+                      disabled={isProcessing}
+                      onClick={() => handleAIAnswer("fiveyearold")}
                       variant="outline"
                       className="justify-start h-7 py-0 text-xs whitespace-nowrap"
                       size="sm"
