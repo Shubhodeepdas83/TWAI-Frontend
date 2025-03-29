@@ -9,6 +9,7 @@ export default function DocumentUploadModal({ isOpen, onClose, onSuccess }) {
   const [description, setDescription] = useState("")
   const [addEmbedding, setAddEmbedding] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0])
@@ -25,34 +26,73 @@ export default function DocumentUploadModal({ isOpen, onClose, onSuccess }) {
       return
     }
 
-    // Create form data to send the file and additional information
-    const formData = new FormData()
-    formData.append("file", file)
-    formData.append("add_embedding", addEmbedding)
-    formData.append("title", title)
-    formData.append("description", description)
-
     setIsLoading(true)
+    setUploadProgress(0)
 
     try {
-      // Send the file and data to the server via the API route
-      const response = await fetch("/api/file_upload", {
+      // 1. Get a signed URL from the server
+      const signedUrlResponse = await fetch("/api/get_signed_url", {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          filename: file.name,
+          contentType: file.type,
+        }),
       })
 
-      const data = await response.json()
+      if (!signedUrlResponse.ok) {
+        throw new Error("Failed to get signed URL")
+      }
 
-      if (response.ok) {
+      const { signedUrl, fileUrl } = await signedUrlResponse.json()
+
+      // 2. Upload the file directly to S3 using the signed URL
+      const uploadResponse = await fetch(signedUrl, {
+        method: "PUT",
+        body: file,
+        headers: {
+          "Content-Type": file.type,
+        },
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+          setUploadProgress(percentCompleted)
+        },
+      })
+
+      if (!uploadResponse.ok) {
+        throw new Error("Failed to upload file to S3")
+      }
+
+      // 3. Save the document metadata to our database
+      const metadataResponse = await fetch("/api/file_upload", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fileUrl,
+          add_embedding: addEmbedding,
+          title,
+          description,
+          fileName: file.name,
+        }),
+      })
+
+      const data = await metadataResponse.json()
+
+      if (metadataResponse.ok) {
         onSuccess()
       } else {
-        alert(data.error || "File upload failed.")
+        alert(data.error || "Failed to save document metadata.")
       }
     } catch (error) {
       alert("An error occurred while uploading the file.")
       console.error("Upload error:", error)
     } finally {
       setIsLoading(false)
+      setUploadProgress(0)
     }
   }
 
@@ -123,6 +163,18 @@ export default function DocumentUploadModal({ isOpen, onClose, onSuccess }) {
               Add Embedding (for AI search capabilities)
             </label>
           </div>
+
+          {isLoading && uploadProgress > 0 && (
+            <div className="w-full">
+              <div className="h-2 w-full bg-gray-200 rounded-full">
+                <div 
+                  className="h-full bg-blue-600 rounded-full" 
+                  style={{ width: `${uploadProgress}%` }}
+                ></div>
+              </div>
+              <p className="text-xs text-center mt-1">{uploadProgress}% uploaded</p>
+            </div>
+          )}
 
           <div className="flex justify-end space-x-2">
             <button

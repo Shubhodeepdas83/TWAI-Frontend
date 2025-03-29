@@ -13,15 +13,18 @@ export function AppProvider({ children }) {
   const [micPartialTranscript, setMicPartialTranscript] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [wholeConversation, setWholeConversation] = useState([]);
-  const [enableWebSearch, setEnableWebSearch] = useState(false);
+  const [enableWebSearch, setEnableWebSearch] = useState(true);
   const [showGraph, setShowGraph] = useState(false);
   const [stream,setStream] = useState(null);
   const videoRef = useRef(null);
   const [usedCitations, setUsedCitations] = useState([]);
   const [copiedText, setCopiedText] = useState("");
   const [useHighlightedText,setUseHighlightedText] = useState(false);
+  const [useRag,setUseRag] = useState(false);
+  const [graphImage, setGraphImage] = useState(null)
   const micToken = useRef(null);
   const captureToken = useRef(null);
+  const [saveChatCounter,setSaveChatCounter] = useState(0);
 
   return (
     <AppContext.Provider
@@ -46,7 +49,8 @@ export function AppProvider({ children }) {
         enableWebSearch,
         setEnableWebSearch,
         showGraph,
-        setShowGraph,usedCitations, setUsedCitations,setCopiedText,copiedText,micToken,captureToken,setUseHighlightedText,useHighlightedText
+        setShowGraph,usedCitations, setUsedCitations,setCopiedText,copiedText,micToken,captureToken,setUseHighlightedText,useHighlightedText,graphImage,setGraphImage,useRag,setUseRag,setSaveChatCounter,
+        saveChatCounter
       }}
     >
       {children}

@@ -28,6 +28,7 @@ model Session {
   name         String
   description  String?
   conversation Json[]           @default([])
+  chat         Json[]           @default([])
   createdAt    DateTime         @default(now())
   summary      String?
   captureToken String?

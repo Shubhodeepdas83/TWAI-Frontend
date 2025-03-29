@@ -3,19 +3,20 @@
 import LeftSection from "../../../components/SessionPageComponents/left-section"
 import MiddleSection from "../../../components/SessionPageComponents/middle-section"
 import RightSection from "../../../components/SessionPageComponents/right-section"
-import { Button } from "../../../components/ui/button"
-import { LogOut } from "lucide-react"
+import WelcomeModal from "@/components/SessionPageComponents/welcomeModal"
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
-import { isValidSession, appendConversation } from "./actions"
+import { isValidSession } from "./actions"
 import { useAppContext } from "../../../context/AppContext"
+// Import the Toaster component for toast notifications
+import { Toaster } from "@/components/ui/toaster"
 
 export default function Home() {
   const { sessionId } = useParams()
   const { status } = useSession()
 
-  const { wholeConversation, setCopiedText, micToken, captureToken } = useAppContext()
+  const { wholeConversation, setCopiedText, setWholeConversation, setChatMessages } = useAppContext()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(true)
 
@@ -30,49 +31,54 @@ export default function Home() {
       if (data.failure) {
         router.push("/")
       } else {
-        micToken.current = data.micToken
-        captureToken.current = data.captureToken
+        if (data.chat) {
+          setChatMessages(data.chat.map((c) => ({ ...c, hidden: true, saved: true })))
+        }
+        if (data.conversation) {
+          setWholeConversation(data.conversation.map((c) => ({ ...c, hidden: true, saved: true })))
+        }
+
         setIsLoading(false)
       }
     }
 
     fetchData()
-  }, [status, sessionId, router, captureToken, micToken])
+  }, [status, sessionId, router])
 
-  useEffect(() => {
-    const handleMouseUp = () => {
-      const selectedText = window.getSelection()?.toString().trim()
-      if (!selectedText) return
+  // useEffect(() => {
+  //   const handleMouseUp = () => {
+  //     const selectedText = window.getSelection()?.toString().trim()
+  //     if (!selectedText) return
 
-      const selection = window.getSelection()
-      if (!selection) return
+  //     const selection = window.getSelection()
+  //     if (!selection) return
 
-      const anchorNode = selection.anchorNode
-      const focusNode = selection.focusNode
-      if (!anchorNode || !focusNode) return
+  //     const anchorNode = selection.anchorNode
+  //     const focusNode = selection.focusNode
 
-      const conversationContainer = document.getElementById("conversation-container")
+  //     if (!anchorNode || !focusNode) return
 
-      // Ensure BOTH the start and end of selection are inside the conversation container
-      if (conversationContainer?.contains(anchorNode) && conversationContainer.contains(focusNode)) {
-        navigator.clipboard
-          .writeText(selectedText)
-          .then(() => {
-            console.log("Copied:", selectedText)
-            setCopiedText(selectedText)
-          })
-          .catch((err) => console.error("Copy failed:", err))
-      }
-    }
+  //     // Ensure BOTH the start and end of selection are inside the conversation container
+  //     const conversationContainer = document.getElementById("conversation-container")
 
-    document.addEventListener("mouseup", handleMouseUp)
-    return () => document.removeEventListener("mouseup", handleMouseUp)
-  }, [setCopiedText])
+  //     if (
+  //       conversationContainer &&
+  //       conversationContainer.contains(anchorNode) &&
+  //       conversationContainer.contains(focusNode)
+  //     ) {
+  //       navigator.clipboard
+  //         .writeText(selectedText)
+  //         .then(() => {
+  //           console.log("Copied:", selectedText)
+  //           setCopiedText(selectedText)
+  //         })
+  //         .catch((err) => console.error("Copy failed:", err))
+  //     }
+  //   }
 
-  const handleExit = async () => {
-    await appendConversation({ sessionId: sessionId, newMessages: wholeConversation })
-    window.location.href = "/dashboard"
-  }
+  //   document.addEventListener("mouseup", handleMouseUp)
+  //   return () => document.removeEventListener("mouseup", handleMouseUp)
+  // }, [setCopiedText])
 
   if (isLoading) {
     return <div>Loading...</div>
@@ -80,32 +86,28 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="sticky top-0 z-10 flex items-center justify-between p-4 bg-gray-900 text-white shadow-md">
-        <h1 className="text-xl font-bold">AI Meeting Assistant</h1>
-        <Button
-          onClick={async () => {
-            await handleExit()
-          }}
-          variant="destructive"
-          className="flex items-center gap-2"
-        >
-          <LogOut className="h-4 w-4" />
-          Exit Session
-        </Button>
-      </header>
+      <main className="flex-1 w-full p-2 grid grid-cols-1 lg:grid-cols-12 gap-2 max-h-screen overflow-hidden">
+        {/* Left Section - Screen Capture + Conversation */}
+        <div className="lg:col-span-4 xl:col-span-4 overflow-hidden flex flex-col max-h-[calc(100vh-16px)]">
+          <LeftSection />
+        </div>
 
-      <main className="flex-1 w-full p-4 grid grid-cols-1 lg:grid-cols-12 gap-4 max-h-[calc(100vh-80px)] overflow-hidden">
-  <div className="lg:col-span-4 xl:col-span-4 overflow-hidden">
-    <LeftSection />
-  </div>
-  <div className="lg:col-span-4 xl:col-span-4 overflow-hidden">
-    <MiddleSection />
-  </div>
-  <div className="lg:col-span-4 xl:col-span-4 overflow-hidden">
-    <RightSection />
-  </div>
-</main>
+        {/* Middle Section - AI Meeting Helper */}
+        <div className="lg:col-span-5 xl:col-span-5 overflow-hidden flex flex-col max-h-[calc(100vh-16px)]">
+          <MiddleSection />
+        </div>
 
+        {/* Right Section - AI Tools + Citations */}
+        <div className="lg:col-span-3 xl:col-span-3 overflow-hidden flex flex-col max-h-[calc(100vh-16px)]">
+          <RightSection />
+        </div>
+      </main>
+
+      {/* Welcome Modal */}
+      <WelcomeModal />
+
+      {/* Toast notifications */}
+      <Toaster />
     </div>
   )
 }
