@@ -447,50 +447,65 @@ export default function RightSection() {
         </CardHeader>
 
         <CardContent className="p-2 pt-0 flex flex-col gap-3">
-          {/* Checkboxes Section - Moved to top */}
+          {/* Checkboxes Section converted to button style */}
           <div className="flex flex-wrap gap-2">
-            <label className="flex items-center gap-1 cursor-pointer whitespace-nowrap">
-              <Checkbox
-                checked={enableWebSearch}
-                onCheckedChange={() => setEnableWebSearch(!enableWebSearch)}
-                id="web-search"
-                className={`h-3 w-3 ${enableWebSearch ? "bg-primary text-primary-foreground" : ""}`}
-              />
-              <div className="flex items-center gap-1">
-                <Search className={`h-3 w-3 ${enableWebSearch ? "text-primary" : "text-muted-foreground"}`} />
-                <span className={`text-xs ${enableWebSearch ? "text-primary font-medium" : ""}`}>Web Search</span>
-              </div>
-            </label>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setEnableWebSearch(!enableWebSearch)}
+              className={`text-muted-foreground h-7 px-2 flex items-center ${enableWebSearch ? "bg-primary/10 text-primary" : ""}`}
+              title={enableWebSearch ? "Web Search On" : "Web Search Off"}
+            >
+              <Search className="h-3 w-3 mr-1" />
+              Web Search
+            </Button>
 
-            <label className="flex items-center gap-1 cursor-pointer whitespace-nowrap">
-              <Checkbox
-                checked={showGraph}
-                onCheckedChange={() => setShowGraph(!showGraph)}
-                id="show-graph"
-                className={`h-3 w-3 ${showGraph ? "bg-primary text-primary-foreground" : ""}`}
-              />
-              <div className="flex items-center gap-1">
-                <BarChart2 className={`h-3 w-3 ${showGraph ? "text-primary" : "text-muted-foreground"}`} />
-                <span className={`text-xs ${showGraph ? "text-primary font-medium" : ""}`}>Graph</span>
-              </div>
-            </label>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowGraph(!showGraph)}
+              className={`text-muted-foreground h-7 px-2 flex items-center ${showGraph ? "bg-primary/10 text-primary" : ""}`}
+              title={showGraph ? "Graph On" : "Graph Off"}
+            >
+              <BarChart2 className="h-3 w-3 mr-1" />
+              Graph
+            </Button>
 
-            <label className="flex items-center gap-1 cursor-pointer whitespace-nowrap">
-              <Checkbox
-                checked={useRag}
-                onCheckedChange={() => setUseRag(!useRag)}
-                id="use-rag-toggle"
-                className={`h-3 w-3 ${useRag ? "bg-primary text-primary-foreground" : ""}`}
-              />
-              <div className="flex items-center gap-1">
-                <Database className={`h-3 w-3 ${useRag ? "text-primary" : "text-muted-foreground"}`} />
-                <span className={`text-xs ${useRag ? "text-primary font-medium" : ""}`}>Use RAG</span>
-              </div>
-            </label>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setUseRag(!useRag)}
+              className={`text-muted-foreground h-7 px-2 flex items-center ${useRag ? "bg-primary/10 text-primary" : ""}`}
+              title={useRag ? "RAG On" : "RAG Off"}
+            >
+              <Database className="h-3 w-3 mr-1" />
+              RAG
+            </Button>
           </div>
+          
+          {/* Display Copied Text when useHighlightedText is true - now single line with ellipsis */}
+          {useHighlightedText && copiedText && (
+            <div className="flex items-center gap-2 bg-muted p-2 rounded-md text-xs relative">
+              <div className="overflow-hidden flex-1 pr-6 w-full">
+                <p className="whitespace-nowrap overflow-hidden text-ellipsis">{copiedText}</p>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setCopiedText("");
+                  setUseHighlightedText(false);
+                }}
+                className="h-5 w-5 p-0 absolute right-1 top-1"
+                title="Clear highlighted text"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          )}
 
-          {/* Vertically Scrollable Buttons Section (2 per row) */}
-          <div className="overflow-y-auto max-h-[120px] pr-1" style={{ scrollSnapType: "y mandatory" }}>
+          {/* Vertically Scrollable Buttons Section (2 per row) - reduced height */}
+          <div className="overflow-y-auto max-h-[95px] pr-1" style={{ scrollSnapType: "y mandatory" }}>
             <div className="grid grid-cols-2 gap-1">
               {/* AI Answer */}
               <TooltipProvider>
@@ -722,10 +737,6 @@ export default function RightSection() {
                   <Send className="h-4 w-4" />
                 </Button>
               </div>
-            </div>
-
-            <div className="flex justify-end">
-              <span className="text-xs text-muted-foreground">Shift+Enter for new line</span>
             </div>
           </div>
         </CardContent>
