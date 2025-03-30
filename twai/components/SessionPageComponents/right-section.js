@@ -482,13 +482,13 @@ export default function RightSection() {
               RAG
             </Button>
           </div>
-          
-          {/* Display Copied Text when useHighlightedText is true - now single line with ellipsis */}
+
+
           {useHighlightedText && copiedText && (
             <div className="flex items-center gap-2 bg-muted p-2 rounded-md text-xs relative">
-              <div className="overflow-hidden flex-1 pr-6 w-full">
-                <p className="whitespace-nowrap overflow-hidden text-ellipsis">{copiedText}</p>
-              </div>
+              <p className="whitespace-nowrap overflow-hidden text-ellipsis flex-1 pr-6 w-full">
+                <span className="font-bold">Selected Text:</span> {copiedText}
+              </p>
               <Button
                 variant="ghost"
                 size="sm"

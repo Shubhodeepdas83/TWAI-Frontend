@@ -86,7 +86,7 @@ export default function MiddleSection() {
         setChatMessages((prev) =>
           prev.map((msg) =>
             msg.id === mid && msg.sender === "ai"
-              ? { ...msg, text: msg.text + "\n\n_Thinking..._", isExpanding: true }
+              ? { ...msg, isExpanding: true }
               : msg,
           ),
         )
@@ -332,7 +332,7 @@ export default function MiddleSection() {
       setChatMessages((prev) =>
         prev
           .map((msg) =>
-            msg.isExpanding ? { ...msg, text: msg.text.replace("\n\n_Thinking..._", ""), isExpanding: false } : msg,
+            msg.isExpanding ? { ...msg, isExpanding: false } : msg,
           )
           .filter((msg) => msg.text !== "Thinking..."),
       )
