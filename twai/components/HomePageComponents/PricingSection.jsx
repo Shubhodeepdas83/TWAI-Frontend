@@ -191,16 +191,7 @@ const PricingSection = () => {
           ))}
         </div>
 
-        <div className="mt-16 text-center">
-          <h3 className="text-2xl font-bold text-white mb-4">Need a custom plan?</h3>
-          <p className="text-gray-300 mb-8">
-            Contact our sales team for custom pricing and plans tailored to your organization&apos;s needs.
-          </p>
-          <p className="text-sm text-gray-300 mt-2">Don&apos;t see a plan that works for you? Contact us for custom pricing.</p>
-          <Button variant="outline" className="border-[#FF00D6] text-[#FF00D6] hover:bg-[#FF00D6]/10">
-            Contact Sales
-          </Button>
-        </div>
+
       </div>
 
       {/* Waitlist Modal */}

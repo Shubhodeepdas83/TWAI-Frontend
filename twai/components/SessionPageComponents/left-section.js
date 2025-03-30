@@ -34,22 +34,7 @@ export default function LeftSection() {
   // Add this inside the component function
   const { toast } = useToast()
 
-  const handleClearConversation = async () => {
-    const tempConversation = [...wholeConversation]
-    setWholeConversation((prev) => prev.map((message) => ({ ...message, hidden: true })))
-    // setWholeConversation([]) // Immediately clear UI
-    await appendConversation({
-      sessionId,
-      newMessages: tempConversation
-        .filter((msg) => msg.saved == false)
-        .map((message) =>
-          ["user", "other", "time"].reduce((acc, key) => {
-            if (message.hasOwnProperty(key)) acc[key] = message[key]
-            return acc
-          }, {}),
-        ),
-    })
-  }
+
 
   const handleAddConversation = () => {
     const timestamp = new Date().toISOString() // Universal UTC timestamp

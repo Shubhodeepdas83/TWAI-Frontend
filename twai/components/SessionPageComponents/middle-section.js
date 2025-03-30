@@ -642,13 +642,13 @@ export default function MiddleSection() {
           {/* Scrollable Messages Area */}
           <div className="flex-1 overflow-hidden">
             <ScrollArea className="h-full pr-2">
-              {chatMessages.length === 0 ? (
+              {chatMessages.filter((msg) => msg.hidden == false).length === 0 ? (
                 <div className="h-full flex items-center justify-center text-center p-4">
                   <div className="max-w-sm">
                     <Bot className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-                    <h3 className="text-base font-medium mb-1">Welcome to AI Meeting Helper</h3>
-                    <p className="text-muted-foreground text-xs">
-                      Ask questions or upload an image to get assistance with your meeting preparation.
+                    <p className="text-muted-foreground py-4">
+                      <span className="block text-sm">Your conversation with JarWizAI will appear here...</span>
+                      <span className="block text-xs mt-1">Type a message below to start chatting</span>
                     </p>
                   </div>
                 </div>

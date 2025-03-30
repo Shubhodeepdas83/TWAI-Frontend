@@ -76,7 +76,7 @@ export default function RightSection() {
 
   const handleExit = async () => {
     setLoadingExit(true)
-    await appendConversation({
+    appendConversation({
       sessionId: sessionId,
       newMessages: wholeConversation
         .filter((msg) => msg.saved == false)
