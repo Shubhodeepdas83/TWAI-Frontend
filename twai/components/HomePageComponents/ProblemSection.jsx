@@ -14,15 +14,15 @@ const ProblemSection = () => {
             </div>
             <div className="grid gap-6 relative z-10">
               <div className="bg-[#242936] p-5 rounded-lg shadow-sm border border-gray-800">
-                <h3 className="text-xl font-semibold text-[#FF00D6] mb-2">Time Wasted before meetings</h3>
+                <h3 className="text-xl font-semibold text-[#FF00D6] mb-2">Time Wasted - before meetings</h3>
                 <p className="text-gray-300">Hours spent preparing materials that may never be referenced during the meeting.</p>
               </div>
               <div className="bg-[#242936] p-5 rounded-lg shadow-sm border border-gray-800">
-                <h3 className="text-xl font-semibold text-[#FF00D6] mb-2">Information Overload during meetings</h3>
+                <h3 className="text-xl font-semibold text-[#FF00D6] mb-2">Information Overload - during meetings</h3>
                 <p className="text-gray-300">Struggling to recall key data points when they are most needed in discussions.</p>
               </div>
               <div className="bg-[#242936] p-5 rounded-lg shadow-sm border border-gray-800">
-                <h3 className="text-xl font-semibold text-[#FF00D6] mb-2">Lost Opportunities after meetings</h3>
+                <h3 className="text-xl font-semibold text-[#FF00D6] mb-2">Lost Opportunities - after meetings</h3>
                 <p className="text-gray-300">Missing crucial insights that could have led to better business decisions.</p>
               </div>
             </div>
