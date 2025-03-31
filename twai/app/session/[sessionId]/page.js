@@ -17,7 +17,7 @@ export default function Home() {
   const { sessionId } = useParams()
   const { status } = useSession()
 
-  const { wholeConversation, setCopiedText, setWholeConversation, setChatMessages } = useAppContext()
+  const { wholeConversation, setCopiedText, setWholeConversation, setChatMessages,setSessionDetails } = useAppContext()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(true)
   const [loadingPhase, setLoadingPhase] = useState("initializing")
@@ -52,11 +52,11 @@ export default function Home() {
         if (data.conversation) {
           setWholeConversation(data.conversation.map((c) => ({ ...c, hidden: true, saved: true })))
         }
+        if(data.sessionDetails) {
+          setSessionDetails({description:data.sessionDetails.description,name:data.sessionDetails.name,templateInfo:data.sessionDetails.template})
+        }
 
-        // Simulate a minimum loading time for better UX
-        setTimeout(() => {
-          setIsLoading(false)
-        }, 800)
+        setIsLoading(false)
       } catch (error) {
         console.error("Error fetching session data:", error)
         router.push("/")

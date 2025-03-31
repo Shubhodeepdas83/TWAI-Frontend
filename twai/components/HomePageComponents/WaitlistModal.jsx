@@ -61,7 +61,7 @@ const WaitlistModal = ({ isOpen, onClose }) => {
               </svg>
             </div>
             <h3 className="text-xl font-medium text-white mb-2">Awesome!</h3>
-            <p className="text-gray-400">You&apos;re on early access list of JarWiz AI. Stay Tuned !</p>
+            <p className="text-gray-400">You&apos;re on early access list of JarWiz AI.</p>
 
           </div>
         ) : (

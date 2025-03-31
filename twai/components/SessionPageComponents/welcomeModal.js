@@ -4,33 +4,16 @@ import { useState, useEffect } from "react"
 import { X, Mic, MonitorSmartphone, Bot, Info } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useParams } from "next/navigation"
+import { useAppContext } from "@/context/AppContext"
 
 export default function WelcomeModal() {
   const [isOpen, setIsOpen] = useState(true)
   const [currentStep, setCurrentStep] = useState(0)
-  const [sessionDetails, setSessionDetails] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   const { sessionId } = useParams()
+  const { sessionDetails } = useAppContext()
 
-  useEffect(() => {
-    const fetchSessionDetails = async () => {
-      try {
-        const response = await fetch(`/api/session-details?sessionId=${sessionId}`)
-        if (response.ok) {
-          const data = await response.json()
-          setSessionDetails(data)
-        }
-      } catch (error) {
-        console.error("Failed to fetch session details:", error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
 
-    if (isOpen) {
-      fetchSessionDetails()
-    }
-  }, [sessionId, isOpen])
 
   const handleClose = () => setIsOpen(false)
   const handleNext = () => {

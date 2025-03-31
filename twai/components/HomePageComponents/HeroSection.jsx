@@ -60,7 +60,7 @@ const HeroSection = () => {
               {suffixes.map((suffix, index) => (
                 <span
                   key={suffix}
-                  className={`absolute transition-all duration-500 ease-in-out font-extrabold ${index === textIndex
+                  className={`absolute transition-all duration-500 ease-in-out font-extrabold text-[#ff00d4e9] ${index === textIndex
                       ? "opacity-100 transform-none"
                       : "opacity-0 translate-y-8"
                     }`}
