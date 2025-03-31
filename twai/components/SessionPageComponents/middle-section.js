@@ -648,7 +648,6 @@ export default function MiddleSection() {
                     <Bot className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
                     <p className="text-muted-foreground py-4">
                       <span className="block text-sm">Your conversation with JarWizAI will appear here...</span>
-                      <span className="block text-xs mt-1">Type a message below to start chatting</span>
                     </p>
                   </div>
                 </div>

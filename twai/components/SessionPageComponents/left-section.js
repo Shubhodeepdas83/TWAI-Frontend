@@ -59,10 +59,7 @@ export default function LeftSection() {
   useEffect(() => {
     setWholeConversation((prev) =>
       prev.map(
-        (message) =>
-          message.saved
-            ? { ...message, hidden: !showConversation } // Toggle `hidden` only for saved messages
-            : message, // Keep unsaved messages unchanged
+        (message) => ({ ...message, hidden: !showConversation }) // Toggle `hidden` only for saved messages
       ),
     )
   }, [showConversation])
@@ -96,13 +93,13 @@ export default function LeftSection() {
             setCopiedText(selectedText);
             setUseHighlightedText(true); // Set highlighted text state to true
   
-            // Show toast notification
-            toast({
-              title: "Text Selected",
-              description: selectedText.length > 50 ? `"${selectedText.substring(0, 50)}..."` : `"${selectedText}"`,
-              className: "bg-primary text-primary-foreground",
-              duration: 1000,
-            });
+            // // Show toast notification
+            // toast({
+            //   title: "Text Selected",
+            //   description: selectedText.length > 50 ? `"${selectedText.substring(0, 50)}..."` : `"${selectedText}"`,
+            //   className: "bg-primary text-primary-foreground",
+            //   duration: 1000,
+            // });
   
             // Deselect text after copying
             selection.removeAllRanges();
