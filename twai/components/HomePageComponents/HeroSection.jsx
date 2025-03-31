@@ -21,9 +21,15 @@ const HeroSection = () => {
 
   return (
     <section className="pt-32 pb-20 md:py-40 px-4 bg-[#0f1217] text-white relative overflow-hidden">
-      {/* Background pattern for visual interest */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYtMi42ODYgNi02cy0yLjY4Ni02LTYtNmMtMyAwLTYgMi42ODYtNiA2czMgNiA2IDZ6bTAgMThjMy4zMTQgMCA2LTIuNjg2IDYtNnMtMi42ODYtNi02LTZjLTMgMC02IDIuNjg2LTYgNnMzIDYgNiA2em0xOCAwYzMuMzE0IDAgNi0yLjY4NiA2LTZzLTIuNjg2LTYtNi02Yy0zIDAtNiAyLjY4Ni02IDZzMyA2IDYgNnptMC0xOGMzLjMxNCAwIDYtMi42ODYgNi02cy0yLjY4Ni02LTYtNmMtMyAwLTYgMi42ODYtNiA2czMgNiA2IDZ6bS0xOCAxOGMtMyAwLTYgMi42ODYtNiA2czMgNiA2IDZjMy4zMTQgMCA2LTIuNjg2IDYtNnMtMi42ODYtNi02LTZ6bS0xOC0xOGMtMyAwLTYgMi42ODYtNiA2czMgNiA2IDZjMy4zMTQgMCA2LTIuNjg2IDYtNnMtMi42ODYtNi02LTZ6bTAgMThjLTMgMC02IDIuNjg2LTYgNnMzIDYgNiA2YzMuMzE0IDAgNi0yLjY4NiA2LTZzLTIuNjg2LTYtNi02em0tMTgtMThjLTMgMC02IDIuNjg2LTYgNnMzIDYgNiA2YzMuMzE0IDAgNi0yLjY4NiA2LTZzLTIuNjg2LTYtNi02eiIgZmlsbD0iI2ZmZmZmZiIvPjwvZz48L3N2Zz4=')]"></div>
+      {/* Background image - using an online meeting image */}
+      <div className="absolute inset-0 opacity-40">
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: "url('https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80')"
+          }}
+        ></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0f1217] via-[#0f1217]/70 to-[#0f1217]"></div>
       </div>
 
       {/* Product Hunt notification banner with improved visual */}
