@@ -23,7 +23,7 @@ const FeaturesSection = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           <FeatureCard
             icon={<MessageSquare size={24} />}
-            title="Real-time conversation analysis"
+            title="Real-time AI collaborator"
             description="Understands the meeting flow & provides relevant inputs exactly when you need, without disrupting the natural conversation."
           />
 
@@ -35,8 +35,8 @@ const FeaturesSection = () => {
 
           <FeatureCard
             icon={<FileText size={24} />}
-            title="Instant document retrieval"
-            description="Accesses uploaded documents to pull up exact information when needed, saving you from awkward pauses while searching for data."
+            title="Instant web & doc search"
+            description="Searches uploaded documents & web to pull up exact information when needed, saving you from awkward pauses while searching for data."
           />
 
           <FeatureCard
@@ -48,7 +48,7 @@ const FeaturesSection = () => {
           <FeatureCard
             icon={<Link size={24} />}
             title="Seamless integration"
-            description="Works with popular meeting platforms like Zoom, Google Meet, Microsoft Teams and all browser based meeting apps."
+            description="Works with all popular meeting platforms like Zoom, Google Meet, Microsoft Teams and other browser based meeting apps."
           />
 
           <FeatureCard
