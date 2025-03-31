@@ -98,7 +98,7 @@ const TestimonialsSection = () => {
               className="bg-[#171b22] border border-gray-800 p-6 h-full flex flex-col shadow-lg hover:shadow-xl transition-shadow duration-300"
             >
               <div className="mb-4">
-                <h3 className="text-xl md:text-2xl font-bold text-white italic">"{testimonial.quote}"</h3>
+                <h3 className="text-xl md:text-2xl font-bold text-white italic">&quot;{testimonial.quote}&quot;</h3>
               </div>
               
               <p className="text-gray-300 mb-6 flex-grow">
