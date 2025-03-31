@@ -449,39 +449,45 @@ export default function RightSection() {
         <CardContent className="p-2 pt-0 flex flex-col gap-3">
           {/* Checkboxes Section converted to button style */}
           <div className="flex flex-wrap gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setEnableWebSearch(!enableWebSearch)}
-              className={`text-muted-foreground h-7 px-2 flex items-center ${enableWebSearch ? "bg-primary/10 text-primary" : ""}`}
-              title={enableWebSearch ? "Web Search On" : "Web Search Off"}
-            >
-              <Search className="h-3 w-3 mr-1" />
-              Web Search
-            </Button>
+  <Button
+    variant="ghost"
+    size="sm"
+    onClick={() => setEnableWebSearch(!enableWebSearch)}
+    className={`text-muted-foreground h-7 px-2 flex items-center hover:bg-transparent hover:text-current ${
+      enableWebSearch ? "bg-primary/10 text-primary hover:bg-primary/10 hover:text-primary" : ""
+    }`}
+    title={enableWebSearch ? "Web Search On" : "Web Search Off"}
+  >
+    <Search className="h-3 w-3 mr-1" />
+    Web Search
+  </Button>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowGraph(!showGraph)}
-              className={`text-muted-foreground h-7 px-2 flex items-center ${showGraph ? "bg-primary/10 text-primary" : ""}`}
-              title={showGraph ? "Graph On" : "Graph Off"}
-            >
-              <BarChart2 className="h-3 w-3 mr-1" />
-              Graph
-            </Button>
+  <Button
+    variant="ghost"
+    size="sm"
+    onClick={() => setShowGraph(!showGraph)}
+    className={`text-muted-foreground h-7 px-2 flex items-center hover:bg-transparent hover:text-current ${
+      showGraph ? "bg-primary/10 text-primary hover:bg-primary/10 hover:text-primary" : ""
+    }`}
+    title={showGraph ? "Graph On" : "Graph Off"}
+  >
+    <BarChart2 className="h-3 w-3 mr-1" />
+    Graph
+  </Button>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setUseRag(!useRag)}
-              className={`text-muted-foreground h-7 px-2 flex items-center ${useRag ? "bg-primary/10 text-primary" : ""}`}
-              title={useRag ? "RAG On" : "RAG Off"}
-            >
-              <Database className="h-3 w-3 mr-1" />
-              RAG
-            </Button>
-          </div>
+  <Button
+    variant="ghost"
+    size="sm"
+    onClick={() => setUseRag(!useRag)}
+    className={`text-muted-foreground h-7 px-2 flex items-center hover:bg-transparent hover:text-current ${
+      useRag ? "bg-primary/10 text-primary hover:bg-primary/10 hover:text-primary" : ""
+    }`}
+    title={useRag ? "RAG On" : "RAG Off"}
+  >
+    <Database className="h-3 w-3 mr-1" />
+    RAG
+  </Button>
+</div>
 
           {useHighlightedText && copiedText && (
             <div className="flex items-center gap-2 bg-muted p-2 rounded-md text-xs relative">
