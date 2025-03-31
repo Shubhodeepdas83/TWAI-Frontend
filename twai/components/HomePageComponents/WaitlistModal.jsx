@@ -41,7 +41,7 @@ const WaitlistModal = ({ isOpen, onClose }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
       <div className="bg-[#1a1f29] rounded-xl p-6 max-w-md w-full mx-4 border border-gray-700 shadow-xl animate-in fade-in duration-300">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-white">Join the Waitlist</h2>
+          <h2 className="text-xl font-bold text-white">Get Early Access to JarWiz AI</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
             <X size={20} />
           </button>
@@ -60,22 +60,17 @@ const WaitlistModal = ({ isOpen, onClose }) => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h3 className="text-xl font-medium text-white mb-2">Thank You!</h3>
-            <p className="text-gray-400 mb-6">We&apos;ll let you know when we&apos;re ready to launch!</p>
-            <Button onClick={onClose} className="bg-[#242936] hover:bg-[#2f3646] text-white">
-              Close
-            </Button>
+            <h3 className="text-xl font-medium text-white mb-2">Awesome!</h3>
+            <p className="text-gray-400">You&apos;re on early access list of JarWiz AI.</p>
+
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <p className="text-gray-400 mb-4">
-                We&apos;re excited to have you on our waitlist! We&apos;ll be in touch soon.
+                Be the first to get a real-time AI Meeting companion to ace your meetings!
               </p>
               <div className="space-y-2">
-                <label htmlFor="email" className="block text-sm font-medium text-gray-300">
-                  Email Address
-                </label>
                 <input
                   type="email"
                   id="email"

@@ -1,112 +1,125 @@
-"use client"
 
-import { useState } from "react"
-import { ChevronLeft, ChevronRight, Star } from "lucide-react"
+import { Star } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
 const testimonials = [
   {
     id: 1,
-    quote:
-      "Jarwiz AI has revolutionized how I conduct client meetings. I never have to worry about forgetting details again. It's like having a brilliant assistant who never misses a beat.",
-    name: "Sarah Johnson",
-    title: "Freelance Consultant",
-    company: "Johnson Consulting LLC",
-    avatar: "SJ",
+    quote: "Real-time savior",
+    content: "Just upload all the notes, ideas & docs. And it surfaces them in meeting, at exactly the right moment.",
+    name: "Nibin Issac",
+    rating: 5,
   },
   {
     id: 2,
-    quote:
-      "With Jarwiz AI, our team meetings are more focused and productive. It's like having an extra team member dedicated to efficiency. The real-time data access has saved us countless hours.",
-    name: "David Chen",
-    title: "Startup Founder",
-    company: "NexGen Technologies",
-    avatar: "DC",
+    quote: "No more dark eyes for me",
+    content: "Before I had to prepare hours for presentations, memorizing & creating notes, which then I always forgot. Well not anymore",
+    name: "Olivia Thompson",
+    rating: 5,
   },
   {
     id: 3,
-    quote:
-      "I was skeptical about AI meeting assistants, but Jarwiz proved me wrong. It's intuitive, non-intrusive, and genuinely makes my meetings better. Worth every penny!",
-    name: "Michelle Rodriguez",
-    title: "Project Manager",
-    company: "Innovative Solutions Inc.",
-    avatar: "MR",
+    quote: "Takes away all your stress",
+    content: "I enjoy presentations much more now. All questions, doubts, arguments are handles by JarWiz instantly. And I just focus on connecting with clients now.",
+    name: "Harish Goyal",
+    rating: 5,
   },
-]
+  {
+    id: 4,
+    quote: "Citations gives confidence",
+    content: "It cites everything and shows exactly where it got the detail from. Exact slide, exact paragraph, exact tab. Never doubts about hallucination.",
+    name: "Kanan Gupta",
+    rating: 5,
+  },
+  {
+    id: 5,
+    quote: "No more disagreements",
+    content: "More consensus. No more hand-waving. More data-backed arguments. Everybody on same page.",
+    name: "Sonia Thomas",
+    rating: 5,
+  },
+  {
+    id: 6,
+    quote: "Meetings are fun",
+    content: "Once you get try it, there is no going back. Meetings are not same anymore. They are walk in park.",
+    name: "Prakash Oswal",
+    rating: 5,
+  },
+  {
+    id: 7,
+    quote: "So many Agents!",
+    content: "It has so 20+ Agents, all working in background and they surface instantly, only when you need.",
+    name: "Sam Sharma",
+    rating: 5,
+  },
+  {
+    id: 8,
+    quote: "Amazingly Non-Intrusive",
+    content: "Initially I had doubts if AI will obstruct my flow. But kudos to 1-click feature. It is so intuitive and seamless.",
+    name: "Noah Johnson",
+    rating: 5,
+  },
+  {
+    id: 9,
+    quote: "Crack those critical meetings..",
+    content: "You dont want to take chances with those high-stakes critical meetings. Every inch matters in them & JarWIZ gives you a yard ",
+    name: "Morten Larsson",
+    rating: 5,
+  },
+];
 
 const TestimonialsSection = () => {
-  const [activeIndex, setActiveIndex] = useState(0)
-
-  const goToPrevious = () => {
-    setActiveIndex((prev) => (prev === 0 ? testimonials.length - 1 : prev - 1))
-  }
-
-  const goToNext = () => {
-    setActiveIndex((prev) => (prev === testimonials.length - 1 ? 0 : prev + 1))
-  }
+  // Function to render stars based on rating
+  const renderStars = (rating) => {
+    return (
+      <div className="flex">
+        {[...Array(5)].map((_, i) => (
+          <Star
+            key={i}
+            className={`h-4 w-4 ${
+              i < rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"
+            }`}
+          />
+        ))}
+        <span className="ml-1 text-sm text-gray-300">{rating}/5</span>
+      </div>
+    );
+  };
 
   return (
-    <section id="testimonials" className="section-padding bg-[#0f1217]">
-      <div className="container mx-auto">
-        <h2 className="section-title text-white">What Our Users Say</h2>
-
-        <div className="relative max-w-4xl mx-auto">
-          <div className="bg-[#1a1f29] rounded-xl p-8 md:p-12 border border-gray-800 shadow-md">
-            <div className="flex justify-center mb-8">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="text-yellow-400 h-6 w-6 fill-yellow-400" />
-              ))}
-            </div>
-
-            <blockquote className="text-xl md:text-2xl text-center text-gray-300 italic mb-8">
-              &quot;{testimonials[activeIndex].quote}&quot;
-            </blockquote>
-
-            <div className="flex flex-col items-center">
-              <div className="w-16 h-16 rounded-full bg-[#FF00D6]/20 flex items-center justify-center text-white font-semibold text-xl mb-4">
-                {testimonials[activeIndex].avatar}
-              </div>
-              <div className="text-center">
-                <h4 className="text-lg font-bold text-white">{testimonials[activeIndex].name}</h4>
-                <p className="text-gray-400">
-                  {testimonials[activeIndex].title}, {testimonials[activeIndex].company}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-center mt-8 space-x-4">
-            <button
-              onClick={goToPrevious}
-              className="w-12 h-12 rounded-full bg-[#242936] border border-gray-700 flex items-center justify-center text-gray-300 hover:bg-[#2f3646] hover:text-white transition-colors"
-              aria-label="Previous testimonial"
+    <section id="testimonials" className="section-padding bg-[#0f1217] pt-20 pb-24">
+      <div className="container mx-auto px-4">
+        <h2 className="section-title text-white">What Our Beta Users Say</h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
+          {testimonials.map((testimonial) => (
+            <Card 
+              key={testimonial.id} 
+              className="bg-[#171b22] border border-gray-800 p-6 h-full flex flex-col shadow-lg hover:shadow-xl transition-shadow duration-300"
             >
-              <ChevronLeft className="h-6 w-6" />
-            </button>
-
-            <div className="flex space-x-2 items-center">
-              {testimonials.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setActiveIndex(index)}
-                  className={`w-3 h-3 rounded-full ${index === activeIndex ? "bg-[#FF00D6]" : "bg-gray-600"}`}
-                  aria-label={`Go to testimonial ${index + 1}`}
-                />
-              ))}
-            </div>
-
-            <button
-              onClick={goToNext}
-              className="w-12 h-12 rounded-full bg-[#242936] border border-gray-700 flex items-center justify-center text-gray-300 hover:bg-[#2f3646] hover:text-white transition-colors"
-              aria-label="Next testimonial"
-            >
-              <ChevronRight className="h-6 w-6" />
-            </button>
-          </div>
+              <div className="mb-4">
+                <h3 className="text-xl md:text-2xl font-bold text-white italic">&quot;{testimonial.quote}&quot;</h3>
+              </div>
+              
+              <p className="text-gray-300 mb-6 flex-grow">
+                {testimonial.content}
+              </p>
+              
+              <div className="mt-auto">
+                <h4 className="font-medium text-white mb-1">{testimonial.name}</h4>
+                {testimonial.title && testimonial.company && (
+                  <p className="text-sm text-gray-400">{testimonial.title}, {testimonial.company}</p>
+                )}
+                <div className="mt-2">
+                  {renderStars(testimonial.rating)}
+                </div>
+              </div>
+            </Card>
+          ))}
         </div>
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default TestimonialsSection
-
+export default TestimonialsSection;

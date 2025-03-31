@@ -25,6 +25,7 @@ export function AppProvider({ children }) {
   const micToken = useRef(null);
   const captureToken = useRef(null);
   const [saveChatCounter,setSaveChatCounter] = useState(0);
+  const [sessionDetails,setSessionDetails] = useState(null);
 
   return (
     <AppContext.Provider
@@ -50,7 +51,8 @@ export function AppProvider({ children }) {
         setEnableWebSearch,
         showGraph,
         setShowGraph,usedCitations, setUsedCitations,setCopiedText,copiedText,micToken,captureToken,setUseHighlightedText,useHighlightedText,graphImage,setGraphImage,useRag,setUseRag,setSaveChatCounter,
-        saveChatCounter
+        saveChatCounter,sessionDetails,
+        setSessionDetails
       }}
     >
       {children}

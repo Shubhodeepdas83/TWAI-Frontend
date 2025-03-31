@@ -63,6 +63,8 @@ export async function POST(req) {
       factcheck: "/process-ai-factcheck",
       summary: "/process-ai-summary",
       help: "/process-ai-help",
+      fiveyearold: "/explain-like-5-year-old",
+      createactionplan: "/create-action-plan",
     };
 
     const response = await fetch(`${process.env.BACKEND_URL}${endpoints[requestType]}`, {

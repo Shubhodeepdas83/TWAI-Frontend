@@ -4,12 +4,14 @@ import { useSession, signOut } from "next-auth/react"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { getUserDetails, removeDocument, getSummary, deleteMeetingTemplate, getAgentStore } from "./actions"
-import { Calendar, FileText, Folder, LogOut, Plus, Trash, User, Edit, Store, ExternalLink } from "lucide-react"
+import { Calendar, FileText, Folder, LogOut, Plus, Trash, User, Edit, Store, List, Smile } from "lucide-react"
 import CreateSessionModal from "../../components/DashboardPageComponents/CreateSessionModal"
 import DocumentUploadModal from "../../components/DashboardPageComponents/DocumentUploadModal"
 import CreateTemplateModal from "../../components/DashboardPageComponents/CreateTemplateModal"
 import EditDocumentModal from "../../components/DashboardPageComponents/EditDocumentModal"
 import EditTemplateModal from "../../components/DashboardPageComponents/EditTemplateModal"
+import { DashboardSkeleton, LoadingOverlay } from "@/components/loading-page"
+import { SpinnerButton } from "@/components/ui/spinnerButton"
 
 export default function DashboardPage() {
   const { data: session, status } = useSession()
@@ -24,6 +26,8 @@ export default function DashboardPage() {
   const [isDeleting, setIsDeleting] = useState(false)
   const [deletingId, setDeletingId] = useState(null)
   const [agents, setAgents] = useState([])
+  const [isLoadingSummary, setIsLoadingSummary] = useState(false)
+  const [isOpeningSession, setIsOpeningSession] = useState(false)
   const router = useRouter()
 
   // Add these state variables in the DashboardPage component
@@ -32,6 +36,15 @@ export default function DashboardPage() {
   const [selectedDocument, setSelectedDocument] = useState(null)
   const [selectedTemplate, setSelectedTemplate] = useState(null)
 
+  // Add loading state to sign-out button
+  // Fix summary generation bug to apply loading state only to specific session
+
+  // Update the sign-out button to include loading state
+  const [isSigningOut, setIsSigningOut] = useState(false)
+
+  // Fix summary generation bug - track loading state per session
+  const [loadingSummaryId, setLoadingSummaryId] = useState(null)
+
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/")
@@ -39,7 +52,6 @@ export default function DashboardPage() {
   }, [status, router])
 
   useEffect(() => {
-
     fetchAgentStore()
     fetchUserData()
   }, [])
@@ -51,7 +63,6 @@ export default function DashboardPage() {
       setUser(data.user)
       setIsLoading(false)
     }
-
   }
 
   const fetchAgentStore = async () => {
@@ -59,11 +70,9 @@ export default function DashboardPage() {
     const data = await getAgentStore()
     if (data.agents) {
       setAgents(data.agents)
-    }
-    else{
+    } else {
       alert("Failed to fetch agents")
     }
-
   }
 
   const handleDeleteDocument = async (documentId) => {
@@ -110,13 +119,30 @@ export default function DashboardPage() {
     }
   }
 
+  const handleOpenSession = (sessionId) => {
+    setIsOpeningSession(true)
+    router.push(`/session/${sessionId}`)
+  }
+
+  // Add this to the component
+  const handleSignOut = async () => {
+    setIsSigningOut(true)
+    await signOut()
+  }
+
+  // Update the handleGenerateSummary function
   const handleGenerateSummary = async (sessionId) => {
-    const data = await getSummary(sessionId)
-    if (data.summary) {
-      setSelectedSessionSummary(data.summary)
-      setIsSummaryModalOpen(true)
-    } else {
-      alert("Failed to generate summary")
+    setLoadingSummaryId(sessionId)
+    try {
+      const data = await getSummary(sessionId)
+      if (data.summary) {
+        setSelectedSessionSummary(data.summary)
+        setIsSummaryModalOpen(true)
+      } else {
+        alert("Failed to generate summary")
+      }
+    } finally {
+      setLoadingSummaryId(null)
     }
   }
 
@@ -132,11 +158,14 @@ export default function DashboardPage() {
   }
 
   if (status === "loading" || isLoading) {
-    return <div className="h-screen flex items-center justify-center">Loading...</div>
+    return <DashboardSkeleton />
   }
 
   return (
     <div className="flex h-screen bg-gray-50">
+      {/* Loading overlays */}
+      <LoadingOverlay message="Opening session" isOpen={isOpeningSession} />
+
       {/* Sidebar */}
       <div className="flex h-full w-64 flex-col border-r bg-white px-4 py-6 shadow-sm">
         {/* User Info */}
@@ -192,11 +221,21 @@ export default function DashboardPage() {
 
         {/* Sign Out Button */}
         <button
-          onClick={() => signOut()}
+          onClick={handleSignOut}
+          disabled={isSigningOut}
           className="mt-auto inline-flex w-full items-center justify-start rounded-md px-4 py-2 text-sm font-medium text-red-600 hover:bg-gray-50 transition-colors"
         >
-          <LogOut className="mr-2 h-4 w-4" />
-          Sign Out
+          {isSigningOut ? (
+            <>
+              <div className="mr-2 h-4 w-4 border-2 border-t-transparent border-red-600 rounded-full animate-spin"></div>
+              Signing Out...
+            </>
+          ) : (
+            <>
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign Out
+            </>
+          )}
         </button>
       </div>
 
@@ -256,18 +295,28 @@ export default function DashboardPage() {
                         <p className="mb-3 text-sm text-gray-600 line-clamp-2 flex-grow">{session.description}</p>
                       )}
                       <div className="mt-auto flex items-center justify-between">
-                        <button
-                          onClick={() => router.push(`/session/${session.id}`)}
+                        <SpinnerButton
+                          onClick={() => handleOpenSession(session.id)}
                           className="rounded-md bg-blue-100 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-200 transition-colors"
+                          loadingText="Opening..."
+                          loading={isOpeningSession}
+                          size="sm"
+                          variant="secondary"
                         >
                           Open Session
-                        </button>
-                        <button
+                        </SpinnerButton>
+
+                        {/* Update the SpinnerButton in the session card */}
+                        <SpinnerButton
                           onClick={() => handleGenerateSummary(session.id)}
                           className="rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200 transition-colors"
+                          loading={loadingSummaryId === session.id}
+                          loadingText="Loading..."
+                          size="sm"
+                          variant="outline"
                         >
                           View Summary
-                        </button>
+                        </SpinnerButton>
                       </div>
                     </div>
                   ))}
@@ -298,67 +347,67 @@ export default function DashboardPage() {
               </div>
 
               {user?.documents?.length > 0 ? (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <div className="w-full border rounded-lg overflow-hidden">
+                  <div className="grid grid-cols-[1.5fr_2fr_1fr_1fr_2fr] gap-4 p-2 text-gray-700 font-medium bg-gray-100">
+                    <span>Title</span>
+                    <span>Description</span>
+                    <span>Date</span>
+                    <span>Status</span>
+                    <span>Actions</span>
+                  </div>
+
                   {user.documents.map((doc) => (
                     <div
                       key={doc.id}
-                      className="rounded-lg border bg-white p-5 shadow-sm transition-shadow hover:shadow-md h-[220px] flex flex-col"
+                      className="grid grid-cols-[1.5fr_2fr_1fr_1fr_2fr] gap-4 p-2 border-b items-center"
                     >
-                      <div className="mb-2 flex items-center justify-between">
-                        <h3 className="font-medium text-blue-600 truncate max-w-[200px]">
-                          {doc.title || "Untitled Document"}
-                        </h3>
-                        <div className="flex items-center gap-2 ml-2">
-                          {doc.isEmbedded ? (
-                            <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full whitespace-nowrap">
-                              Embedded
-                            </span>
-                          ) : (
-                            <span className="text-xs px-2 py-1 bg-gray-100 text-gray-800 rounded-full whitespace-nowrap">
-                              Not Embedded
-                            </span>
-                          )}
-                        </div>
+                      {/* Document Title */}
+                      <span className="truncate text-blue-600">{doc.title || "Untitled Document"}</span>
+
+                      {/* Document Description (truncated) */}
+                      <span className="truncate text-gray-600">{doc.description || "No description"}</span>
+
+                      {/* Upload Date */}
+                      <span className="text-xs text-gray-500">{new Date(doc.uploadedAt).toLocaleDateString()}</span>
+
+                      {/* Status Badge */}
+                      <div className="text-left">
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full inline-block ${
+                            doc.isEmbedded ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
+                          {doc.isEmbedded ? "Embedded" : "Not Embedded"}
+                        </span>
                       </div>
-                      <div className="flex items-center text-xs text-gray-500 mb-2">
-                        <span>{new Date(doc.uploadedAt).toLocaleDateString()}</span>
-                      </div>
-                      {doc.description && (
-                        <p className="mb-3 text-sm text-gray-600 line-clamp-2 flex-grow">{doc.description}</p>
-                      )}
-                      <p className="mb-3 text-xs text-gray-500 truncate">{doc.fileUrl}</p>
-                      <div className="mt-auto flex justify-between">
-                        <div className="flex gap-2">
-                          <a
-                            href={doc.fileUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="rounded-md bg-blue-100 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-200 transition-colors"
-                          >
-                            View
-                          </a>
-                          <button
-                            onClick={() => handleEditDocument(doc)}
-                            className="rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200 transition-colors"
-                          >
-                            <Edit className="mr-1 inline-block h-3 w-3" />
-                            Edit
-                          </button>
-                        </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-2">
                         <button
+                          onClick={() => window.open(doc.fileUrl, "_blank")}
+                          className="rounded-md bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 hover:bg-blue-200 transition-colors"
+                        >
+                          View
+                        </button>
+                        <button
+                          onClick={() => handleEditDocument(doc)}
+                          className="rounded-md bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-200 transition-colors"
+                        >
+                          <Edit className="mr-1 inline-block h-3 w-3" />
+                          Edit
+                        </button>
+                        <SpinnerButton
                           onClick={() => handleDeleteDocument(doc.id)}
                           disabled={isDeleting && deletingId === doc.id}
-                          className="rounded-md bg-red-100 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-200 disabled:bg-gray-100 disabled:text-gray-400 transition-colors"
+                          loading={isDeleting && deletingId === doc.id}
+                          loadingText="Deleting..."
+                          className="rounded-md bg-red-100 px-3 py-1 text-xs font-medium text-red-700 hover:bg-red-200 disabled:bg-gray-100 disabled:text-gray-400 transition-colors"
+                          size="sm"
+                          variant="outline"
                         >
-                          {isDeleting && deletingId === doc.id ? (
-                            "Deleting..."
-                          ) : (
-                            <>
-                              <Trash className="mr-1 inline-block h-3 w-3" />
-                              Delete
-                            </>
-                          )}
-                        </button>
+                          <Trash className="mr-1 inline-block h-3 w-3" />
+                          Delete
+                        </SpinnerButton>
                       </div>
                     </div>
                   ))}
@@ -437,20 +486,18 @@ export default function DashboardPage() {
                             <Edit className="mr-1 inline-block h-3 w-3" />
                             Edit
                           </button>
-                          <button
+                          <SpinnerButton
                             onClick={() => handleDeleteTemplate(template.id)}
                             disabled={isDeleting && deletingId === template.id}
+                            loading={isDeleting && deletingId === template.id}
+                            loadingText="Deleting..."
                             className="rounded-md bg-red-100 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-200 disabled:bg-gray-100 disabled:text-gray-400 transition-colors"
+                            size="sm"
+                            variant="outline"
                           >
-                            {isDeleting && deletingId === template.id ? (
-                              "Deleting..."
-                            ) : (
-                              <>
-                                <Trash className="mr-1 inline-block h-3 w-3" />
-                                Delete
-                              </>
-                            )}
-                          </button>
+                            <Trash className="mr-1 inline-block h-3 w-3" />
+                            Delete
+                          </SpinnerButton>
                         </div>
                       </div>
                     </div>
@@ -512,16 +559,6 @@ export default function DashboardPage() {
                               </span>
                             ))}
                           </div>
-                        </div>
-
-                        <div className="flex justify-end">
-                          {/* <button
-                            className="rounded-md bg-blue-100 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-200 transition-colors flex items-center"
-                            disabled
-                          >
-                            <ExternalLink className="mr-1 h-3 w-3" />
-                            Coming Soon
-                          </button> */}
                         </div>
                       </div>
                     </div>

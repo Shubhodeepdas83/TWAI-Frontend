@@ -43,6 +43,9 @@ export async function isValidSession({ sessionId }) {
         select: {
             chat: true,
             conversation:true,
+            template:true,
+            description:true,
+            name:true,
             
         },
     });
@@ -55,7 +58,7 @@ export async function isValidSession({ sessionId }) {
 
 
 
-    return { chat: found.chat,conversation:found.conversation };
+    return { chat: found.chat,conversation:found.conversation,sessionDetails:found };
 
 
 }

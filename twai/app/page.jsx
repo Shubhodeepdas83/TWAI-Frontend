@@ -13,6 +13,7 @@ import PricingSection from "@/components/HomePageComponents/PricingSection"
 import FAQSection from "@/components/HomePageComponents/FAQSection"
 import CTASection from "@/components/HomePageComponents/CTASection"
 import Footer from "@/components/HomePageComponents/Footer"
+import ProblemSection from "@/components/HomePageComponents/ProblemSection"
 
 export default function Home() {
   const { status } = useSession()
@@ -36,6 +37,7 @@ export default function Home() {
     <div className="min-h-screen bg-[#0f1217]">
       <Header />
       <HeroSection />
+      <ProblemSection />
       <SolutionSection />
       <FeaturesSection />
       <BenefitsSection />

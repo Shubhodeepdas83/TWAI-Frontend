@@ -11,77 +11,63 @@ import { isValidSession } from "./actions"
 import { useAppContext } from "../../../context/AppContext"
 // Import the Toaster component for toast notifications
 import { Toaster } from "@/components/ui/toaster"
+import { FullscreenLoader } from "@/components/loading-page"
 
 export default function Home() {
   const { sessionId } = useParams()
   const { status } = useSession()
 
-  const { wholeConversation, setCopiedText, setWholeConversation, setChatMessages } = useAppContext()
+  const { wholeConversation, setCopiedText, setWholeConversation, setChatMessages,setSessionDetails } = useAppContext()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(true)
+  const [loadingPhase, setLoadingPhase] = useState("initializing")
 
   useEffect(() => {
     const fetchData = async () => {
       if (status === "unauthenticated") {
         router.push("/")
+        return
       }
 
-      const data = await isValidSession({ sessionId: sessionId })
+      if (status === "loading") {
+        return
+      }
 
-      if (data.failure) {
-        router.push("/")
-      } else {
+      setLoadingPhase("authenticating")
+
+      try {
+        const data = await isValidSession({ sessionId: sessionId })
+
+        if (data.failure) {
+          router.push("/")
+          return
+        }
+
+        setLoadingPhase("loading-session")
+
         if (data.chat) {
           setChatMessages(data.chat.map((c) => ({ ...c, hidden: true, saved: true })))
         }
+
         if (data.conversation) {
           setWholeConversation(data.conversation.map((c) => ({ ...c, hidden: true, saved: true })))
         }
+        if(data.sessionDetails) {
+          setSessionDetails({description:data.sessionDetails.description,name:data.sessionDetails.name,templateInfo:data.sessionDetails.template})
+        }
 
         setIsLoading(false)
+      } catch (error) {
+        console.error("Error fetching session data:", error)
+        router.push("/")
       }
     }
 
     fetchData()
   }, [status, sessionId, router])
 
-  // useEffect(() => {
-  //   const handleMouseUp = () => {
-  //     const selectedText = window.getSelection()?.toString().trim()
-  //     if (!selectedText) return
-
-  //     const selection = window.getSelection()
-  //     if (!selection) return
-
-  //     const anchorNode = selection.anchorNode
-  //     const focusNode = selection.focusNode
-
-  //     if (!anchorNode || !focusNode) return
-
-  //     // Ensure BOTH the start and end of selection are inside the conversation container
-  //     const conversationContainer = document.getElementById("conversation-container")
-
-  //     if (
-  //       conversationContainer &&
-  //       conversationContainer.contains(anchorNode) &&
-  //       conversationContainer.contains(focusNode)
-  //     ) {
-  //       navigator.clipboard
-  //         .writeText(selectedText)
-  //         .then(() => {
-  //           console.log("Copied:", selectedText)
-  //           setCopiedText(selectedText)
-  //         })
-  //         .catch((err) => console.error("Copy failed:", err))
-  //     }
-  //   }
-
-  //   document.addEventListener("mouseup", handleMouseUp)
-  //   return () => document.removeEventListener("mouseup", handleMouseUp)
-  // }, [setCopiedText])
-
-  if (isLoading) {
-    return <div>Loading...</div>
+  if (status === "loading" || isLoading) {
+    return <FullscreenLoader />
   }
 
   return (

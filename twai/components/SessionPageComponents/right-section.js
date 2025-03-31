@@ -18,6 +18,8 @@ import {
   Search,
   Book,
   List,
+  Send,
+  Database,
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -26,6 +28,8 @@ import { appendConversation } from "../../app/session/[sessionId]/actions"
 import { unstable_noStore as noStore } from "next/cache"
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { v4 as uuidv4 } from "uuid"
+import { Textarea } from "@/components/ui/textarea"
+import FloatingImageWindow from "./FloatingImageWindow"
 
 export default function RightSection() {
   noStore()
@@ -50,7 +54,12 @@ export default function RightSection() {
     useRag,
     setSaveChatCounter,
     setUseHighlightedText,
-    useHighlightedText
+    useHighlightedText,
+    setEnableWebSearch,
+    videoRef,
+    stream,
+    setUseRag,
+    saveChatCounter,
   } = useAppContext()
 
   const { sessionId } = useParams()
@@ -59,6 +68,7 @@ export default function RightSection() {
   const [enlargedImage, setEnlargedImage] = useState(null)
   const [loadingExit, setLoadingExit] = useState(false)
   const [zoomLevel, setZoomLevel] = useState(1)
+  const [userInput, setUserInput] = useState("")
 
   const toggleGraphVisibility = () => {
     setIsGraphVisible(!isGraphVisible)
@@ -66,7 +76,7 @@ export default function RightSection() {
 
   const handleExit = async () => {
     setLoadingExit(true)
-    await appendConversation({
+    appendConversation({
       sessionId: sessionId,
       newMessages: wholeConversation
         .filter((msg) => msg.saved == false)
@@ -103,8 +113,8 @@ export default function RightSection() {
           conversation: tempconv,
           use_web: enableWebSearch,
           requestType,
-          useHighlightedText:USEHIGHLIGHTEDTEXT,
-          copiedText:COPIEDTEXT,
+          useHighlightedText: USEHIGHLIGHTEDTEXT,
+          copiedText: COPIEDTEXT,
           sessionId,
           useRag,
         }),
@@ -248,7 +258,6 @@ export default function RightSection() {
         }
       }
 
-      
       setChatMessages((prev) => [...prev.filter((msg) => msg.text !== "Thinking...")])
 
       setSaveChatCounter((prev) => prev + 1)
@@ -287,6 +296,129 @@ export default function RightSection() {
     setEnlargedImage(imageData)
   }
 
+  const handleSendMessage = async () => {
+    if (isProcessing || !userInput.trim()) return
+
+    const id = uuidv4()
+    setIsProcessing(true)
+    setCopiedText("")
+    setUseHighlightedText(false)
+
+    setChatMessages((prev) => [
+      ...prev,
+      {
+        text: userInput,
+        sender: "user",
+        id: id,
+        time: new Date().toISOString(),
+        action: "chat_Jamie_AI",
+        latestConvoTime: wholeConversation.length > 0 ? wholeConversation[wholeConversation.length - 1].time : null,
+        saved: false,
+        hidden: false,
+        isWeb: enableWebSearch,
+        isRag: useRag,
+        useHighlightedText: false,
+        copiedText: "",
+      },
+      { text: "Thinking...", sender: "ai" },
+    ])
+
+    setUserInput("")
+    setUsedCitations([])
+    setGraphImage(null)
+
+    const formData = new FormData()
+    formData.append("user_input", userInput)
+    formData.append("use_web", enableWebSearch)
+    formData.append("use_graph", showGraph)
+    formData.append("sessionId", sessionId)
+    formData.append("useRag", useRag)
+
+    try {
+      const response = await fetch("/api/chat_Jamie_AI", {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!response.ok) throw new Error(`Server responded with ${response.status}`)
+
+      const reader = response.body?.getReader()
+      if (!reader) throw new Error("Streaming not supported")
+
+      const decoder = new TextDecoder()
+      let buffer = ""
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        buffer += decoder.decode(value, { stream: true })
+
+        const lines = buffer.split("\n")
+        buffer = lines.pop() || ""
+
+        for (const line of lines) {
+          if (!line.trim()) continue
+          try {
+            const h = JSON.parse(line)
+
+            if (h.result) {
+              setChatMessages((prev) => {
+                const filteredMessages = prev.filter((msg) => msg.text !== "Thinking...")
+                const existingMessageIndex = filteredMessages.findIndex((msg) => msg.id === id && msg.sender === "ai")
+
+                if (existingMessageIndex !== -1) {
+                  return filteredMessages.map((msg) =>
+                    msg.id === id && msg.sender === "ai" ? { ...msg, text: h.result, saved: false } : msg,
+                  )
+                } else {
+                  return [
+                    ...filteredMessages,
+                    {
+                      text: h.result,
+                      sender: "ai",
+                      id: id,
+                      time: new Date().toISOString(),
+                      saved: false,
+                      hidden: false,
+                    },
+                  ]
+                }
+              })
+            }
+
+            if (h.used_citations) {
+              setUsedCitations(
+                Object.entries(h.used_citations).map(([key, value]) => ({
+                  id: key,
+                  ...value,
+                })),
+              )
+            }
+
+            if (h.graph) {
+              setGraphImage(h.graph)
+              setShowGraph(true)
+            }
+          } catch (error) {
+            console.warn("JSON parse error for line:", line, error)
+          }
+        }
+      }
+
+      setChatMessages((prev) => [...prev.filter((msg) => msg.text !== "Thinking...")])
+      setSaveChatCounter((prev) => prev + 1)
+    } catch (error) {
+      console.error("Error sending message:", error)
+      setChatMessages((prev) => [
+        ...prev.filter((msg) => msg.text !== "Thinking..."),
+        { text: "An error occurred while processing your request.", sender: "ai", hidden: false },
+      ])
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
   return (
     <div className="h-full flex flex-col gap-2">
       {/* AI Tools Card */}
@@ -313,10 +445,83 @@ export default function RightSection() {
             )}
           </Button>
         </CardHeader>
-        <CardContent className="p-2 pt-0">
-          <div className="grid grid-cols-2 gap-2">
-            {/* Left Column - 5 Buttons */}
-            <div className="flex flex-col gap-1">
+
+        <CardContent className="p-2 pt-0 flex flex-col gap-3">
+          {/* Checkboxes Section converted to button style */}
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setEnableWebSearch(!enableWebSearch)}
+              className={`text-muted-foreground h-7 px-2 flex items-center hover:bg-transparent hover:text-current ${
+                enableWebSearch ? "bg-primary/10 text-primary hover:bg-primary/10 hover:text-primary" : ""
+              }`}
+              title={enableWebSearch ? "Web Search On" : "Web Search Off"}
+            >
+              <Search className="h-3 w-3 mr-1" />
+              Web Search
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowGraph(!showGraph)}
+              className={`text-muted-foreground h-7 px-2 flex items-center hover:bg-transparent hover:text-current ${
+                showGraph ? "bg-primary/10 text-primary hover:bg-primary/10 hover:text-primary" : ""
+              }`}
+              title={showGraph ? "Graph On" : "Graph Off"}
+            >
+              <BarChart2 className="h-3 w-3 mr-1" />
+              Graph
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setUseRag(!useRag)}
+              className={`text-muted-foreground h-7 px-2 flex items-center hover:bg-transparent hover:text-current ${
+                useRag ? "bg-primary/10 text-primary hover:bg-primary/10 hover:text-primary" : ""
+              }`}
+              title={useRag ? "RAG On" : "RAG Off"}
+            >
+              <Database className="h-3 w-3 mr-1" />
+              RAG
+            </Button>
+          </div>
+
+          {useHighlightedText && copiedText && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-2 bg-blue-500 p-2 rounded-md text-xs relative cursor-help">
+                    <p className="whitespace-nowrap overflow-hidden text-ellipsis flex-1 pr-6 w-full text-white">
+                      <span className="font-bold">Text copied to ask AI:</span> {copiedText}
+                    </p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setCopiedText("")
+                        setUseHighlightedText(false)
+                      }}
+                      className="h-5 w-5 p-0 absolute right-1 top-1 text-white hover:bg-blue-600 hover:text-white"
+                      title="Clear highlighted text"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-sm">
+                  <p className="text-xs">{copiedText}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+
+          {/* Vertically Scrollable Buttons Section (2 per row) - reduced height */}
+          <div className="overflow-y-auto max-h-[95px] pr-1" style={{ scrollSnapType: "y mandatory" }}>
+            <div className="grid grid-cols-2 gap-1">
               {/* AI Answer */}
               <TooltipProvider>
                 <Tooltip>
@@ -325,8 +530,9 @@ export default function RightSection() {
                       disabled={isProcessing}
                       onClick={() => handleAIAnswer("help")}
                       variant="outline"
-                      className="justify-start h-7 py-0 text-xs"
+                      className="justify-start h-7 py-0 text-xs whitespace-nowrap"
                       size="sm"
+                      style={{ scrollSnapAlign: "start" }}
                     >
                       <BookOpen className="mr-1 h-3 w-3" />
                       AI Answer
@@ -346,8 +552,9 @@ export default function RightSection() {
                       disabled={isProcessing}
                       onClick={() => handleAIAnswer("factcheck")}
                       variant="outline"
-                      className="justify-start h-7 py-0 text-xs"
+                      className="justify-start h-7 py-0 text-xs whitespace-nowrap"
                       size="sm"
+                      style={{ scrollSnapAlign: "start" }}
                     >
                       <FileText className="mr-1 h-3 w-3" />
                       Fact Checking
@@ -367,8 +574,9 @@ export default function RightSection() {
                       disabled={isProcessing}
                       onClick={() => handleAIAnswer("summary")}
                       variant="outline"
-                      className="justify-start h-7 py-0 text-xs"
+                      className="justify-start h-7 py-0 text-xs whitespace-nowrap"
                       size="sm"
+                      style={{ scrollSnapAlign: "start" }}
                     >
                       <Clock className="mr-1 h-3 w-3" />
                       Summarize
@@ -380,6 +588,47 @@ export default function RightSection() {
                 </Tooltip>
               </TooltipProvider>
 
+              {/* Create Action Plan */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      disabled={isProcessing}
+                      onClick={() => handleAIAnswer("createactionplan")}
+                      variant="outline"
+                      className="justify-start h-7 py-0 text-xs whitespace-nowrap"
+                      size="sm"
+                      style={{ scrollSnapAlign: "start" }}
+                    >
+                      <List className="mr-1 h-3 w-3" />
+                      Create Action Plan
+                    </Button>
+                  </TooltipTrigger>
+                </Tooltip>
+              </TooltipProvider>
+
+              {/* Explain Like 5-Year-Old */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      disabled={isProcessing}
+                      onClick={() => handleAIAnswer("fiveyearold")}
+                      variant="outline"
+                      className="justify-start h-7 py-0 text-xs whitespace-nowrap"
+                      size="sm"
+                      style={{ scrollSnapAlign: "start" }}
+                    >
+                      <Smile className="mr-1 h-3 w-3" />
+                      Explain Like 5yr Old
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">Simplify the explanation</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
               {/* Make Convincing */}
               <TooltipProvider>
                 <Tooltip>
@@ -387,8 +636,9 @@ export default function RightSection() {
                     <Button
                       disabled={true}
                       variant="outline"
-                      className="justify-start h-7 py-0 text-xs truncate"
+                      className="justify-start h-7 py-0 text-xs whitespace-nowrap"
                       size="sm"
+                      style={{ scrollSnapAlign: "start" }}
                     >
                       <Star className="mr-1 h-3 w-3" />
                       Make Convincing
@@ -404,36 +654,14 @@ export default function RightSection() {
                     <Button
                       disabled={true}
                       variant="outline"
-                      className="justify-start h-7 py-0 text-xs truncate"
+                      className="justify-start h-7 py-0 text-xs whitespace-nowrap"
                       size="sm"
+                      style={{ scrollSnapAlign: "start" }}
                     >
                       <Search className="mr-1 h-3 w-3" />
                       Search CRM
                     </Button>
                   </TooltipTrigger>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-
-            {/* Right Column - 5 Buttons */}
-            <div className="flex flex-col gap-1">
-              {/* Explain Like 5-Year-Old */}
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      disabled={true}
-                      variant="outline"
-                      className="justify-start h-7 py-0 text-xs truncate"
-                      size="sm"
-                    >
-                      <Smile className="mr-1 h-3 w-3" />
-                      Explain Like 5yr Old
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="text-xs">Simplify the explanation</p>
-                  </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
 
@@ -444,8 +672,9 @@ export default function RightSection() {
                     <Button
                       disabled={true}
                       variant="outline"
-                      className="justify-start h-7 py-0 text-xs truncate"
+                      className="justify-start h-7 py-0 text-xs whitespace-nowrap"
                       size="sm"
+                      style={{ scrollSnapAlign: "start" }}
                     >
                       <MessageCircle className="mr-1 h-3 w-3" />
                       Help Explain Better
@@ -464,8 +693,9 @@ export default function RightSection() {
                     <Button
                       disabled={true}
                       variant="outline"
-                      className="justify-start h-7 py-0 text-xs truncate"
+                      className="justify-start h-7 py-0 text-xs whitespace-nowrap"
                       size="sm"
+                      style={{ scrollSnapAlign: "start" }}
                     >
                       <Handshake className="mr-1 h-3 w-3" />
                       Negotiation Tip
@@ -484,8 +714,9 @@ export default function RightSection() {
                     <Button
                       disabled={true}
                       variant="outline"
-                      className="justify-start h-7 py-0 text-xs truncate"
+                      className="justify-start h-7 py-0 text-xs whitespace-nowrap"
                       size="sm"
+                      style={{ scrollSnapAlign: "start" }}
                     >
                       <Book className="mr-1 h-3 w-3" />
                       Explain Layman Terms
@@ -493,23 +724,29 @@ export default function RightSection() {
                   </TooltipTrigger>
                 </Tooltip>
               </TooltipProvider>
+            </div>
+          </div>
 
-              {/* Create Action Plan */}
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      disabled={true}
-                      variant="outline"
-                      className="justify-start h-7 py-0 text-xs truncate"
-                      size="sm"
-                    >
-                      <List className="mr-1 h-3 w-3" />
-                      Create Action Plan
-                    </Button>
-                  </TooltipTrigger>
-                </Tooltip>
-              </TooltipProvider>
+          {/* Text Input and Send Button */}
+          <div className="flex flex-col gap-1 w-full mt-1">
+            <div className="flex gap-1 w-full">
+              <Textarea
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                placeholder="Ask JarWiz directly for assistance..."
+                className="resize-none min-h-[60px] flex-1 text-sm"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault()
+                    handleSendMessage()
+                  }
+                }}
+              />
+              <div className="flex flex-col gap-1">
+                <Button disabled={isProcessing || !userInput.trim()} onClick={handleSendMessage} className="flex-1">
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
         </CardContent>
@@ -639,90 +876,13 @@ export default function RightSection() {
 
       {/* Enlarged Image Slide-in Panel */}
       {enlargedImage && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-end z-50"
-          onClick={() => {
+        <FloatingImageWindow
+          imageData={enlargedImage}
+          onClose={() => {
             setEnlargedImage(null)
             setZoomLevel(1) // Reset zoom when closing
           }}
-        >
-          <div
-            className="bg-white p-3 rounded-lg max-h-screen max-w-md w-full h-full overflow-auto animate-in slide-in-from-right duration-300"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="text-sm font-medium">Image Preview</h3>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setZoomLevel((prev) => Math.max(0.5, prev - 0.25))}
-                  className="h-6 w-6 p-0"
-                  title="Zoom out"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    <line x1="8" y1="11" x2="14" y2="11"></line>
-                  </svg>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setZoomLevel((prev) => Math.min(3, prev + 0.25))}
-                  className="h-6 w-6 p-0"
-                  title="Zoom in"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    <line x1="11" y1="8" x2="11" y2="14"></line>
-                    <line x1="8" y1="11" x2="14" y2="11"></line>
-                  </svg>
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setEnlargedImage(null)
-                    setZoomLevel(1) // Reset zoom when closing
-                  }}
-                  className="h-6 w-6 p-0"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            <div className="flex justify-center items-center h-[calc(100%-2rem)] overflow-auto">
-              <img
-                src={`data:image/png;base64,${enlargedImage}`}
-                alt="Enlarged Citation"
-                className="max-w-full max-h-full object-contain rounded-md transition-transform duration-200"
-                style={{ transform: `scale(${zoomLevel})` }}
-              />
-            </div>
-          </div>
-        </div>
+        />
       )}
     </div>
   )

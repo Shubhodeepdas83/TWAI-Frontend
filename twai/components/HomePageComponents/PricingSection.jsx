@@ -7,57 +7,58 @@ import WaitlistModal from "./WaitlistModal"
 
 const pricingTiers = [
   {
+    id: "free",
+    name: "Free",
+    price: 0,
+    description: "Perfect for checking out first time",
+    meetings: "300 minutes of meetings",
+    storage: "1 GB storage",
+    features: [
+      "Real-time AI meeting assistance",
+      "Document search & retrieval",
+      "Meeting summaries / Transcripts",
+      "Priority support",
+      "5 Agents"
+    ],
+    cta: "Join Waitlist",
+    ctaColor: "bg-[#242936] hover:bg-[#2f3646]"
+  },
+  {
     id: "basic",
     name: "Basic",
     price: 29,
     description: "Perfect for freelancers and individual consultants",
-    meetings: "10 meetings",
-    storage: "100MB storage",
+    meetings: "1500 minutes of meetings",
+    storage: "5 GB storage",
     features: [
-      "Real-time meeting assistance",
-      "Document search & retrieval",
-      "Basic meeting summaries",
-      "Email support",
-      "1 AI agent template",
+      "Everything in Free, plus:",
+      "Agenda item tracking",
+      "Preparation Hub QnA Access",
+      "Priority support",
+      "15 AI-agents"
     ],
+    popular: true,
     cta: "Join Waitlist",
+    ctaColor: "bg-[#FF00D6] hover:bg-[#D600B1]"
   },
   {
     id: "pro",
     name: "Pro",
-    price: 79,
+    price: 199,
     description: "Ideal for small teams and growing businesses",
-    meetings: "30 meetings",
-    storage: "1GB storage",
+    meetings: "10000 minutes of meetings",
+    storage: "20 GB storage",
     features: [
       "Everything in Basic, plus:",
-      "Advanced meeting insights",
-      "Full meeting transcriptions",
-      "Action item tracking",
-      "Priority support",
-      "3 AI agent templates",
-    ],
-    popular: true,
-    cta: "Join Waitlist",
-  },
-  {
-    id: "premium",
-    name: "Premium",
-    price: 149,
-    description: "For enterprises and organizations with advanced needs",
-    meetings: "Unlimited meetings",
-    storage: "5GB storage",
-    features: [
-      "Everything in Pro, plus:",
       "Custom AI agent development",
       "Integration with CRM systems",
-      "Analytics dashboard",
       "Dedicated account manager",
-      "Unlimited AI agent templates",
+      "Unlimited AI-agent templates"
     ],
-    cta: "Contact Sales",
+    cta: "Join Waitlist",
+    ctaColor: "bg-[#242936] hover:bg-[#2f3646]"
   },
-]
+];
 
 const PricingSection = () => {
   const [billingCycle, setBillingCycle] = useState("monthly")
@@ -191,16 +192,7 @@ const PricingSection = () => {
           ))}
         </div>
 
-        <div className="mt-16 text-center">
-          <h3 className="text-2xl font-bold text-white mb-4">Need a custom plan?</h3>
-          <p className="text-gray-300 mb-8">
-            Contact our sales team for custom pricing and plans tailored to your organization&apos;s needs.
-          </p>
-          <p className="text-sm text-gray-300 mt-2">Don&apos;t see a plan that works for you? Contact us for custom pricing.</p>
-          <Button variant="outline" className="border-[#FF00D6] text-[#FF00D6] hover:bg-[#FF00D6]/10">
-            Contact Sales
-          </Button>
-        </div>
+
       </div>
 
       {/* Waitlist Modal */}

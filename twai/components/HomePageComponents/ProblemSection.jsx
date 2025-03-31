@@ -1,11 +1,12 @@
-import { ClipboardX } from "lucide-react"
+
+import { ClipboardX } from "lucide-react";
 
 const ProblemSection = () => {
   return (
     <section className="section-padding bg-[#0f1217] text-white">
       <div className="container mx-auto">
-        <h2 className="text-2xl md:text-3xl font-bold mb-4">You&apos;re facing these challenges in meetings</h2>
-
+        <h2 className="section-title text-white">The Hidden Cost of Ineffective Meetings</h2>
+        
         <div className="grid md:grid-cols-2 gap-16 items-center">
           <div className="bg-[#1a1f29] p-8 rounded-xl relative overflow-hidden">
             <div className="absolute -right-10 -bottom-10 opacity-10">
@@ -14,29 +15,22 @@ const ProblemSection = () => {
             <div className="grid gap-6 relative z-10">
               <div className="bg-[#242936] p-5 rounded-lg shadow-sm border border-gray-800">
                 <h3 className="text-xl font-semibold text-[#FF00D6] mb-2">Time Wasted</h3>
-                <p className="text-gray-300">
-                  Hours spent preparing materials that may never be referenced during the meeting.
-                </p>
+                <p className="text-gray-300">Hours spent preparing materials that may never be referenced during the meeting.</p>
               </div>
               <div className="bg-[#242936] p-5 rounded-lg shadow-sm border border-gray-800">
                 <h3 className="text-xl font-semibold text-[#FF00D6] mb-2">Information Overload</h3>
-                <p className="text-gray-300">
-                  Struggling to recall key data points when they&apos;re most needed in discussions.
-                </p>
+                <p className="text-gray-300">Struggling to recall key data points when they&apos;re most needed in discussions.</p>
               </div>
               <div className="bg-[#242936] p-5 rounded-lg shadow-sm border border-gray-800">
                 <h3 className="text-xl font-semibold text-[#FF00D6] mb-2">Lost Opportunities</h3>
-                <p className="text-gray-300">
-                  Missing crucial insights that could have led to better business decisions.
-                </p>
+                <p className="text-gray-300">Missing crucial insights that could have led to better business decisions.</p>
               </div>
             </div>
           </div>
-
+          
           <div>
             <p className="text-lg text-gray-300 mb-6">
-              Professionals waste hours each week preparing for and following up on meetings, only to struggle with
-              information overload and forgotten details during the discussion.
+              Professionals waste hours each week preparing for and following up on meetings, only to struggle with information overload and forgotten details during the discussion.
             </p>
             <p className="text-lg text-gray-300 mb-6">
               This leads to lost opportunities, delayed decisions, and unnecessary stress.
@@ -68,8 +62,7 @@ const ProblemSection = () => {
         </div>
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default ProblemSection
-
+export default ProblemSection;

@@ -20,7 +20,7 @@ import CaptureScreenButton from "@/components/SessionPageComponents/captureScree
 import { useToast } from "@/hooks/use-toast";
 
 export default function LeftSection() {
-  const { wholeConversation, setWholeConversation, videoRef, stream,setUseHighlightedText,setCopiedText } = useAppContext()
+  const { wholeConversation, setWholeConversation, videoRef, stream, setUseHighlightedText, setCopiedText } = useAppContext()
   const { sessionId } = useParams()
   const router = useRouter()
   const [autoScroll, setAutoScroll] = useState(true)
@@ -34,22 +34,7 @@ export default function LeftSection() {
   // Add this inside the component function
   const { toast } = useToast()
 
-  const handleClearConversation = async () => {
-    const tempConversation = [...wholeConversation]
-    setWholeConversation((prev) => prev.map((message) => ({ ...message, hidden: true })))
-    // setWholeConversation([]) // Immediately clear UI
-    await appendConversation({
-      sessionId,
-      newMessages: tempConversation
-        .filter((msg) => msg.saved == false)
-        .map((message) =>
-          ["user", "other", "time"].reduce((acc, key) => {
-            if (message.hasOwnProperty(key)) acc[key] = message[key]
-            return acc
-          }, {}),
-        ),
-    })
-  }
+
 
   const handleAddConversation = () => {
     const timestamp = new Date().toISOString() // Universal UTC timestamp
@@ -74,10 +59,7 @@ export default function LeftSection() {
   useEffect(() => {
     setWholeConversation((prev) =>
       prev.map(
-        (message) =>
-          message.saved
-            ? { ...message, hidden: !showConversation } // Toggle `hidden` only for saved messages
-            : message, // Keep unsaved messages unchanged
+        (message) => ({ ...message, hidden: !showConversation }) // Toggle `hidden` only for saved messages
       ),
     )
   }, [showConversation])
@@ -88,17 +70,17 @@ export default function LeftSection() {
     const handleMouseUp = () => {
       const selectedText = window.getSelection()?.toString().trim();
       if (!selectedText) return;
-  
+
       const selection = window.getSelection();
       if (!selection) return;
-  
+
       const anchorNode = selection.anchorNode;
       const focusNode = selection.focusNode;
-  
+
       if (!anchorNode || !focusNode) return;
-  
+
       const conversationContainer = document.getElementById("conversation-container");
-  
+
       if (
         conversationContainer &&
         conversationContainer.contains(anchorNode) &&
@@ -110,28 +92,28 @@ export default function LeftSection() {
             console.log("Copied:", selectedText);
             setCopiedText(selectedText);
             setUseHighlightedText(true); // Set highlighted text state to true
-  
-            // Show toast notification
-            toast({
-              title: "Text Selected",
-              description: selectedText.length > 50 ? `"${selectedText.substring(0, 50)}..."` : `"${selectedText}"`,
-              className: "bg-primary text-primary-foreground",
-              duration: 1000,
-            });
-  
+
+            // // Show toast notification
+            // toast({
+            //   title: "Text Selected",
+            //   description: selectedText.length > 50 ? `"${selectedText.substring(0, 50)}..."` : `"${selectedText}"`,
+            //   className: "bg-primary text-primary-foreground",
+            //   duration: 1000,
+            // });
+
             // Deselect text after copying
             selection.removeAllRanges();
           })
           .catch((err) => console.error("Copy failed:", err));
       }
-    };  
+    };
     document.addEventListener("mouseup", handleMouseUp);
     return () => document.removeEventListener("mouseup", handleMouseUp);
   }, []);
-  
-  
-  
-  
+
+
+
+
 
   return (
     <div className="h-full flex flex-col gap-2">
@@ -179,32 +161,38 @@ export default function LeftSection() {
         <CardContent className="p-2 pt-8 flex-1 flex flex-col overflow-hidden">
           <div className="flex-1 min-h-0 overflow-hidden">
             <ScrollArea className="h-full pr-2" ref={scrollAreaRef} id="conversation-container">
-              {wholeConversation?.filter((msg) => msg.hidden == false).length > 0 ? (
-                <div className="space-y-2 py-1">
-                  {wholeConversation
-                    .filter((msg) => msg.hidden == false)
-                    .map((message, index) => (
-                      <div key={index} className={`flex ${message.user ? "justify-end" : "justify-start"}`}>
-                        <div
-                          className={`max-w-[80%] rounded-lg p-2 text-sm ${
-                            message.user
-                              ? "bg-primary text-primary-foreground rounded-tr-none"
-                              : "bg-muted rounded-tl-none"
-                          }`}
-                        >
-                          {message.user ? message.user : message.other}
+              {wholeConversation && wholeConversation.length > 0 ? (
+                wholeConversation.filter((msg) => !msg.hidden).length > 0 ? (
+                  <div className="space-y-2 py-1">
+                    {wholeConversation
+                      .filter((msg) => !msg.hidden)
+                      .map((message, index) => (
+                        <div key={index} className={`flex ${message.user ? "justify-end" : "justify-start"}`}>
+                          <div
+                            className={`max-w-[80%] rounded-lg p-2 text-sm ${message.user ? "bg-primary text-primary-foreground rounded-tr-none" : "bg-muted rounded-tl-none"
+                              }`}
+                          >
+                            {message.user ? message.user : message.other}
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  <div ref={conversationEndRef} />
-                </div>
+                      ))}
+                    <div ref={conversationEndRef} />
+                  </div>
+                ) : (
+                  <div className="text-center mt-20 text-muted-foreground py-4">
+                    <p className="text-sm">This conversation is currently hidden.</p>
+                    <p className="text-xs mt-1">You can bring it back anytime from the above toggle.</p>
+                  </div>
+
+                )
               ) : (
-                <div className="text-center text-muted-foreground py-4">
+                <div className="text-center mt-20 text-muted-foreground py-4">
                   <p className="text-sm">No conversation recorded yet...</p>
                   <p className="text-xs mt-1">Use the microphone or screen capture to start recording</p>
                 </div>
               )}
             </ScrollArea>
+
           </div>
 
           {/* Add Message Button */}
