@@ -86,7 +86,7 @@ const HeroSection = () => {
 
         {/* Enhanced subheadline with better typography and spacing */}
         <div className="space-y-5 text-center mx-auto mb-14 pr-5 font-semibold">
-          <p className="text-xl md:text-2xl text-gray-200 animate-fade-in">
+          <p className="text-lg md:text-xl text-gray-300 animate-fade-in">
             Join every meeting with a team of AI experts. No more pre-meeting stress, in-meeting anxiety or post-meeting
             regrets.
           </p>
