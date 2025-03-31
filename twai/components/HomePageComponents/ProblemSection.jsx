@@ -19,7 +19,7 @@ const ProblemSection = () => {
               </div>
               <div className="bg-[#242936] p-5 rounded-lg shadow-sm border border-gray-800">
                 <h3 className="text-xl font-semibold text-[#FF00D6] mb-2">Information Overload</h3>
-                <p className="text-gray-300">Struggling to recall key data points when they're most needed in discussions.</p>
+                <p className="text-gray-300">Struggling to recall key data points when they&apos;re most needed in discussions.</p>
               </div>
               <div className="bg-[#242936] p-5 rounded-lg shadow-sm border border-gray-800">
                 <h3 className="text-xl font-semibold text-[#FF00D6] mb-2">Lost Opportunities</h3>
