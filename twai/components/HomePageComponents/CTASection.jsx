@@ -24,9 +24,7 @@ const CTASection = () => {
             >
               Join the Waitlist
             </Button>
-            <Button variant="outline" className="border-gray-600 text-white hover:bg-[#242936] text-lg py-6 px-8">
-              Schedule a Demo <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+
           </div>
           <p className="text-gray-400 mt-6">No credit card required. Early access for waitlist members.</p>
         </div>
