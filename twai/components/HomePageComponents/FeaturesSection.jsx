@@ -24,7 +24,7 @@ const FeaturesSection = () => {
           <FeatureCard
             icon={<MessageSquare size={24} />}
             title="Real-time conversation analysis"
-            description="Understands the flow of the meeting and provides relevant inputs exactly when you need them, without disrupting the natural conversation."
+            description="Understands the meeting flow & provides relevant inputs exactly when you need, without disrupting the natural conversation."
           />
 
           <FeatureCard
@@ -41,14 +41,14 @@ const FeaturesSection = () => {
 
           <FeatureCard
             icon={<Lightbulb size={24} />}
-            title="Contextual suggestions and insights"
-            description="Offers actionable advice based on the discussion, helping you make better decisions and identify opportunities you might have missed."
+            title="Contextual suggestions"
+            description="Offers live advice based on the discussion, helping you make better decisions and identify opportunities you might have missed."
           />
 
           <FeatureCard
             icon={<Link size={24} />}
             title="Seamless integration"
-            description="Works with popular meeting platforms like Zoom, Google Meet, Microsoft Teams, and more with just a simple browser extension."
+            description="Works with popular meeting platforms like Zoom, Google Meet, Microsoft Teams and all browser based meeting apps."
           />
 
           <FeatureCard
