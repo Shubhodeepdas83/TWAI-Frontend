@@ -10,7 +10,7 @@ const SolutionSection = () => {
         <p className="text-xl text-center text-gray-300 w-4/5 mx-auto mb-16">
           A real-time RAG-based AI super-agent that helps you think, speak, and communicate effectively & accurately. Simply update JarWiz AI with meeting details, relevant documents, and integrations (e.g., Salesforce, Google Suite, CRM).
           <br /><br />
-          It joins your meeting on any platform, follows the conversation, delivers instant answers, arguments, options, and action plans. Forget noting. Answer everything.
+          It joins your meeting on any platform, follows the conversation, delivers instant answers, arguments, & action plans.
         </p>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
