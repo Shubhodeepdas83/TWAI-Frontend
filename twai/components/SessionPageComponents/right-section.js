@@ -449,64 +449,74 @@ export default function RightSection() {
         <CardContent className="p-2 pt-0 flex flex-col gap-3">
           {/* Checkboxes Section converted to button style */}
           <div className="flex flex-wrap gap-2">
-  <Button
-    variant="ghost"
-    size="sm"
-    onClick={() => setEnableWebSearch(!enableWebSearch)}
-    className={`text-muted-foreground h-7 px-2 flex items-center hover:bg-transparent hover:text-current ${
-      enableWebSearch ? "bg-primary/10 text-primary hover:bg-primary/10 hover:text-primary" : ""
-    }`}
-    title={enableWebSearch ? "Web Search On" : "Web Search Off"}
-  >
-    <Search className="h-3 w-3 mr-1" />
-    Web Search
-  </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setEnableWebSearch(!enableWebSearch)}
+              className={`text-muted-foreground h-7 px-2 flex items-center hover:bg-transparent hover:text-current ${
+                enableWebSearch ? "bg-primary/10 text-primary hover:bg-primary/10 hover:text-primary" : ""
+              }`}
+              title={enableWebSearch ? "Web Search On" : "Web Search Off"}
+            >
+              <Search className="h-3 w-3 mr-1" />
+              Web Search
+            </Button>
 
-  <Button
-    variant="ghost"
-    size="sm"
-    onClick={() => setShowGraph(!showGraph)}
-    className={`text-muted-foreground h-7 px-2 flex items-center hover:bg-transparent hover:text-current ${
-      showGraph ? "bg-primary/10 text-primary hover:bg-primary/10 hover:text-primary" : ""
-    }`}
-    title={showGraph ? "Graph On" : "Graph Off"}
-  >
-    <BarChart2 className="h-3 w-3 mr-1" />
-    Graph
-  </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowGraph(!showGraph)}
+              className={`text-muted-foreground h-7 px-2 flex items-center hover:bg-transparent hover:text-current ${
+                showGraph ? "bg-primary/10 text-primary hover:bg-primary/10 hover:text-primary" : ""
+              }`}
+              title={showGraph ? "Graph On" : "Graph Off"}
+            >
+              <BarChart2 className="h-3 w-3 mr-1" />
+              Graph
+            </Button>
 
-  <Button
-    variant="ghost"
-    size="sm"
-    onClick={() => setUseRag(!useRag)}
-    className={`text-muted-foreground h-7 px-2 flex items-center hover:bg-transparent hover:text-current ${
-      useRag ? "bg-primary/10 text-primary hover:bg-primary/10 hover:text-primary" : ""
-    }`}
-    title={useRag ? "RAG On" : "RAG Off"}
-  >
-    <Database className="h-3 w-3 mr-1" />
-    RAG
-  </Button>
-</div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setUseRag(!useRag)}
+              className={`text-muted-foreground h-7 px-2 flex items-center hover:bg-transparent hover:text-current ${
+                useRag ? "bg-primary/10 text-primary hover:bg-primary/10 hover:text-primary" : ""
+              }`}
+              title={useRag ? "RAG On" : "RAG Off"}
+            >
+              <Database className="h-3 w-3 mr-1" />
+              RAG
+            </Button>
+          </div>
 
           {useHighlightedText && copiedText && (
-            <div className="flex items-center gap-2 bg-muted p-2 rounded-md text-xs relative">
-              <p className="whitespace-nowrap overflow-hidden text-ellipsis flex-1 pr-6 w-full">
-                <span className="font-bold">Selected Text:</span> {copiedText}
-              </p>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setCopiedText("")
-                  setUseHighlightedText(false)
-                }}
-                className="h-5 w-5 p-0 absolute right-1 top-1"
-                title="Clear highlighted text"
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            </div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-2 bg-blue-500 p-2 rounded-md text-xs relative cursor-help">
+                    <p className="whitespace-nowrap overflow-hidden text-ellipsis flex-1 pr-6 w-full text-white">
+                      <span className="font-bold">Text copied to ask AI:</span> {copiedText}
+                    </p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setCopiedText("")
+                        setUseHighlightedText(false)
+                      }}
+                      className="h-5 w-5 p-0 absolute right-1 top-1 text-white hover:bg-blue-600 hover:text-white"
+                      title="Clear highlighted text"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-sm">
+                  <p className="text-xs">{copiedText}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
 
           {/* Vertically Scrollable Buttons Section (2 per row) - reduced height */}
@@ -723,7 +733,7 @@ export default function RightSection() {
               <Textarea
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
-                placeholder="Type a message..."
+                placeholder="Ask JarWiz directly for assistance..."
                 className="resize-none min-h-[60px] flex-1 text-sm"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {

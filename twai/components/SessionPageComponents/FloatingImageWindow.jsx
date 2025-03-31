@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 
 export function FloatingImageWindow({ imageData, onClose }) {
   const [position, setPosition] = useState({
-    x: window.innerWidth - 400 - 20,  // 400px window width + 20px padding from the right edge
+    x: window.innerWidth - 400 - 20 - 200,  // 400px window width + 20px padding from the right edge
     y: window.innerHeight - 300 - 20, // 300px window height + 20px padding from the bottom edge
   })
   const [isDragging, setIsDragging] = useState(false)
@@ -84,7 +84,7 @@ export function FloatingImageWindow({ imageData, onClose }) {
       >
         <h3 className="text-sm font-medium">Image Preview</h3>
         <div className="window-controls flex items-center gap-2">
-          <Button
+          {/* <Button
             variant="outline"
             size="sm"
             onClick={() => setZoomLevel((prev) => Math.max(0.5, prev - 0.25))}
@@ -130,7 +130,7 @@ export function FloatingImageWindow({ imageData, onClose }) {
               <line x1="11" y1="8" x2="11" y2="14"></line>
               <line x1="8" y1="11" x2="14" y2="11"></line>
             </svg>
-          </Button>
+          </Button> */}
           <Button variant="ghost" size="sm" onClick={onClose} className="h-6 w-6 p-0">
             <X className="h-4 w-4" />
           </Button>

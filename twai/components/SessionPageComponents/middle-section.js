@@ -337,7 +337,7 @@ export default function MiddleSection() {
           .filter((msg) => msg.text !== "Thinking..."),
       )
 
-      
+
       setChatMessages((prev) => [...prev.filter((msg) => msg.text !== "Thinking...")])
       setSaveChatCounter((prev) => prev + 1)
     } catch (error) {
@@ -642,19 +642,29 @@ export default function MiddleSection() {
           {/* Scrollable Messages Area */}
           <div className="flex-1 overflow-hidden">
             <ScrollArea className="h-full pr-2">
-              {chatMessages.filter((msg) => msg.hidden == false).length === 0 ? (
-                <div className="h-full flex items-center justify-center text-center p-4">
+              {chatMessages.length === 0 ? (
+                <div className="h-full flex mt-40 items-center justify-center text-center p-4">
                   <div className="max-w-sm">
                     <Bot className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
                     <p className="text-muted-foreground py-4">
-                      <span className="block text-sm">Your conversation with JarWizAI will appear here...</span>
+                      <span className="block text-sm">Your interactions with JarWiz AI will start to appear here...</span>
+                    </p>
+                  </div>
+                </div>
+              ) : chatMessages.filter((msg) => !msg.hidden).length === 0 ? (
+                <div className="h-full flex mt-40 items-center justify-center text-center p-4">
+                  <div className="max-w-sm">
+                    <Bot className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-muted-foreground py-4">
+                      <span className="block text-sm">Your conversation is hidden for a clean screen.</span>
+                      <span className="block text-xs mt-1">You can unhide it anytime from the above toggle.</span>
                     </p>
                   </div>
                 </div>
               ) : (
                 <div className="space-y-3 py-1">
                   {chatMessages
-                    .filter((msg) => msg.hidden !== true)
+                    .filter((msg) => !msg.hidden)
                     .map((message, index) => (
                       <div
                         key={index}
@@ -662,7 +672,8 @@ export default function MiddleSection() {
                       >
                         {/* Chat Bubble */}
                         <div
-                          className={`relative p-3 rounded-lg max-w-[85%] text-sm shadow-md ${message.sender === "user" ? "bg-primary text-primary-foreground" : "bg-muted"}`}
+                          className={`relative p-3 rounded-lg max-w-[85%] text-sm shadow-md ${message.sender === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
+                            }`}
                         >
                           {message.text === "Thinking..." ? (
                             <div className="flex items-center gap-1">
@@ -694,11 +705,9 @@ export default function MiddleSection() {
                               (chatwithjamieIds.includes(message.id) && message.sender === "ai")) && (
                                 <button
                                   disabled={isProcessing}
-                                  onClick={() =>
-                                    regenerateQuery(message.id, message.sender === "user" ? "Query" : "Result")
-                                  }
+                                  onClick={() => regenerateQuery(message.id, message.sender === "user" ? "Query" : "Result")}
                                   className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded-md 
-              ${isProcessing ? "" : "hover:bg-gray-200"} transition-colors duration-200 border border-gray-200 shadow-sm`}
+          ${isProcessing ? "" : "hover:bg-gray-200"} transition-colors duration-200 border border-gray-200 shadow-sm`}
                                   title="Regenerate response"
                                 >
                                   <svg
@@ -725,7 +734,7 @@ export default function MiddleSection() {
                                   disabled={isProcessing}
                                   onClick={() => regenerateQuery(message.id, "expandquestion")}
                                   className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded-md 
-              ${isProcessing ? "" : "hover:bg-gray-200"} transition-colors duration-200 border border-gray-200 shadow-sm`}
+          ${isProcessing ? "" : "hover:bg-gray-200"} transition-colors duration-200 border border-gray-200 shadow-sm`}
                                   title="Expand response"
                                 >
                                   <svg
@@ -752,6 +761,7 @@ export default function MiddleSection() {
                 </div>
               )}
             </ScrollArea>
+
           </div>
         </CardContent>
       </Card>
