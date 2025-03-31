@@ -39,22 +39,22 @@ const HeroSection = () => {
         </div>
       </div>
 
-      <div className="container mx-auto max-w-5xl relative z-10">
+      <div className="container mx-auto relative z-10">
         {/* Improved heading with better animated text */}
         <div className="text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-5xl mb-8 text-center font-semibold bg-gradient-to-r from-jarwiz-400 to-jarwiz-500 bg-clip-text text-transparent flex items-center justify-center flex-wrap">
+          <h1 className="text-4xl md:text-5xl lg:text-7xl mb-8 text-center fon font-extrabold bg-gradient-to-r from-jarwiz-400 to-jarwiz-500 bg-clip-text text-transparent flex items-center justify-center flex-wrap">
             <span>Your Meeting AI Co</span>
             <span className="relative inline-flex items-center overflow-hidden ml-1"
               style={{
                 height: '1.4em',
-                minWidth: '250px',
+                minWidth: '380px',
                 display: 'inline-block',
                 verticalAlign: 'bottom'
               }}>
               {suffixes.map((suffix, index) => (
                 <span
                   key={suffix}
-                  className={`absolute transition-all duration-500 ease-in-out font-bold ${index === textIndex
+                  className={`absolute transition-all duration-500 ease-in-out font-extrabold ${index === textIndex
                       ? "opacity-100 transform-none"
                       : "opacity-0 translate-y-8"
                     }`}
@@ -74,14 +74,12 @@ const HeroSection = () => {
         </div>
 
         {/* Enhanced subheadline with better typography and spacing */}
-        <div className="space-y-5 text-center max-w-3xl mx-auto mb-14 font-semibold">
-          <p className="text-xl md:text-2xl text-gray-200">Step into every meeting with a virtual team of experts</p>
-          <p className="text-lg md:text-xl text-gray-300">
-            Pre-meeting prep, Real-time support, Post-meeting analysis. All handled by team of AI-agents
+        <div className="space-y-5 text-center mx-auto mb-14 pr-5 font-semibold">
+          <p className="text-xl md:text-2xl text-gray-200">Join every meeting with a team of AI experts. No more pre-meeting stress, in-meeting anxiety or post-meeting regrets.
           </p>
+          <p className="text-lg md:text-xl text-gray-300">Dump all your research, ideas & plans onto JarWiz and get in-meeting instant answer on any topic.</p>
           <p className="text-lg md:text-xl text-gray-300">
-            Jarwiz AI ensures every conversation, henceforth, will be more productive, efficient and delivers optimum
-            outcome.
+          1-click, context-aware agents working in background—no need to type queries or interrupt your flow. 
           </p>
         </div>
 

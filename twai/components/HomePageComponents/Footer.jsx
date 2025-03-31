@@ -7,7 +7,9 @@ const Footer = () => {
         <div className="grid md:grid-cols-4 gap-8">
           <div className="col-span-1">
             <h3 className="text-2xl font-bold text-white mb-4">
-              Jarwiz<span className="text-[#FF00D6]">AI</span>
+            <a href="#" className="text-3xl font-extrabold" style={{ color: "#007BFF" }}>
+    Jarwiz<span style={{ color: "#FF00D6" }}>AI</span>
+  </a>
             </h3>
             <p className="mb-4 text-gray-400">
               AI-powered meeting assistant that makes every conversation more productive.

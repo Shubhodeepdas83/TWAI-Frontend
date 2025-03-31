@@ -30,9 +30,9 @@ const Header = () => {
     >
       <div className="container mx-auto px-4 flex justify-between items-center">
         <div className="flex items-center">
-          <a href="#" className="text-2xl font-bold text-white">
-            Jarwiz<span className="text-[#FF00D6]">AI</span>
-          </a>
+        <a href="#" className="text-3xl font-extrabold" style={{ color: "#007BFF" }}>
+    Jarwiz<span style={{ color: "#FF00D6" }}>AI</span>
+  </a>
         </div>
 
         {/* Desktop Navigation */}

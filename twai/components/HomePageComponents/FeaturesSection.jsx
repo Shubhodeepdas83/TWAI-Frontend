@@ -29,6 +29,12 @@ const FeaturesSection = () => {
 
           <FeatureCard
             icon={<FileText size={24} />}
+            title="1-Click assistance"
+            description="Pre-defined quick-action AI-agents. Customized for un-interruptive & summarized assistance that is easy to grasp "
+          />
+
+          <FeatureCard
+            icon={<FileText size={24} />}
             title="Instant document retrieval"
             description="Accesses uploaded documents to pull up exact information when needed, saving you from awkward pauses while searching for data."
           />
@@ -50,6 +56,7 @@ const FeaturesSection = () => {
             title="Customizable AI agents"
             description="Tailor the AI to specific roles or industries, ensuring you get exactly the type of assistance most relevant to your business needs."
           />
+
         </div>
       </div>
     </section>
