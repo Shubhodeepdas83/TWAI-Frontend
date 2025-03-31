@@ -21,7 +21,7 @@ import {
   Send,
   Database,
 } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useParams, useRouter } from "next/navigation"
 import { appendConversation } from "../../app/session/[sessionId]/actions"
@@ -29,7 +29,7 @@ import { unstable_noStore as noStore } from "next/cache"
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { v4 as uuidv4 } from "uuid"
 import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
+import FloatingImageWindow from "./FloatingImageWindow"
 
 export default function RightSection() {
   noStore()
@@ -483,7 +483,6 @@ export default function RightSection() {
             </Button>
           </div>
 
-
           {useHighlightedText && copiedText && (
             <div className="flex items-center gap-2 bg-muted p-2 rounded-md text-xs relative">
               <p className="whitespace-nowrap overflow-hidden text-ellipsis flex-1 pr-6 w-full">
@@ -493,8 +492,8 @@ export default function RightSection() {
                 variant="ghost"
                 size="sm"
                 onClick={() => {
-                  setCopiedText("");
-                  setUseHighlightedText(false);
+                  setCopiedText("")
+                  setUseHighlightedText(false)
                 }}
                 className="h-5 w-5 p-0 absolute right-1 top-1"
                 title="Clear highlighted text"
@@ -592,8 +591,6 @@ export default function RightSection() {
                 </Tooltip>
               </TooltipProvider>
 
-
-
               {/* Explain Like 5-Year-Old */}
               <TooltipProvider>
                 <Tooltip>
@@ -615,7 +612,6 @@ export default function RightSection() {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-
 
               {/* Make Convincing */}
               <TooltipProvider>
@@ -712,8 +708,6 @@ export default function RightSection() {
                   </TooltipTrigger>
                 </Tooltip>
               </TooltipProvider>
-
-
             </div>
           </div>
 
@@ -866,90 +860,13 @@ export default function RightSection() {
 
       {/* Enlarged Image Slide-in Panel */}
       {enlargedImage && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-end z-50"
-          onClick={() => {
+        <FloatingImageWindow
+          imageData={enlargedImage}
+          onClose={() => {
             setEnlargedImage(null)
             setZoomLevel(1) // Reset zoom when closing
           }}
-        >
-          <div
-            className="bg-white p-3 rounded-lg max-h-screen max-w-md w-full h-full overflow-auto animate-in slide-in-from-right duration-300"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="text-sm font-medium">Image Preview</h3>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setZoomLevel((prev) => Math.max(0.5, prev - 0.25))}
-                  className="h-6 w-6 p-0"
-                  title="Zoom out"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    <line x1="8" y1="11" x2="14" y2="11"></line>
-                  </svg>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setZoomLevel((prev) => Math.min(3, prev + 0.25))}
-                  className="h-6 w-6 p-0"
-                  title="Zoom in"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    <line x1="11" y1="8" x2="11" y2="14"></line>
-                    <line x1="8" y1="11" x2="14" y2="11"></line>
-                  </svg>
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setEnlargedImage(null)
-                    setZoomLevel(1) // Reset zoom when closing
-                  }}
-                  className="h-6 w-6 p-0"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            <div className="flex justify-center items-center h-[calc(100%-2rem)] overflow-auto">
-              <img
-                src={`data:image/png;base64,${enlargedImage}`}
-                alt="Enlarged Citation"
-                className="max-w-full max-h-full object-contain rounded-md transition-transform duration-200"
-                style={{ transform: `scale(${zoomLevel})` }}
-              />
-            </div>
-          </div>
-        </div>
+        />
       )}
     </div>
   )

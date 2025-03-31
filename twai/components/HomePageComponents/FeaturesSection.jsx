@@ -2,7 +2,7 @@ import { MessageSquare, FileText, Lightbulb, Link, Settings } from "lucide-react
 
 const FeatureCard = ({ icon, title, description }) => {
   return (
-    <div className="bg-[#1a1f29] p-6 rounded-xl shadow-md transition-all duration-300 hover:shadow-lg border border-gray-800">
+    <div className="bg-[#1a1f29] p-6 rounded-xl shadow-md transition-all duration-300 hover:shadow-lg hover:translate-y-[-5px] border border-gray-800">
       <div className="flex items-start">
         <div className="mt-1 mr-4 text-[#FF00D6]">{icon}</div>
         <div>
@@ -18,9 +18,9 @@ const FeaturesSection = () => {
   return (
     <section id="features" className="section-padding bg-[#0f1217]">
       <div className="container mx-auto">
-        <h2 className="section-title text-white">Key Features</h2>
+        <h2 className="section-title text-white animate-fade-in">Key Features</h2>
 
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           <FeatureCard
             icon={<MessageSquare size={24} />}
             title="Real-time conversation analysis"
@@ -56,7 +56,6 @@ const FeaturesSection = () => {
             title="Customizable AI agents"
             description="Tailor the AI to specific roles or industries, ensuring you get exactly the type of assistance most relevant to your business needs."
           />
-
         </div>
       </div>
     </section>

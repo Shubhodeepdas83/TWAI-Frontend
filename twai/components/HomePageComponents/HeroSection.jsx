@@ -11,6 +11,7 @@ const HeroSection = () => {
   const suffixes = ["mpanion", "llaborator", "presenter", "pilot"]
   const suffixRef = useRef(null)
 
+  // Update the suffix animation to be smoother
   useEffect(() => {
     const interval = setInterval(() => {
       setTextIndex((prevIndex) => (prevIndex + 1) % suffixes.length)
@@ -19,14 +20,16 @@ const HeroSection = () => {
     return () => clearInterval(interval)
   }, [suffixes.length]) // Added missing dependency
 
+  // Add responsive improvements for tablets
   return (
     <section className="pt-32 pb-20 md:py-40 px-4 bg-[#0f1217] text-white relative overflow-hidden">
       {/* Background image - using an online meeting image */}
       <div className="absolute inset-0 opacity-40">
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: "url('https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80')"
+            backgroundImage:
+              "url('https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80')",
           }}
         ></div>
         <div className="absolute inset-0 bg-gradient-to-r from-[#0f1217] via-[#0f1217]/70 to-[#0f1217]"></div>
@@ -50,26 +53,28 @@ const HeroSection = () => {
         <div className="text-center">
           <h1 className="text-4xl md:text-5xl lg:text-7xl mb-8 text-center fon font-extrabold bg-gradient-to-r from-jarwiz-400 to-jarwiz-500 bg-clip-text text-transparent flex items-center justify-center flex-wrap">
             <span>Your Meeting AI Co</span>
-            <span className="relative inline-flex items-center overflow-hidden ml-1"
+            <span
+              className="relative inline-flex items-center overflow-hidden ml-1"
               style={{
-                height: '1.4em',
-                minWidth: '380px',
-                display: 'inline-block',
-                verticalAlign: 'bottom'
-              }}>
+                height: "1.4em",
+                minWidth: "380px",
+                display: "inline-block",
+                verticalAlign: "bottom",
+              }}
+            >
               {suffixes.map((suffix, index) => (
                 <span
                   key={suffix}
-                  className={`absolute transition-all duration-500 ease-in-out font-extrabold text-[#ff00d4e9] ${index === textIndex
-                      ? "opacity-100 transform-none"
-                      : "opacity-0 translate-y-8"
-                    }`}
+                  className={`absolute transition-all duration-500 ease-in-out font-extrabold text-[#ff00d4e9] ${
+                    index === textIndex ? "opacity-100 transform-none" : "opacity-0 translate-y-8"
+                  }`}
                   style={{
-                    left: '0%',
-                    top: '15%',
-                    textShadow: index === textIndex ? '0 0 0px rgba(255,0,214,0.5), 0 0 0px rgba(255,255,255,0.3)' : 'none',
-                    WebkitBackgroundClip: 'text',
-                    letterSpacing: '0.5px'
+                    left: "0%",
+                    top: "15%",
+                    textShadow:
+                      index === textIndex ? "0 0 0px rgba(255,0,214,0.5), 0 0 0px rgba(255,255,255,0.3)" : "none",
+                    WebkitBackgroundClip: "text",
+                    letterSpacing: "0.5px",
                   }}
                 >
                   {suffix}
@@ -81,20 +86,31 @@ const HeroSection = () => {
 
         {/* Enhanced subheadline with better typography and spacing */}
         <div className="space-y-5 text-center mx-auto mb-14 pr-5 font-semibold">
-          <p className="text-xl md:text-2xl text-gray-200">Join every meeting with a team of AI experts. No more pre-meeting stress, in-meeting anxiety or post-meeting regrets.
+          <p className="text-xl md:text-2xl text-gray-200 animate-fade-in">
+            Join every meeting with a team of AI experts. No more pre-meeting stress, in-meeting anxiety or post-meeting
+            regrets.
           </p>
-          <p className="text-lg md:text-xl text-gray-300">Dump all your research, ideas & plans onto JarWiz and get in-meeting instant answer on any topic.</p>
-          <p className="text-lg md:text-xl text-gray-300">
-          1-click, context-aware agents working in background—no need to type queries or interrupt your flow. 
+          <p className="text-lg md:text-xl text-gray-300 animate-fade-in animation-delay-200">
+            Dump all your research, ideas & plans onto JarWiz and get in-meeting instant answer on any topic.
+          </p>
+          <p className="text-lg md:text-xl text-gray-300 animate-fade-in animation-delay-500">
+            1-click, context-aware agents working in background—no need to type queries or interrupt your flow.
           </p>
         </div>
 
         {/* Enhanced integration logos */}
-        <div className="flex justify-center gap-8 mb-14">
-          <div className="flex items-center gap-3 text-gray-200 transition-all duration-200 hover:text-white">
+        <div className="flex flex-wrap justify-center gap-8 mb-14">
+          <div className="flex items-center gap-3 text-gray-200 transition-all duration-300 hover:text-white hover:scale-105">
             <span className="bg-white/10 p-2.5 rounded-lg flex items-center justify-center border border-white/5 shadow-lg">
               {/* Fixed Google Meet logo - 24px with no background */}
-              <svg xmlns="http://www.w3.org/2000/svg" aria-label="Google Meet" role="img" viewBox="0 0 512 512" width="24px" height="24px">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                aria-label="Google Meet"
+                role="img"
+                viewBox="0 0 512 512"
+                width="24px"
+                height="24px"
+              >
                 <path d="M166 106v90h-90" fill="#ea4335"></path>
                 <path d="M166 106v90h120v62l90-73v-49q0-30-30-30" fill="#ffba00"></path>
                 <path d="M164 406v-90h122v-60l90 71v49q0 30-30 30" fill="#00ac47"></path>
@@ -106,13 +122,13 @@ const HeroSection = () => {
             </span>
             <span className="font-medium">Google Meet</span>
           </div>
-          <div className="flex items-center gap-3 text-gray-200 transition-all duration-200 hover:text-white">
+          <div className="flex items-center gap-3 text-gray-200 transition-all duration-300 hover:text-white hover:scale-105">
             <span className="bg-white/10 p-2.5 rounded-lg flex items-center justify-center border border-white/5 shadow-lg">
               <VideoIcon size={22} className="text-[#0E86D4]" />
             </span>
             <span className="font-medium">Zoom</span>
           </div>
-          <div className="flex items-center gap-3 text-gray-200 transition-all duration-200 hover:text-white">
+          <div className="flex items-center gap-3 text-gray-200 transition-all duration-300 hover:text-white hover:scale-105">
             <span className="bg-white/10 p-2.5 rounded-lg flex items-center justify-center border border-white/5 shadow-lg">
               <Users size={22} className="text-[#6264A7]" />
             </span>

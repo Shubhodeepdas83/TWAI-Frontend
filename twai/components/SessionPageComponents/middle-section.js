@@ -654,7 +654,7 @@ export default function MiddleSection() {
               ) : (
                 <div className="space-y-3 py-1">
                   {chatMessages
-                    .filter((msg) => !msg.hidden)
+                    .filter((msg) => msg.hidden !== true)
                     .map((message, index) => (
                       <div
                         key={index}

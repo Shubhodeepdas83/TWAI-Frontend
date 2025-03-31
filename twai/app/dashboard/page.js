@@ -4,7 +4,7 @@ import { useSession, signOut } from "next-auth/react"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { getUserDetails, removeDocument, getSummary, deleteMeetingTemplate, getAgentStore } from "./actions"
-import { Calendar, FileText, Folder, LogOut, Plus, Trash, User, Edit, Store } from "lucide-react"
+import { Calendar, FileText, Folder, LogOut, Plus, Trash, User, Edit, Store, List, Smile } from "lucide-react"
 import CreateSessionModal from "../../components/DashboardPageComponents/CreateSessionModal"
 import DocumentUploadModal from "../../components/DashboardPageComponents/DocumentUploadModal"
 import CreateTemplateModal from "../../components/DashboardPageComponents/CreateTemplateModal"
@@ -35,6 +35,15 @@ export default function DashboardPage() {
   const [isEditTemplateModalOpen, setIsEditTemplateModalOpen] = useState(false)
   const [selectedDocument, setSelectedDocument] = useState(null)
   const [selectedTemplate, setSelectedTemplate] = useState(null)
+
+  // Add loading state to sign-out button
+  // Fix summary generation bug to apply loading state only to specific session
+
+  // Update the sign-out button to include loading state
+  const [isSigningOut, setIsSigningOut] = useState(false)
+
+  // Fix summary generation bug - track loading state per session
+  const [loadingSummaryId, setLoadingSummaryId] = useState(null)
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -115,8 +124,15 @@ export default function DashboardPage() {
     router.push(`/session/${sessionId}`)
   }
 
+  // Add this to the component
+  const handleSignOut = async () => {
+    setIsSigningOut(true)
+    await signOut()
+  }
+
+  // Update the handleGenerateSummary function
   const handleGenerateSummary = async (sessionId) => {
-    setIsLoadingSummary(true)
+    setLoadingSummaryId(sessionId)
     try {
       const data = await getSummary(sessionId)
       if (data.summary) {
@@ -126,7 +142,7 @@ export default function DashboardPage() {
         alert("Failed to generate summary")
       }
     } finally {
-      setIsLoadingSummary(false)
+      setLoadingSummaryId(null)
     }
   }
 
@@ -167,32 +183,36 @@ export default function DashboardPage() {
         <nav className="mb-6 space-y-1">
           <button
             onClick={() => setActiveTab("sessions")}
-            className={`flex w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors ${activeTab === "sessions" ? "bg-blue-100 text-blue-700" : "text-gray-700 hover:bg-gray-100"
-              }`}
+            className={`flex w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+              activeTab === "sessions" ? "bg-blue-100 text-blue-700" : "text-gray-700 hover:bg-gray-100"
+            }`}
           >
             <Calendar className="mr-2 h-5 w-5" />
             Sessions
           </button>
           <button
             onClick={() => setActiveTab("documents")}
-            className={`flex w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors ${activeTab === "documents" ? "bg-blue-100 text-blue-700" : "text-gray-700 hover:bg-gray-100"
-              }`}
+            className={`flex w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+              activeTab === "documents" ? "bg-blue-100 text-blue-700" : "text-gray-700 hover:bg-gray-100"
+            }`}
           >
             <FileText className="mr-2 h-5 w-5" />
             Documents
           </button>
           <button
             onClick={() => setActiveTab("templates")}
-            className={`flex w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors ${activeTab === "templates" ? "bg-blue-100 text-blue-700" : "text-gray-700 hover:bg-gray-100"
-              }`}
+            className={`flex w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+              activeTab === "templates" ? "bg-blue-100 text-blue-700" : "text-gray-700 hover:bg-gray-100"
+            }`}
           >
             <Folder className="mr-2 h-5 w-5" />
             Meeting Templates
           </button>
           <button
             onClick={() => setActiveTab("agentStore")}
-            className={`flex w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors ${activeTab === "agentStore" ? "bg-blue-100 text-blue-700" : "text-gray-700 hover:bg-gray-100"
-              }`}
+            className={`flex w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+              activeTab === "agentStore" ? "bg-blue-100 text-blue-700" : "text-gray-700 hover:bg-gray-100"
+            }`}
           >
             <Store className="mr-2 h-5 w-5" />
             Agent Store
@@ -201,11 +221,21 @@ export default function DashboardPage() {
 
         {/* Sign Out Button */}
         <button
-          onClick={() => signOut()}
+          onClick={handleSignOut}
+          disabled={isSigningOut}
           className="mt-auto inline-flex w-full items-center justify-start rounded-md px-4 py-2 text-sm font-medium text-red-600 hover:bg-gray-50 transition-colors"
         >
-          <LogOut className="mr-2 h-4 w-4" />
-          Sign Out
+          {isSigningOut ? (
+            <>
+              <div className="mr-2 h-4 w-4 border-2 border-t-transparent border-red-600 rounded-full animate-spin"></div>
+              Signing Out...
+            </>
+          ) : (
+            <>
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign Out
+            </>
+          )}
         </button>
       </div>
 
@@ -276,10 +306,11 @@ export default function DashboardPage() {
                           Open Session
                         </SpinnerButton>
 
+                        {/* Update the SpinnerButton in the session card */}
                         <SpinnerButton
                           onClick={() => handleGenerateSummary(session.id)}
                           className="rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200 transition-colors"
-                          loading={isLoadingSummary}
+                          loading={loadingSummaryId === session.id}
                           loadingText="Loading..."
                           size="sm"
                           variant="outline"
