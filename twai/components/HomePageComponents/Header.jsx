@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { signIn } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Menu, X } from "lucide-react"
 import WaitlistModal from "./WaitlistModal"
@@ -52,12 +51,6 @@ const Header = () => {
           <a href="#faq" className="text-gray-300 hover:text-white transition-colors">
             FAQ
           </a>
-          <Button
-            onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-            className="bg-[#FF00D6] hover:bg-[#D600B1] text-white"
-          >
-            Sign Up
-          </Button>
         </nav>
 
         {/* Mobile Menu Button */}
