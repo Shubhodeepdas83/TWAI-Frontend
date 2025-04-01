@@ -26,11 +26,6 @@ const faqs = [
     answer:
       "If you approach your limits, you'll receive notifications so you can manage your usage. If you exceed your limits, you can either upgrade to a higher tier or purchase additional meeting credits or storage as needed. We never abruptly cut off service in the middle of an important meeting.",
   },
-  {
-    question: "Can Jarwiz AI help with multiple languages?",
-    answer:
-      "Yes, Jarwiz AI currently supports English, Spanish, French, German, Japanese, and Mandarin Chinese, with more languages being added regularly. The system can translate in real-time and provide assistance across supported languages.",
-  },
 ]
 
 const FAQSection = () => {

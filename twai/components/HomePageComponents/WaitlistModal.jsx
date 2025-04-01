@@ -24,14 +24,25 @@ const WaitlistModal = ({ isOpen, onClose }) => {
 
     setIsSubmitting(true)
 
-    // Simulate API call
     try {
-      // Replace with actual API call when ready
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const response = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Something went wrong');
+      }
+
       setIsSubmitted(true)
       setEmail("")
     } catch (err) {
-      setError("Something went wrong. Please try again.")
+      setError(err.message || "Something went wrong. Please try again.")
     } finally {
       setIsSubmitting(false)
     }
