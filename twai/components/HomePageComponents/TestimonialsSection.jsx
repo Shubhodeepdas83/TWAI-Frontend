@@ -151,8 +151,6 @@ const TestimonialsSection = () => {
         
         <div 
           className="relative h-96 overflow-hidden"
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
         >
           {/* Gradient overlay at top */}
           <div className="absolute inset-x-0 top-0 bg-gradient-to-b from-[#0f1217] to-transparent h-16 z-10 pointer-events-none"></div>
