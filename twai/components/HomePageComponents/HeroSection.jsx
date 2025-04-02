@@ -48,6 +48,7 @@ const HeroSection = () => {
           </div>
         </div>
       </div>
+      
 
       <div className="container mx-auto relative z-10">
         {/* Mobile View Heading */}
