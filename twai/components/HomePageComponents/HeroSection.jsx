@@ -124,7 +124,7 @@ const HeroSection = () => {
         </div>
 
         <div className="space-y-4 text-center mx-auto mb-10 md:mb-14 font-medium">
-          <p className="text-base text-gray-300 animate-fade-in">
+          <p className="text-lg text-gray-300 animate-fade-in">
             Join every meeting with team of AI experts. No more pre-meeting stress, in-meeting anxiety or post-meeting
             regrets.
           </p>
