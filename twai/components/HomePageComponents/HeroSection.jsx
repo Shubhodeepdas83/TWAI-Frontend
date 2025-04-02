@@ -99,7 +99,6 @@ const HeroSection = () => {
                   verticalAlign: "bottom",
                 }}
               >
-                <span className="absolute left-0 sm:left-auto">Co</span>
                 {suffixes.map((suffix, index) => (
                   <span
                     key={suffix}
