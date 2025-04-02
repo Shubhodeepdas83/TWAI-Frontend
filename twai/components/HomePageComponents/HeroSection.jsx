@@ -51,13 +51,13 @@ const HeroSection = () => {
           <h1 className="text-4xl font-extrabold bg-gradient-to-r from-jarwiz-400 to-jarwiz-500 bg-clip-text text-transparent">
             Your Meeting
           </h1>
-          <h2 className="text-4xl  font-extrabold pl-5 bg-gradient-to-r from-jarwiz-400 to-jarwiz-500 bg-clip-text text-transparent flex items-center justify-center">
+          <h2 className="text-4xl font-extrabold pl-3 bg-gradient-to-r from-jarwiz-400 to-jarwiz-500 bg-clip-text text-transparent flex items-center justify-center">
             AI Co
             <div
               className="relative overflow-hidden ml-1"
               style={{
                 height: "1.2em",
-                minWidth: "155px", /* Reduced minWidth for mobile */
+                minWidth: "150px", /* Further reduced minWidth for better mobile fit */
                 display: "inline-block",
                 verticalAlign: "bottom",
               }}
@@ -65,7 +65,7 @@ const HeroSection = () => {
               {suffixes.map((suffix, index) => (
                 <span
                   key={suffix}
-                  className={`absolute transition-all duration-500 ease-in-out font-extrabold text-[#ff00d4] text-3xl ${ 
+                  className={`absolute transition-all duration-500 ease-in-out font-extrabold text-[#ff00d4] text-3xl whitespace-nowrap ${ // Added whitespace-nowrap
                     index === textIndex ? "opacity-100 transform-none" : "opacity-0 translate-y-6"
                   }`}
                   style={{
