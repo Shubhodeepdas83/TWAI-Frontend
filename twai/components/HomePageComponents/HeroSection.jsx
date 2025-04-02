@@ -57,7 +57,7 @@ const HeroSection = () => {
               className="relative overflow-hidden ml-1"
               style={{
                 height: "1.2em",
-                minWidth: "180px",
+                minWidth: "155px", /* Reduced minWidth for mobile */
                 display: "inline-block",
                 verticalAlign: "bottom",
               }}
@@ -65,12 +65,12 @@ const HeroSection = () => {
               {suffixes.map((suffix, index) => (
                 <span
                   key={suffix}
-                  className={`absolute transition-all duration-500 ease-in-out font-extrabold text-[#ff00d4e9] ${
+                  className={`absolute transition-all duration-500 ease-in-out font-extrabold text-[#ff00d4e9] text-3xl ${ /* Reduced font size for mobile */
                     index === textIndex ? "opacity-100 transform-none" : "opacity-0 translate-y-6"
                   }`}
                   style={{
-                    left: "0%",
-                    top: "0%",
+                    left: "-2%",
+                    top: "10%",
                     textShadow:
                       index === textIndex ? "0 0 5px rgba(255,0,214,0.5), 0 0 10px rgba(255,255,255,0.3)" : "none",
                     WebkitBackgroundClip: "text",
@@ -136,42 +136,41 @@ const HeroSection = () => {
           </p>
         </div>
 
-        <div className="flex flex-wrap md:flex-nowrap justify-center gap-2 md:gap-4 mb-10 md:mb-14 overflow-x-auto w-full px-2 min-w-0">
-  <div className="flex items-center gap-1.5 md:gap-3 text-gray-200 transition-all duration-300 hover:text-white hover:scale-105 flex-shrink">
-    <span className="bg-white/10 p-1.5 md:p-2.5 rounded-lg flex items-center justify-center border border-white/5 shadow-lg">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        aria-label="Google Meet"
-        role="img"
-        viewBox="0 0 512 512"
-        width="20px"
-        height="20px"
-      >
-        <path d="M166 106v90h-90" fill="#ea4335"></path>
-        <path d="M166 106v90h120v62l90-73v-49q0-30-30-30" fill="#ffba00"></path>
-        <path d="M164 406v-90h122v-60l90 71v49q0 30-30 30" fill="#00ac47"></path>
-        <path d="M286 256l90-73v146" fill="#00832d"></path>
-        <path d="M376 183l42-34c9-7 18-7 18 7v200c0 14-9 14-18 7l-42-34" fill="#00ac47"></path>
-        <path d="M76 314v62q0 30 30 30h60v-92" fill="#0066da"></path>
-        <path d="M76 196h90v120h-90" fill="#2684fc"></path>
-      </svg>
-    </span>
-    <span className="text-xs md:text-sm font-medium">Google Meet</span>
-  </div>
-  <div className="flex items-center gap-1.5 md:gap-3 text-gray-200 transition-all duration-300 hover:text-white hover:scale-105 flex-shrink">
-    <span className="bg-white/10 p-1.5 md:p-2.5 rounded-lg flex items-center justify-center border border-white/5 shadow-lg">
-      <VideoIcon size={20} className="text-[#0E86D4]" />
-    </span>
-    <span className="text-xs md:text-sm font-medium">Zoom</span>
-  </div>
-  <div className="flex items-center gap-1.5 md:gap-3 text-gray-200 transition-all duration-300 hover:text-white hover:scale-105 flex-shrink">
-    <span className="bg-white/10 p-1.5 md:p-2.5 rounded-lg flex items-center justify-center border border-white/5 shadow-lg">
-      <Users size={20} className="text-[#6264A7]" />
-    </span>
-    <span className="text-xs md:text-sm font-medium">Teams</span>
-  </div>
-</div>
-
+        <div className="flex flex-wrap md:flex-nowrap justify-center gap-3 md:gap-4 mb-10 md:mb-14 overflow-x-auto w-full px-2 min-w-0">
+          <div className="flex items-center gap-1.5 md:gap-3 text-gray-200 transition-all duration-300 hover:text-white hover:scale-105 flex-shrink-0"> {/* Added flex-shrink-0 */}
+            <span className="bg-white/10 p-1.5 md:p-2.5 rounded-lg flex items-center justify-center border border-white/5 shadow-lg">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                aria-label="Google Meet"
+                role="img"
+                viewBox="0 0 512 512"
+                width="20px"
+                height="20px"
+              >
+                <path d="M166 106v90h-90" fill="#ea4335"></path>
+                <path d="M166 106v90h120v62l90-73v-49q0-30-30-30" fill="#ffba00"></path>
+                <path d="M164 406v-90h122v-60l90 71v49q0 30-30 30" fill="#00ac47"></path>
+                <path d="M286 256l90-73v146" fill="#00832d"></path>
+                <path d="M376 183l42-34c9-7 18-7 18 7v200c0 14-9 14-18 7l-42-34" fill="#00ac47"></path>
+                <path d="M76 314v62q0 30 30 30h60v-92" fill="#0066da"></path>
+                <path d="M76 196h90v120h-90" fill="#2684fc"></path>
+              </svg>
+            </span>
+            <span className="text-xs md:text-sm font-medium">Google Meet</span>
+          </div>
+          <div className="flex items-center gap-1.5 md:gap-3 text-gray-200 transition-all duration-300 hover:text-white hover:scale-105 flex-shrink-0"> {/* Added flex-shrink-0 */}
+            <span className="bg-white/10 p-1.5 md:p-2.5 rounded-lg flex items-center justify-center border border-white/5 shadow-lg">
+              <VideoIcon size={20} className="text-[#0E86D4]" />
+            </span>
+            <span className="text-xs md:text-sm font-medium">Zoom</span>
+          </div>
+          <div className="flex items-center gap-1.5 md:gap-3 text-gray-200 transition-all duration-300 hover:text-white hover:scale-105 flex-shrink-0"> {/* Added flex-shrink-0 */}
+            <span className="bg-white/10 p-1.5 md:p-2.5 rounded-lg flex items-center justify-center border border-white/5 shadow-lg">
+              <Users size={20} className="text-[#6264A7]" />
+            </span>
+            <span className="text-xs md:text-sm font-medium">Teams</span>
+          </div>
+        </div>
 
         <div className="flex justify-center">
           <Button
