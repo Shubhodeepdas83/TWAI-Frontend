@@ -51,7 +51,7 @@ const HeroSection = () => {
           <h1 className="text-4xl font-extrabold bg-gradient-to-r from-jarwiz-400 to-jarwiz-500 bg-clip-text text-transparent">
             Your Meeting
           </h1>
-          <h2 className="text-4xl  font-extrabold pl-2 bg-gradient-to-r from-jarwiz-400 to-jarwiz-500 bg-clip-text text-transparent flex items-center justify-center">
+          <h2 className="text-4xl  font-extrabold pl-5 bg-gradient-to-r from-jarwiz-400 to-jarwiz-500 bg-clip-text text-transparent flex items-center justify-center">
             AI Co
             <div
               className="relative overflow-hidden ml-1"
@@ -65,14 +65,14 @@ const HeroSection = () => {
               {suffixes.map((suffix, index) => (
                 <span
                   key={suffix}
-                  className={`absolute transition-all duration-500 ease-in-out font-extrabold text-[#ff00d4e9] text-3xl ${ /* Reduced font size for mobile */
+                  className={`absolute transition-all duration-500 ease-in-out font-extrabold text-[#ff00d4] text-3xl ${ 
                     index === textIndex ? "opacity-100 transform-none" : "opacity-0 translate-y-6"
                   }`}
                   style={{
                     left: "-2%",
                     top: "11%",
                     textShadow:
-                      index === textIndex ? "0 0 5px rgba(255,0,214,0.5), 0 0 10px rgba(255,255,255,0.3)" : "none",
+                      index === textIndex ? "0 0 2px rgba(255,0,214,0.2)" : "none",
                     WebkitBackgroundClip: "text",
                     letterSpacing: "0.5px",
                   }}
@@ -103,14 +103,14 @@ const HeroSection = () => {
                 {suffixes.map((suffix, index) => (
                   <span
                     key={suffix}
-                    className={`absolute transition-all duration-500 ease-in-out font-extrabold text-[#ff00d4e9] ${
+                    className={`absolute transition-all duration-500 ease-in-out font-extrabold text-[#ff00d4] ${
                       index === textIndex ? "opacity-100 transform-none" : "opacity-0 translate-y-8"
                     }`}
                     style={{
                       left: "0%",
                       top: "15%",
                       textShadow:
-                        index === textIndex ? "0 0 0px rgba(255,0,214,0.5), 0 0 0px rgba(255,255,255,0.3)" : "none",
+                        index === textIndex ? "0 0 2px rgba(255,0,214,0.2)" : "none",
                       WebkitBackgroundClip: "text",
                       letterSpacing: "0.5px",
                     }}

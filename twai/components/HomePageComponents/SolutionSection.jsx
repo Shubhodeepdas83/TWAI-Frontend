@@ -242,7 +242,7 @@ const SolutionSection = () => {
     <section className="section-padding bg-[#181d26] text-white py-12 md:py-16">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold text-white text-center mb-6 md:mb-8">
-          How JarWiz AI Transforms Your Meetings
+          How JarWiz AI Transforms Meetings
         </h2>
 
         <p className="text-base text-center text-gray-300 w-full md:w-4/5 mx-auto mb-8 md:mb-12 hidden md:block">

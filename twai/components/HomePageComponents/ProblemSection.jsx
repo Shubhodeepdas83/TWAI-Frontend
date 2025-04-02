@@ -245,19 +245,19 @@ const ProblemSection = () => {
               <h3 className="text-lg font-bold text-white mb-4">The Average Professional:</h3>
               <ul className="space-y-4">
                 <li className="flex items-center">
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#242936] flex items-center justify-center text-[#FF00D6] mr-3 md:mr-4 flex-shrink-0 text-sm">
+                  <div className="w-10 font-extrabold h-10 md:w-12 md:h-12 rounded-full bg-[#242936] flex items-center justify-center text-[#FF00D6] mr-3 md:mr-4 flex-shrink-0 text-sm">
                     12+
                   </div>
                   <p className="text-sm text-gray-300">Hours per week in meetings</p>
                 </li>
                 <li className="flex items-center">
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#242936] flex items-center justify-center text-[#FF00D6] mr-3 md:mr-4 flex-shrink-0 text-sm">
+                  <div className="w-10 font-extrabold h-10 md:w-12 md:h-12 rounded-full bg-[#242936] flex items-center justify-center text-[#FF00D6] mr-3 md:mr-4 flex-shrink-0 text-sm">
                     4+
                   </div>
                   <p className="text-sm text-gray-300">Hours preparing for those meetings</p>
                 </li>
                 <li className="flex items-center">
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#242936] flex items-center justify-center text-[#FF00D6] mr-3 md:mr-4 flex-shrink-0 text-sm">
+                  <div className="w-10 font-extrabold h-10 md:w-12 md:h-12 rounded-full bg-[#242936] flex items-center justify-center text-[#FF00D6] mr-3 md:mr-4 flex-shrink-0 text-sm">
                     65%
                   </div>
                   <p className="text-sm text-gray-300">Feel meetings are unproductive</p>
