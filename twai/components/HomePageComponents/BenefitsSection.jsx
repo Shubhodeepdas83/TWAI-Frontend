@@ -39,13 +39,15 @@ const benefitsData = [
 ];
 
 // --- Reusable Benefit Card Component ---
-const BenefitCard = ({ benefit }) => {
+const BenefitCard = ({ benefit, isMobile = false }) => {
     return (
         <div className="bg-[#1a1f29] p-6 md:p-8 rounded-xl shadow-md border border-gray-800 h-full flex flex-col">
-            <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#242936] flex items-center justify-center text-[#FF00D6] mb-4 md:mb-6 flex-shrink-0">
-                {benefit.icon}
-            </div>
-            <h3 className="text-lg font-semibold text-white mb-2 md:mb-3">{benefit.title}</h3>
+            {!isMobile && (
+                <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#242936] flex items-center justify-center text-[#FF00D6] mb-4 md:mb-6 flex-shrink-0">
+                    {benefit.icon}
+                </div>
+            )}
+            <h3 className={`text-lg font-semibold ${isMobile ? 'text-[#FF00D6]' : 'text-white'} mb-2 md:mb-3`}>{benefit.title}</h3>
             <p className="text-sm text-gray-300 mb-4 md:mb-6 flex-grow">{benefit.description}</p>
             <ul className="space-y-2 md:space-y-3">
                 {benefit.points.map((point, index) => (
@@ -219,7 +221,7 @@ const BenefitsSection = () => {
                                     aria-roledescription="slide"
                                     aria-label={`Benefit ${index + 1} of ${benefitsData.length}: ${benefit.title}`}
                                 >
-                                    <BenefitCard benefit={benefit} />
+                                    <BenefitCard benefit={benefit} isMobile={true} />
                                 </div>
                             ))}
                         </div>

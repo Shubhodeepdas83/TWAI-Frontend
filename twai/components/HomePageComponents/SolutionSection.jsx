@@ -11,9 +11,11 @@ const FeatureCard = ({ icon, title, description, isActive = false, isMobile = fa
           'hover:shadow-lg hover:translate-y-[-5px]'}`}
     >
       <div className="flex items-start">
-        <div className="mt-1 mr-3 md:mr-4 text-[#FF00D6]">{icon}</div>
+        {!isMobile && (
+          <div className="mt-1 mr-3 md:mr-4 text-[#FF00D6]">{icon}</div>
+        )}
         <div>
-          <h3 className="text-lg font-semibold text-white mb-2">{title}</h3>
+          <h3 className={`text-lg font-semibold ${isMobile ? 'text-[#FF00D6]' : 'text-white'} mb-2`}>{title}</h3>
           <p className="text-sm text-gray-300">{description}</p>
         </div>
       </div>

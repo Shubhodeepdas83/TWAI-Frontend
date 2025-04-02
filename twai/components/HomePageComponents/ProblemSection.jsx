@@ -1,14 +1,16 @@
 import { ClipboardX, ChevronLeft, ChevronRight } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
 
-// --- Reusable Problem Card Component (similar to BenefitCard) ---
-const ProblemCard = ({ problem }) => {
+// --- Reusable Problem Card Component ---
+const ProblemCard = ({ problem, isMobile = false }) => {
   return (
     <div className="bg-[#1a1f29] p-6 rounded-xl shadow-md border border-gray-800 h-full flex flex-col">
-      <div className="w-12 h-12 rounded-full bg-[#242936] flex items-center justify-center text-[#FF00D6] mb-4 flex-shrink-0">
-        <ClipboardX className="h-6 w-6" /> {/* Using ClipboardX as a representative icon */}
-      </div>
-      <h3 className="text-lg font-semibold text-white mb-2">{problem.title}</h3>
+      {!isMobile && (
+        <div className="w-12 h-12 rounded-full bg-[#242936] flex items-center justify-center text-[#FF00D6] mb-4 flex-shrink-0">
+          <ClipboardX className="h-6 w-6" />
+        </div>
+      )}
+      <h3 className={`text-lg font-semibold ${isMobile ? 'text-[#FF00D6]' : 'text-white'} mb-2`}>{problem.title}</h3>
       <p className="text-sm text-gray-300 flex-grow">{problem.description}</p>
     </div>
   );
@@ -209,7 +211,7 @@ const ProblemSection = () => {
                     aria-roledescription="slide"
                     aria-label={`Problem ${index + 1} of ${totalSlides}: ${problem.title}`}
                   >
-                    <ProblemCard problem={problem} />
+                    <ProblemCard problem={problem} isMobile={true} />
                   </div>
                 ))}
               </div>

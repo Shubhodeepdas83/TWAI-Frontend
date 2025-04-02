@@ -48,16 +48,16 @@ const HeroSection = () => {
 
       <div className="container mx-auto relative z-10">
         <div className="block md:hidden text-center mb-8">
-          <h1 className="text-3xl font-extrabold bg-gradient-to-r from-jarwiz-400 to-jarwiz-500 bg-clip-text text-transparent">
-            You Meeting
+          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-jarwiz-400 to-jarwiz-500 bg-clip-text text-transparent">
+            Your Meeting
           </h1>
-          <h2 className="text-3xl font-extrabold ml-auto bg-gradient-to-r from-jarwiz-400 to-jarwiz-500 bg-clip-text text-transparent flex items-center justify-center">
+          <h2 className="text-4xl font-extrabold ml-auto bg-gradient-to-r from-jarwiz-400 to-jarwiz-500 bg-clip-text text-transparent flex items-center justify-center">
             AI Co
             <div
               className="relative overflow-hidden ml-1"
               style={{
                 height: "1.2em",
-                minWidth: "170px",
+                minWidth: "180px",
                 display: "inline-block",
                 verticalAlign: "bottom",
               }}
@@ -85,7 +85,7 @@ const HeroSection = () => {
         </div>
 
         <div className="hidden md:block text-center">
-          <h1 className="text-4xl lg:text-5xl mb-8 text-center font-extrabold bg-gradient-to-r from-jarwiz-400 to-jarwiz-500 bg-clip-text text-transparent">
+          <h1 className="text-6xl lg:text-7xl mb-8 text-center font-extrabold bg-gradient-to-r from-jarwiz-400 to-jarwiz-500 bg-clip-text text-transparent">
             <div className="flex items-center justify-center flex-wrap">
               <span className="block sm:inline">Your Meeting AI Co</span>
               <div
