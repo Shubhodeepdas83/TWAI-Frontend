@@ -41,21 +41,21 @@ const benefitsData = [
 // --- Reusable Benefit Card Component ---
 const BenefitCard = ({ benefit }) => {
     return (
-        <div className="bg-[#1a1f29] p-6 md:p-8 rounded-xl shadow-md border border-gray-800 h-full flex flex-col"> {/* Added h-full, flex, flex-col, adjusted padding */}
-            <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#242936] flex items-center justify-center text-[#FF00D6] mb-4 md:mb-6 flex-shrink-0"> {/* Added flex-shrink-0 */}
+        <div className="bg-[#1a1f29] p-6 md:p-8 rounded-xl shadow-md border border-gray-800 h-full flex flex-col">
+            <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#242936] flex items-center justify-center text-[#FF00D6] mb-4 md:mb-6 flex-shrink-0">
                 {benefit.icon}
             </div>
-            <h3 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3">{benefit.title}</h3>
-            <p className="text-sm md:text-base text-gray-300 mb-4 md:mb-6 flex-grow">{benefit.description}</p> {/* Added flex-grow */}
+            <h3 className="text-lg font-semibold text-white mb-2 md:mb-3">{benefit.title}</h3>
+            <p className="text-sm text-gray-300 mb-4 md:mb-6 flex-grow">{benefit.description}</p>
             <ul className="space-y-2 md:space-y-3">
                 {benefit.points.map((point, index) => (
                     <li key={index} className="flex items-start">
                         <div className="text-[#FF00D6] mr-2 mt-1 flex-shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 md:w-5 md:h-5">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                             </svg>
                         </div>
-                        <p className="text-sm md:text-base text-gray-300">{point}</p>
+                        <p className="text-sm text-gray-300">{point}</p>
                     </li>
                 ))}
             </ul>
@@ -185,9 +185,9 @@ const BenefitsSection = () => {
 
 
     return (
-        <section id="benefits" className="section-padding bg-[#121620] py-12 md:py-16"> {/* Reduced padding */}
+        <section id="benefits" className="section-padding bg-[#121620] py-12 md:py-16">
             <div className="container mx-auto px-4">
-                <h2 className="section-title text-white text-3xl md:text-4xl font-bold text-center mb-6 md:mb-8">
+                <h2 className="text-3xl font-bold text-white text-center mb-6 md:mb-8">
                     Why Choose Jarwiz AI?
                 </h2>
 
@@ -202,7 +202,7 @@ const BenefitsSection = () => {
                         {/* Carousel Track */}
                         <div
                             ref={trackRef}
-                            className="flex transition-transform ease-in-out duration-300" // Removed touch-pan-y, duration managed dynamically
+                            className="flex transition-transform ease-in-out duration-300"
                             style={{ transform: `translateX(${calculateOffset()})` }}
                             onTouchStart={handleTouchStart}
                             onTouchMove={handleTouchMove}
@@ -212,10 +212,9 @@ const BenefitsSection = () => {
                                 <div
                                     key={benefit.id}
                                     ref={index === 0 ? cardWrapperRef : null}
-                                    className={`w-[85vw] max-w-[340px] px-2 flex-shrink-0 transform transition-transform transition-opacity ${ // Added transition classes
+                                    className={`w-[85vw] max-w-[340px] px-2 flex-shrink-0 transform transition-transform transition-opacity ${
                                         index === activeIndex ? 'scale-100 opacity-100 z-10' : 'scale-95 opacity-70 z-0'
                                     }`}
-                                    // onClick={() => setActiveIndex(index)} // Removed onClick, rely on swipe/buttons/indicators
                                     role="group"
                                     aria-roledescription="slide"
                                     aria-label={`Benefit ${index + 1} of ${benefitsData.length}: ${benefit.title}`}
@@ -242,7 +241,7 @@ const BenefitsSection = () => {
                     </div>
                 ) : (
                     // --- Desktop Grid View ---
-                    <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 mb-8 md:mb-10 max-w-6xl mx-auto"> {/* Reduced margin */}
+                    <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 mb-8 md:mb-10 max-w-6xl mx-auto">
                         {benefitsData.map((benefit) => (
                             <BenefitCard key={benefit.id} benefit={benefit} />
                         ))}
@@ -250,23 +249,23 @@ const BenefitsSection = () => {
                 )}
 
                  {/* --- Impact Section (Remains unchanged, only visible on desktop) --- */}
-                <div className="bg-[#1a1f29] p-6 md:p-8 rounded-xl shadow-md border border-gray-800 hidden md:block max-w-6xl mx-auto"> {/* Adjusted padding, added max-width/centering */}
-                    <h3 className="text-xl md:text-2xl font-bold text-center text-white mb-6 md:mb-8">Impact on Your Business</h3>
+                <div className="bg-[#1a1f29] p-6 md:p-8 rounded-xl shadow-md border border-gray-800 hidden md:block max-w-6xl mx-auto">
+                    <h3 className="text-lg font-semibold text-white text-center mb-6 md:mb-8">Impact on Your Business</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 text-center">
                         {/* Impact Stat 1 */}
                         <div className="p-4 md:p-6 bg-[#242936] rounded-lg border border-gray-700">
-                            <div className="text-2xl md:text-3xl font-bold text-[#FF00D6] mb-1 md:mb-2">50%</div>
-                            <p className="text-sm md:text-base text-gray-300">Reduction in meeting preparation time</p>
+                            <div className="text-2xl font-bold text-[#FF00D6] mb-1 md:mb-2">50%</div>
+                            <p className="text-sm text-gray-300">Reduction in meeting preparation time</p>
                         </div>
                         {/* Impact Stat 2 */}
                         <div className="p-4 md:p-6 bg-[#242936] rounded-lg border border-gray-700">
-                            <div className="text-2xl md:text-3xl font-bold text-[#FF00D6] mb-1 md:mb-2">35%</div>
-                            <p className="text-sm md:text-base text-gray-300">Increase in meeting productivity</p>
+                            <div className="text-2xl font-bold text-[#FF00D6] mb-1 md:mb-2">35%</div>
+                            <p className="text-sm text-gray-300">Increase in meeting productivity</p>
                         </div>
                          {/* Impact Stat 3 */}
                         <div className="p-4 md:p-6 bg-[#242936] rounded-lg border border-gray-700">
-                             <div className="text-2xl md:text-3xl font-bold text-[#FF00D6] mb-1 md:mb-2">25%</div>
-                             <p className="text-sm md:text-base text-gray-300">Faster decision-making process</p>
+                             <div className="text-2xl font-bold text-[#FF00D6] mb-1 md:mb-2">25%</div>
+                             <p className="text-sm text-gray-300">Faster decision-making process</p>
                         </div>
                     </div>
                 </div>

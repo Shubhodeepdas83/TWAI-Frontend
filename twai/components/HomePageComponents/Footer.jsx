@@ -6,12 +6,12 @@ const Footer = () => {
       <div className="container mx-auto py-10 md:py-12 px-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
           <div className="col-span-2 md:col-span-1">
-            <h3 className="text-xl md:text-2xl font-bold text-white mb-3 md:mb-4">
-              <a href="#" className="text-2xl md:text-3xl font-extrabold" style={{ color: "#007BFF" }}>
+            <h3 className="text-lg font-bold text-white mb-3 md:mb-4">
+              <a href="#" className="text-2xl font-extrabold" style={{ color: "#007BFF" }}>
                 Jarwiz<span style={{ color: "#FF00D6" }}>AI</span>
               </a>
             </h3>
-            <p className="mb-3 md:mb-4 text-sm md:text-base text-gray-400">
+            <p className="text-sm text-gray-400 mb-3 md:mb-4">
               AI-powered meeting assistant that makes every conversation more productive.
             </p>
             <div className="flex space-x-3 md:space-x-4">
@@ -28,8 +28,8 @@ const Footer = () => {
           </div>
 
           <div className="col-span-1">
-            <h4 className="text-base md:text-lg font-semibold text-white mb-3 md:mb-4">Product</h4>
-            <ul className="space-y-1.5 md:space-y-2 text-sm md:text-base">
+            <h4 className="text-base font-semibold text-white mb-3 md:mb-4">Product</h4>
+            <ul className="space-y-1.5 md:space-y-2 text-sm">
               <li>
                 <a href="#features" className="hover:text-white transition-colors">
                   Features
@@ -54,8 +54,8 @@ const Footer = () => {
           </div>
 
           <div className="col-span-1">
-            <h4 className="text-base md:text-lg font-semibold text-white mb-3 md:mb-4">Company</h4>
-            <ul className="space-y-1.5 md:space-y-2 text-sm md:text-base">
+            <h4 className="text-base font-semibold text-white mb-3 md:mb-4">Company</h4>
+            <ul className="space-y-1.5 md:space-y-2 text-sm">
               <li>
                 <a href="#" className="hover:text-white transition-colors">
                   About Us
@@ -80,8 +80,8 @@ const Footer = () => {
           </div>
 
           <div className="col-span-2 md:col-span-1">
-            <h4 className="text-base md:text-lg font-semibold text-white mb-3 md:mb-4">Support</h4>
-            <ul className="space-y-1.5 md:space-y-2 text-sm md:text-base">
+            <h4 className="text-base font-semibold text-white mb-3 md:mb-4">Support</h4>
+            <ul className="space-y-1.5 md:space-y-2 text-sm">
               <li>
                 <a href="#" className="hover:text-white transition-colors">
                   Contact
@@ -107,7 +107,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-gray-800 mt-8 md:mt-12 pt-6 md:pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-sm md:text-base mb-3 md:mb-0">
+          <p className="text-sm mb-3 md:mb-0">
             © {new Date().getFullYear()} Jarwiz AI. All rights reserved.
           </p>
           <div>

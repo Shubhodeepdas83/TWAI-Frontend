@@ -145,7 +145,7 @@ const TestimonialsSection = () => {
   return (
     <section id="testimonials" className="section-padding bg-[#0f1217] pt-14 pb-16">
       <div className="container mx-auto px-4">
-        <h2 className="section-title text-white text-center text-3xl font-bold mb-6">
+        <h2 className="text-3xl font-bold text-white text-center mb-6">
           What Our Beta Users Say
         </h2>
         
@@ -176,15 +176,15 @@ const TestimonialsSection = () => {
                       className="bg-[#171b22] border border-gray-800 p-6 h-64 flex flex-col shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                     >
                       <div className="mb-3">
-                        <h3 className="text-xl font-bold text-white italic">&quot;{testimonial.quote}&quot;</h3>
+                        <h3 className="text-lg font-semibold text-white italic">&quot;{testimonial.quote}&quot;</h3>
                       </div>
                       
-                      <p className="text-gray-300 text-sm mb-4 flex-grow line-clamp-3">
+                      <p className="text-sm text-gray-300 mb-4 flex-grow line-clamp-3">
                         {testimonial.content}
                       </p>
                       
                       <div className="mt-auto">
-                        <h4 className="font-medium text-white mb-1">{testimonial.name}</h4>
+                        <h4 className="text-base font-medium text-white mb-1">{testimonial.name}</h4>
                         {testimonial.title && testimonial.company && (
                           <p className="text-sm text-gray-400">{testimonial.title}, {testimonial.company}</p>
                         )}

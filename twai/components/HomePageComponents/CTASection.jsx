@@ -11,22 +11,22 @@ const CTASection = () => {
     <section className="py-12 md:py-16 px-4 bg-[#0f1217] border-t border-gray-800">
       <div className="container mx-auto">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4 md:mb-6">
+          <h2 className="text-3xl font-bold text-white mb-4 md:mb-6">
             Ready to Transform Your Meetings?
           </h2>
-          <p className="text-base md:text-xl text-gray-300 mb-6 md:mb-8">
+          <p className="text-base text-gray-300 mb-6 md:mb-8">
             Join thousands of professionals who are saving time, reducing stress, and making better decisions with
             Jarwiz AI.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
-              className="bg-[#FF00D6] hover:bg-[#D600B1] text-white text-base md:text-lg py-4 md:py-6 px-6 md:px-8 rounded-xl w-full sm:w-auto"
+              className="bg-[#FF00D6] hover:bg-[#D600B1] text-white text-base py-4 md:py-6 px-6 md:px-8 rounded-xl w-full sm:w-auto"
               onClick={() => setIsModalOpen(true)}
             >
               Join the Waitlist
             </Button>
           </div>
-          <p className="text-gray-400 mt-4 md:mt-6 text-sm md:text-base">
+          <p className="text-sm text-gray-400 mt-4 md:mt-6">
             No credit card required. Early access for waitlist members.
           </p>
         </div>

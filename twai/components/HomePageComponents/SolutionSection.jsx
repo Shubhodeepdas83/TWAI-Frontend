@@ -1,20 +1,20 @@
 import { useState, useRef, useEffect } from "react";
-import { MessageSquare, FileText, Lightbulb, Link, Settings } from "lucide-react"; // Removed unused imports
+import { MessageSquare, FileText, Lightbulb, Link, Settings } from "lucide-react"; 
 
 // FeatureCard component remains the same
 const FeatureCard = ({ icon, title, description, isActive = false, isMobile = false }) => {
   return (
     <div
-      className={`bg-[#1a1f29] p-5 rounded-xl shadow-md transition-all duration-300 border border-gray-800 h-full // Added h-full for consistent height
+      className={`bg-[#1a1f29] p-5 rounded-xl shadow-md transition-all duration-300 border border-gray-800 h-full
         ${isMobile ?
-          `transform ${isActive ? 'scale-100 opacity-100 z-10' : 'scale-95 opacity-70 z-0'}` : // Slightly adjusted non-active scale
+          `transform ${isActive ? 'scale-100 opacity-100 z-10' : 'scale-95 opacity-70 z-0'}` : 
           'hover:shadow-lg hover:translate-y-[-5px]'}`}
     >
       <div className="flex items-start">
         <div className="mt-1 mr-3 md:mr-4 text-[#FF00D6]">{icon}</div>
         <div>
-          <h3 className="text-lg font-bold text-white mb-2">{title}</h3> {/* Removed md:text-xl for mobile consistency */}
-          <p className="text-sm text-gray-300">{description}</p> {/* Removed md:text-base */}
+          <h3 className="text-lg font-semibold text-white mb-2">{title}</h3>
+          <p className="text-sm text-gray-300">{description}</p>
         </div>
       </div>
     </div>
@@ -27,14 +27,11 @@ const MobileCarousel = ({ features }) => {
   const [carouselWidth, setCarouselWidth] = useState(0);
   const [cardWidth, setCardWidth] = useState(0);
   const carouselRef = useRef(null);
-  const cardWrapperRef = useRef(null); // Use a ref for the wrapper to measure its full width
+  const cardWrapperRef = useRef(null);
 
-  // Swipe Handling State
   const [touchStartX, setTouchStartX] = useState(null);
   const [isSwiping, setIsSwiping] = useState(false);
 
-  // --- Debounce Function ---
-  // Simple debounce to prevent excessive recalculations on resize
   function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
@@ -47,33 +44,25 @@ const MobileCarousel = ({ features }) => {
     };
   }
 
-  // --- Update Dimensions Function ---
   const updateDimensions = () => {
     if (carouselRef.current) {
       setCarouselWidth(carouselRef.current.offsetWidth);
     }
-    // Ensure the card wrapper ref exists before measuring
     if (cardWrapperRef.current) {
-      // Measure the wrapper div, which now controls the spacing
       setCardWidth(cardWrapperRef.current.offsetWidth);
     }
   };
 
   useEffect(() => {
-    // Initial calculation
     updateDimensions();
-
-    // Debounced resize handler
     const debouncedHandleResize = debounce(updateDimensions, 100);
-
     window.addEventListener('resize', debouncedHandleResize);
     return () => window.removeEventListener('resize', debouncedHandleResize);
-  }, []); // Empty dependency array ensures this runs once on mount and cleans up on unmount
+  }, []);
 
-  // Recalculate dimensions if the number of features changes (unlikely but good practice)
   useEffect(() => {
     updateDimensions();
-  }, [features.length])
+  }, [features.length]);
 
   const nextSlide = () => {
     setActiveIndex((prevIndex) => (prevIndex + 1) % features.length);
@@ -83,18 +72,14 @@ const MobileCarousel = ({ features }) => {
     setActiveIndex((prevIndex) => (prevIndex - 1 + features.length) % features.length);
   };
 
-  // Calculate offset to center the active card wrapper
   const calculateOffset = () => {
     if (!carouselWidth || !cardWidth) return '0px';
-
     const centerOffset = (carouselWidth - cardWidth) / 2;
-    const maxOffset = 0; // Ensure first card is fully visible
+    const maxOffset = 0;
     const calculatedOffset = `-${(activeIndex * cardWidth) - centerOffset}px`;
-
     return activeIndex === 0 ? `${maxOffset}px` : calculatedOffset;
   };
 
-  // --- Swipe Handlers ---
   const handleTouchStart = (e) => {
     if (e.touches && e.touches.length === 1) {
       setTouchStartX(e.touches[0].clientX);
@@ -106,18 +91,15 @@ const MobileCarousel = ({ features }) => {
     if (!isSwiping || touchStartX === null || !e.touches || e.touches.length !== 1) {
       return;
     }
-    // You can optionally add visual feedback during swipe here
   };
 
   const handleTouchEnd = (e) => {
     if (!isSwiping || touchStartX === null || !e.changedTouches || e.changedTouches.length !== 1) {
       return;
     }
-
     const touchEndX = e.changedTouches[0].clientX;
     const deltaX = touchEndX - touchStartX;
-    const swipeThreshold = 50; // Adjust as needed
-
+    const swipeThreshold = 50;
     if (Math.abs(deltaX) > swipeThreshold) {
       if (deltaX > 0) {
         prevSlide();
@@ -125,19 +107,16 @@ const MobileCarousel = ({ features }) => {
         nextSlide();
       }
     }
-
     setTouchStartX(null);
     setIsSwiping(false);
   };
 
-
-  // Auto-advance interval
   useEffect(() => {
     const interval = setInterval(() => {
       nextSlide();
     }, 5000);
     return () => clearInterval(interval);
-  }, [features.length]); // Re-run if features change, activeIndex change handled by nextSlide
+  }, [features.length]);
 
   return (
     <div
@@ -147,7 +126,6 @@ const MobileCarousel = ({ features }) => {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Left button */}
       <button
         onClick={prevSlide}
         className="absolute left-1 md:left-2 top-1/2 transform -translate-y-1/2 z-20 bg-[#1a1f29]/60 h-10 w-10 md:h-12 md:w-12 flex items-center justify-center rounded-full text-white hover:bg-[#1a1f29]/80 transition-colors"
@@ -158,7 +136,6 @@ const MobileCarousel = ({ features }) => {
         </svg>
       </button>
 
-      {/* Right button */}
       <button
         onClick={nextSlide}
         className="absolute right-1 md:right-2 top-1/2 transform -translate-y-1/2 z-20 bg-[#1a1f29]/60 h-10 w-10 md:h-12 md:w-12 flex items-center justify-center rounded-full text-white hover:bg-[#1a1f29]/80 transition-colors"
@@ -169,22 +146,17 @@ const MobileCarousel = ({ features }) => {
         </svg>
       </button>
 
-      {/* Carousel Track */}
       <div
         className="flex transition-transform duration-300 ease-in-out touch-pan-y"
         style={{
           transform: `translateX(${calculateOffset()})`,
-          // Add a fallback for initial render before JS calculates width
-          // This helps prevent a jarring jump but might not be perfectly centered initially
-          // marginLeft: cardWidth === 0 ? 'calc(50% - 140px)' : '0' // Example fallback: center a 280px card roughly
         }}
       >
         {features.map((feature, index) => (
           <div
             key={index}
-            // *** CHANGE HERE: Use a ref on the wrapper and make width flexible ***
-            ref={index === 0 ? cardWrapperRef : null} // Ref the wrapper of the first card
-            className="w-[80vw] max-w-[300px] px-2 flex-shrink-0 cursor-pointer" // Use viewport width, capped, add padding for spacing, prevent shrinking
+            ref={index === 0 ? cardWrapperRef : null}
+            className="w-[80vw] max-w-[300px] px-2 flex-shrink-0 cursor-pointer"
             onClick={() => setActiveIndex(index)}
             role="group"
             aria-roledescription="slide"
@@ -201,7 +173,6 @@ const MobileCarousel = ({ features }) => {
         ))}
       </div>
 
-      {/* Indicators */}
       <div className="flex justify-center mt-6 space-x-2">
         {features.map((_, index) => (
           <button
@@ -218,7 +189,6 @@ const MobileCarousel = ({ features }) => {
   );
 };
 
-
 // SolutionSection component remains mostly the same, but ensure imports are correct
 const SolutionSection = () => {
   const features = [
@@ -233,7 +203,7 @@ const SolutionSection = () => {
       description: "Pre-defined quick-action AI-agents. Customized for un-interruptive & summarized assistance that is easy to grasp."
     },
     {
-      icon: <FileText size={22} />, // Note: Duplicate icon used, consider FileSearch?
+      icon: <FileText size={22} />,
       title: "Instant web & doc search",
       description: "Searches uploaded documents & web to pull up exact information when needed, saving you from awkward pauses while searching for data."
     },
@@ -258,8 +228,6 @@ const SolutionSection = () => {
 
   useEffect(() => {
     const checkMobile = () => {
-      // Using 768px (Tailwind's `md` breakpoint) might be more standard than 640 (`sm`)
-      // Adjust if your definition of "mobile" differs
       setIsMobile(window.innerWidth < 768);
     };
 
@@ -269,13 +237,13 @@ const SolutionSection = () => {
   }, []);
 
   return (
-    <section className="section-padding bg-[#181d26] text-white py-12 md:py-16"> {/* Reduced padding */}
+    <section className="section-padding bg-[#181d26] text-white py-12 md:py-16">
       <div className="container mx-auto px-4">
-        <h2 className="section-title text-white text-3xl md:text-4xl font-bold text-center mb-6 md:mb-8">
+        <h2 className="text-3xl font-bold text-white text-center mb-6 md:mb-8">
           How JarWiz AI Transforms Your Meetings
         </h2>
 
-        <p className="text-base md:text-xl text-center text-gray-300 w-full md:w-4/5 mx-auto mb-8 md:mb-12 hidden md:block">
+        <p className="text-base text-center text-gray-300 w-full md:w-4/5 mx-auto mb-8 md:mb-12 hidden md:block">
           A real-time RAG-based AI super-agent that helps you think, speak, and communicate effectively & accurately.
 
           <br className="hidden md:block" />
@@ -288,20 +256,17 @@ const SolutionSection = () => {
           It joins your meeting on any platform, follows the conversation, delivers instant answers, arguments, & action plans.
         </p>
 
-        {/* Conditional Rendering */}
         {isMobile ? (
           <MobileCarousel features={features} />
         ) : (
-          /* Desktop Grid */
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"> {/* Adjusted gap */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {features.map((feature, index) => (
               <FeatureCard
                 key={index}
                 icon={feature.icon}
                 title={feature.title}
                 description={feature.description}
-                isMobile={false} // Explicitly pass false for desktop
-              // isActive prop is not needed for the static grid
+                isMobile={false}
               />
             ))}
           </div>
