@@ -70,7 +70,7 @@ const HeroSection = () => {
                   }`}
                   style={{
                     left: "-2%",
-                    top: "10%",
+                    top: "11%",
                     textShadow:
                       index === textIndex ? "0 0 5px rgba(255,0,214,0.5), 0 0 10px rgba(255,255,255,0.3)" : "none",
                     WebkitBackgroundClip: "text",
