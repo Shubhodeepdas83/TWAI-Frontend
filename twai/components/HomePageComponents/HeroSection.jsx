@@ -55,7 +55,7 @@ const HeroSection = () => {
           <h1 className="text-3xl font-extrabold bg-gradient-to-r from-jarwiz-400 to-jarwiz-500 bg-clip-text text-transparent">
             You Meeting
           </h1>
-          <h2 className="text-3xl font-extrabold bg-gradient-to-r from-jarwiz-400 to-jarwiz-500 bg-clip-text text-transparent flex items-center justify-center">
+          <h2 className="text-3xl font-extrabold ml-6 bg-gradient-to-r from-jarwiz-400 to-jarwiz-500 bg-clip-text text-transparent flex items-center justify-center">
             AI Co
             <div
               className="relative overflow-hidden ml-1"
