@@ -103,17 +103,7 @@ const Header = () => {
             >
               FAQ
             </a>
-            <div className="pt-4">
-              <Button
-                className="bg-[#FF00D6] hover:bg-[#D600B1] text-white w-full py-6 text-base"
-                onClick={() => {
-                  setIsMenuOpen(false)
-                  signIn("google", { callbackUrl: "/dashboard" })
-                }}
-              >
-                Sign Up
-              </Button>
-            </div>
+
           </div>
         </div>
       )}
