@@ -17,7 +17,6 @@ const ProblemCard = ({ problem }) => {
 const ProblemSection = () => {
   const [activeSlide, setActiveSlide] = useState(0)
   const totalSlides = 3
-  const carouselRef = useRef(null)
   const cardWidthRef = useRef(null)
   const [isMobile, setIsMobile] = useState(false)
   const [carouselWidth, setCarouselWidth] = useState(0)
@@ -65,7 +64,7 @@ const ProblemSection = () => {
   // --- Update Dimensions Function ---
   const updateDimensions = () => {
     requestAnimationFrame(() => {
-      if (carouselRef.current) setCarouselWidth(carouselRef.current.offsetWidth)
+      if (trackRef.current) setCarouselWidth(trackRef.current.offsetWidth)
       if (cardWidthRef.current) setCardWidth(cardWidthRef.current.offsetWidth)
     })
   }
