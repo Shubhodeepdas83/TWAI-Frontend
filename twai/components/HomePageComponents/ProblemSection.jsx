@@ -198,7 +198,6 @@ const ProblemSection = () => {
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
-                ref={carouselRef}
               >
                 {problemItems.map((problem, index) => (
                   <div
