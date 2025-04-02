@@ -29,13 +29,13 @@ const ProblemSection = () => {
   ]
 
   return (
-    <section className="section-padding bg-[#0f1217] text-white">
+    <section className="section-padding bg-[#0f1217] text-white py-10 md:py-16">
       <div className="container mx-auto px-4">
-        <h2 className="section-title text-white text-3xl md:text-4xl font-bold text-center mb-8 md:mb-12">
+        <h2 className="section-title text-white text-3xl md:text-4xl font-bold text-center mb-6 md:mb-8">
           The Hidden Cost of Ineffective Meetings
         </h2>
 
-        <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
+        <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
           {/* Desktop version - visible only on md screens and up */}
           <div className="hidden md:block bg-[#1a1f29] p-6 md:p-8 rounded-xl relative overflow-hidden">
             <div className="absolute -right-10 -bottom-10 opacity-10">

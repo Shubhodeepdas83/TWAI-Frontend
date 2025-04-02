@@ -143,9 +143,9 @@ const TestimonialsSection = () => {
   }, [scrollPosition]);
 
   return (
-    <section id="testimonials" className="section-padding bg-[#0f1217] pt-20 pb-24">
+    <section id="testimonials" className="section-padding bg-[#0f1217] pt-14 pb-16">
       <div className="container mx-auto px-4">
-        <h2 className="section-title text-white text-center text-3xl font-bold mb-8">
+        <h2 className="section-title text-white text-center text-3xl font-bold mb-6">
           What Our Beta Users Say
         </h2>
         

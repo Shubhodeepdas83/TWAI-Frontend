@@ -8,8 +8,7 @@ const FeatureCard = ({ icon, title, description, isActive = false, isMobile = fa
       className={`bg-[#1a1f29] p-5 rounded-xl shadow-md transition-all duration-300 border border-gray-800 h-full // Added h-full for consistent height
         ${isMobile ?
           `transform ${isActive ? 'scale-100 opacity-100 z-10' : 'scale-95 opacity-70 z-0'}` : // Slightly adjusted non-active scale
-          'hover:shadow-lg hover:translate-y-[-5px]'}`
-      }
+          'hover:shadow-lg hover:translate-y-[-5px]'}`}
     >
       <div className="flex items-start">
         <div className="mt-1 mr-3 md:mr-4 text-[#FF00D6]">{icon}</div>
@@ -22,13 +21,17 @@ const FeatureCard = ({ icon, title, description, isActive = false, isMobile = fa
   );
 };
 
-// MobileCarousel component with fixes
+// MobileCarousel component with swipe functionality
 const MobileCarousel = ({ features }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [carouselWidth, setCarouselWidth] = useState(0);
   const [cardWidth, setCardWidth] = useState(0);
   const carouselRef = useRef(null);
   const cardWrapperRef = useRef(null); // Use a ref for the wrapper to measure its full width
+
+  // Swipe Handling State
+  const [touchStartX, setTouchStartX] = useState(null);
+  const [isSwiping, setIsSwiping] = useState(false);
 
   // --- Debounce Function ---
   // Simple debounce to prevent excessive recalculations on resize
@@ -82,14 +85,50 @@ const MobileCarousel = ({ features }) => {
 
   // Calculate offset to center the active card wrapper
   const calculateOffset = () => {
-    if (!carouselWidth || !cardWidth ) return '0px';
-    
+    if (!carouselWidth || !cardWidth) return '0px';
+
     const centerOffset = (carouselWidth - cardWidth) / 2;
     const maxOffset = 0; // Ensure first card is fully visible
     const calculatedOffset = `-${(activeIndex * cardWidth) - centerOffset}px`;
 
     return activeIndex === 0 ? `${maxOffset}px` : calculatedOffset;
-};
+  };
+
+  // --- Swipe Handlers ---
+  const handleTouchStart = (e) => {
+    if (e.touches && e.touches.length === 1) {
+      setTouchStartX(e.touches[0].clientX);
+      setIsSwiping(true);
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (!isSwiping || touchStartX === null || !e.touches || e.touches.length !== 1) {
+      return;
+    }
+    // You can optionally add visual feedback during swipe here
+  };
+
+  const handleTouchEnd = (e) => {
+    if (!isSwiping || touchStartX === null || !e.changedTouches || e.changedTouches.length !== 1) {
+      return;
+    }
+
+    const touchEndX = e.changedTouches[0].clientX;
+    const deltaX = touchEndX - touchStartX;
+    const swipeThreshold = 50; // Adjust as needed
+
+    if (Math.abs(deltaX) > swipeThreshold) {
+      if (deltaX > 0) {
+        prevSlide();
+      } else {
+        nextSlide();
+      }
+    }
+
+    setTouchStartX(null);
+    setIsSwiping(false);
+  };
 
 
   // Auto-advance interval
@@ -101,7 +140,13 @@ const MobileCarousel = ({ features }) => {
   }, [features.length]); // Re-run if features change, activeIndex change handled by nextSlide
 
   return (
-    <div className="relative w-full overflow-hidden py-6" ref={carouselRef}>
+    <div
+      className="relative w-full overflow-hidden py-6"
+      ref={carouselRef}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       {/* Left button */}
       <button
         onClick={prevSlide}
@@ -224,14 +269,13 @@ const SolutionSection = () => {
   }, []);
 
   return (
-    <section className="section-padding bg-[#181d26] text-white py-16 md:py-24"> {/* Added padding example */}
+    <section className="section-padding bg-[#181d26] text-white py-12 md:py-16"> {/* Reduced padding */}
       <div className="container mx-auto px-4">
-        <h2 className="section-title text-white text-3xl md:text-4xl font-bold text-center mb-8 md:mb-12">
+        <h2 className="section-title text-white text-3xl md:text-4xl font-bold text-center mb-6 md:mb-8">
           How JarWiz AI Transforms Your Meetings
         </h2>
 
-        <p className="text-base md:text-xl text-center text-gray-300 w-full md:w-4/5 mx-auto mb-10 md:mb-16 hidden md:block">
-
+        <p className="text-base md:text-xl text-center text-gray-300 w-full md:w-4/5 mx-auto mb-8 md:mb-12 hidden md:block">
           A real-time RAG-based AI super-agent that helps you think, speak, and communicate effectively & accurately.
 
           <br className="hidden md:block" />
@@ -241,9 +285,7 @@ const SolutionSection = () => {
           <br className="hidden md:block" />
           <br className="hidden md:block" />
 
-
           It joins your meeting on any platform, follows the conversation, delivers instant answers, arguments, & action plans.
-
         </p>
 
         {/* Conditional Rendering */}

@@ -192,14 +192,14 @@ const PricingSection = () => {
 
 
   return (
-    <section id="pricing" className="section-padding bg-[#0f1217] text-white py-16 md:py-24">
+    <section id="pricing" className="section-padding bg-[#0f1217] text-white py-12 md:py-16">
       <div className="container mx-auto px-4">
-        <h2 className="section-title text-white text-3xl md:text-4xl font-bold text-center mb-8 md:mb-12">
+        <h2 className="section-title text-white text-3xl md:text-4xl font-bold text-center mb-6 md:mb-8">
           Choose Your Plan
         </h2>
 
         {/* Billing Cycle Toggle */}
-        <div className="flex justify-center mb-8 md:mb-12">
+        <div className="flex justify-center mb-6 md:mb-8">
            {/* ... Billing toggle buttons ... */}
            <div className="bg-[#1a1f29] rounded-lg p-1 shadow-sm border border-gray-800 inline-flex">
              <button className={`px-3 py-2 md:px-4 md:py-2 text-sm md:text-base rounded-md transition-colors ${ billingCycle === "monthly" ? "bg-[#FF00D6] text-white" : "bg-transparent text-gray-300 hover:bg-[#242936]" }`} onClick={() => setBillingCycle("monthly")}>Monthly</button>

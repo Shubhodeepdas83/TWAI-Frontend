@@ -50,8 +50,46 @@ const HeroSection = () => {
       </div>
 
       <div className="container mx-auto relative z-10">
-        {/* Improved heading with better responsive text sizing */}
-        <div className="text-center">
+        {/* Mobile View Heading */}
+        <div className="block md:hidden text-center mb-8">
+          <h1 className="text-3xl font-extrabold bg-gradient-to-r from-jarwiz-400 to-jarwiz-500 bg-clip-text text-transparent">
+            You Meeting
+          </h1>
+          <h2 className="text-3xl font-extrabold bg-gradient-to-r from-jarwiz-400 to-jarwiz-500 bg-clip-text text-transparent flex items-center justify-center">
+            AI Co
+            <div
+              className="relative overflow-hidden ml-1"
+              style={{
+                height: "1.2em",
+                minWidth: "170px",
+                display: "inline-block",
+                verticalAlign: "bottom",
+              }}
+            >
+              {suffixes.map((suffix, index) => (
+                <span
+                  key={suffix}
+                  className={`absolute transition-all duration-500 ease-in-out font-extrabold text-[#ff00d4e9] ${
+                    index === textIndex ? "opacity-100 transform-none" : "opacity-0 translate-y-6"
+                  }`}
+                  style={{
+                    left: "0%",
+                    top: "0%",
+                    textShadow:
+                      index === textIndex ? "0 0 5px rgba(255,0,214,0.5), 0 0 10px rgba(255,255,255,0.3)" : "none",
+                    WebkitBackgroundClip: "text",
+                    letterSpacing: "0.5px",
+                  }}
+                >
+                  {suffix}
+                </span>
+              ))}
+            </div>
+          </h2>
+        </div>
+
+        {/* Desktop View Heading */}
+        <div className="hidden md:block text-center">
           <h1 className="text-4xl md:text-5xl lg:text-7xl mb-8 text-center font-extrabold bg-gradient-to-r from-jarwiz-400 to-jarwiz-500 bg-clip-text text-transparent">
             <div className="flex items-center justify-center flex-wrap">
               <span className="block sm:inline">Your Meeting AI Co</span>
@@ -160,4 +198,3 @@ const HeroSection = () => {
 }
 
 export default HeroSection
-

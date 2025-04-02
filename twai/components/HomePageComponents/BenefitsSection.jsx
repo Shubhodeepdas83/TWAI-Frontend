@@ -185,16 +185,16 @@ const BenefitsSection = () => {
 
 
     return (
-        <section id="benefits" className="section-padding bg-[#121620] py-16 md:py-24"> {/* Added padding */}
+        <section id="benefits" className="section-padding bg-[#121620] py-12 md:py-16"> {/* Reduced padding */}
             <div className="container mx-auto px-4">
-                <h2 className="section-title text-white text-3xl md:text-4xl font-bold text-center mb-8 md:mb-12">
+                <h2 className="section-title text-white text-3xl md:text-4xl font-bold text-center mb-6 md:mb-8">
                     Why Choose Jarwiz AI?
                 </h2>
 
                 {/* Conditional Rendering: Mobile Carousel or Desktop Grid */}
                 {isMobile ? (
                     // --- Mobile Centered Carousel ---
-                    <div className="relative w-full overflow-hidden pb-6" ref={carouselRef}>
+                    <div className="relative w-full overflow-hidden pb-4" ref={carouselRef}>
                         {/* Left/Right Buttons */}
                         <button onClick={prevSlide} disabled={activeIndex === 0} className="absolute left-0 top-1/2 transform -translate-y-1/2 z-20 bg-[#1a1f29]/60 h-10 w-10 flex items-center justify-center rounded-full text-white hover:bg-[#1a1f29]/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" aria-label="Previous benefit"><ChevronLeft className="h-5 w-5" /></button>
                         <button onClick={nextSlide} disabled={activeIndex >= benefitsData.length - 1} className="absolute right-0 top-1/2 transform -translate-y-1/2 z-20 bg-[#1a1f29]/60 h-10 w-10 flex items-center justify-center rounded-full text-white hover:bg-[#1a1f29]/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" aria-label="Next benefit"><ChevronRight className="h-5 w-5" /></button>
@@ -242,7 +242,7 @@ const BenefitsSection = () => {
                     </div>
                 ) : (
                     // --- Desktop Grid View ---
-                    <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 mb-10 md:mb-16 max-w-6xl mx-auto"> {/* Adjusted gap, added max-width/centering */}
+                    <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 mb-8 md:mb-10 max-w-6xl mx-auto"> {/* Reduced margin */}
                         {benefitsData.map((benefit) => (
                             <BenefitCard key={benefit.id} benefit={benefit} />
                         ))}

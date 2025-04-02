@@ -34,7 +34,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0f1217]">
+    <div className="min-h-screen bg-[#0f1217] space-y-0">
       <Header />
       <HeroSection />
       <ProblemSection />
