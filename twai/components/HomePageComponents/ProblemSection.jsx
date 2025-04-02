@@ -1,6 +1,33 @@
-import { ClipboardX } from "lucide-react"
+import { ClipboardX, ChevronLeft, ChevronRight } from "lucide-react"
+import { useState } from "react"
 
 const ProblemSection = () => {
+  const [activeSlide, setActiveSlide] = useState(0)
+  const totalSlides = 3
+  
+  const nextSlide = () => {
+    setActiveSlide((prev) => (prev === totalSlides - 1 ? 0 : prev + 1))
+  }
+  
+  const prevSlide = () => {
+    setActiveSlide((prev) => (prev === 0 ? totalSlides - 1 : prev - 1))
+  }
+  
+  const problemItems = [
+    {
+      title: "Time Wasted - before meetings",
+      description: "Hours spent preparing materials that may never be referenced during the meeting."
+    },
+    {
+      title: "Information Overload - during meetings",
+      description: "Struggling to recall key data points when they are most needed in discussions."
+    },
+    {
+      title: "Lost Opportunities - after meetings",
+      description: "Missing crucial insights that could have led to better business decisions."
+    }
+  ]
+
   return (
     <section className="section-padding bg-[#0f1217] text-white">
       <div className="container mx-auto px-4">
@@ -9,7 +36,8 @@ const ProblemSection = () => {
         </h2>
 
         <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
-          <div className="bg-[#1a1f29] p-6 md:p-8 rounded-xl relative overflow-hidden">
+          {/* Desktop version - visible only on md screens and up */}
+          <div className="hidden md:block bg-[#1a1f29] p-6 md:p-8 rounded-xl relative overflow-hidden">
             <div className="absolute -right-10 -bottom-10 opacity-10">
               <ClipboardX size={180} className="text-jarwiz-400" />
             </div>
@@ -38,8 +66,61 @@ const ProblemSection = () => {
               </div>
             </div>
           </div>
+          
+          {/* Mobile carousel - visible only on screens below md */}
+          <div className="md:hidden bg-[#1a1f29] p-6 rounded-xl relative overflow-hidden">
+            <div className="absolute -right-10 -bottom-10 opacity-10">
+              <ClipboardX size={180} className="text-jarwiz-400" />
+            </div>
+            <div className="relative z-10">
+              <div className="overflow-hidden">
+                <div 
+                  className="transition-transform duration-300 ease-in-out"
+                  style={{ transform: `translateX(-${activeSlide * 100}%)`, display: 'flex' }}
+                >
+                  {problemItems.map((item, index) => (
+                    <div key={index} className="w-full flex-shrink-0 px-1">
+                      <div className="bg-[#242936] p-4 rounded-lg shadow-sm border border-gray-800">
+                        <h3 className="text-lg font-semibold text-[#FF00D6] mb-2">{item.title}</h3>
+                        <p className="text-sm text-gray-300">{item.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="flex justify-between items-center mt-4">
+                <button 
+                  onClick={prevSlide} 
+                  className="p-2 rounded-full bg-[#242936] text-white"
+                  aria-label="Previous slide"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                
+                <div className="flex space-x-2">
+                  {Array.from({ length: totalSlides }).map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setActiveSlide(index)}
+                      className={`w-2 h-2 rounded-full ${activeSlide === index ? 'bg-[#FF00D6]' : 'bg-gray-600'}`}
+                      aria-label={`Go to slide ${index + 1}`}
+                    />
+                  ))}
+                </div>
+                
+                <button 
+                  onClick={nextSlide} 
+                  className="p-2 rounded-full bg-[#242936] text-white"
+                  aria-label="Next slide"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </div>
+            </div>
+          </div>
 
-          <div className="order-first md:order-last">
+          <div className="order-first md:order-last hidden md:block">
             <p className="text-base md:text-lg text-gray-300 mb-6">
               Professionals waste hours each week preparing for and following up on meetings, only to struggle with
               information overload and forgotten details during the discussion.

@@ -96,10 +96,10 @@ const HeroSection = () => {
             Join every meeting with team of AI experts. No more pre-meeting stress, in-meeting anxiety or post-meeting
             regrets.
           </p>
-          <p className="text-base md:text-xl text-gray-300 animate-fade-in animation-delay-200">
+          <p className="hidden md:block text-base md:text-xl text-gray-300 animate-fade-in animation-delay-200">
             Dump all your research, ideas & plans onto JarWiz and get in-meeting instant answer on any topic.
           </p>
-          <p className="text-base md:text-xl text-gray-300 animate-fade-in animation-delay-500">
+          <p className="hidden md:block text-base md:text-xl text-gray-300 animate-fade-in animation-delay-500">
             1-click, context-aware agents working in background—no need to type queries or interrupt your flow.
           </p>
         </div>
