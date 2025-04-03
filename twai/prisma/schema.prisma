@@ -70,3 +70,9 @@ model AgentStore {
   imageUrl    String?
   createdAt   DateTime @default(now())
 }
+
+model WaitlistEmail {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}

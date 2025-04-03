@@ -24,35 +24,46 @@ const WaitlistModal = ({ isOpen, onClose }) => {
 
     setIsSubmitting(true)
 
-    // Simulate API call
     try {
-      // Replace with actual API call when ready
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const response = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Something went wrong');
+      }
+
       setIsSubmitted(true)
       setEmail("")
     } catch (err) {
-      setError("Something went wrong. Please try again.")
+      setError(err.message || "Something went wrong. Please try again.")
     } finally {
       setIsSubmitting(false)
     }
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-      <div className="bg-[#1a1f29] rounded-xl p-6 max-w-md w-full mx-4 border border-gray-700 shadow-xl animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+      <div className="bg-[#1a1f29] rounded-xl p-5 md:p-6 max-w-md w-full mx-auto border border-gray-700 shadow-xl animate-in fade-in duration-300">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-white">Get Early Access to JarWiz AI</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
+          <h2 className="text-lg md:text-xl font-bold text-white">Get Early Access to JarWiz AI</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors p-1">
             <X size={20} />
           </button>
         </div>
 
         {isSubmitted ? (
-          <div className="text-center py-8">
-            <div className="w-16 h-16 bg-[#FF00D6]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="text-center py-6 md:py-8">
+            <div className="w-14 h-14 md:w-16 md:h-16 bg-[#FF00D6]/20 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-8 w-8 text-[#FF00D6]"
+                className="h-7 w-7 md:h-8 md:w-8 text-[#FF00D6]"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -62,12 +73,11 @@ const WaitlistModal = ({ isOpen, onClose }) => {
             </div>
             <h3 className="text-xl font-medium text-white mb-2">Awesome!</h3>
             <p className="text-gray-400">You&apos;re on early access list of JarWiz AI.</p>
-
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <p className="text-gray-400 mb-4">
+              <p className="text-gray-400 mb-4 text-sm md:text-base">
                 Be the first to get a real-time AI Meeting companion to ace your meetings!
               </p>
               <div className="space-y-2">
@@ -77,10 +87,10 @@ const WaitlistModal = ({ isOpen, onClose }) => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className="w-full px-4 py-3 bg-[#242936] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#FF00D6] focus:border-transparent"
+                  className="w-full px-3 md:px-4 py-2.5 md:py-3 bg-[#242936] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#FF00D6] focus:border-transparent text-sm md:text-base"
                   required
                 />
-                {error && <p className="text-red-400 text-sm">{error}</p>}
+                {error && <p className="text-red-400 text-xs md:text-sm">{error}</p>}
               </div>
             </div>
 
@@ -88,7 +98,7 @@ const WaitlistModal = ({ isOpen, onClose }) => {
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-[#FF00D6] hover:bg-[#D600B1] text-white px-6 py-2"
+                className="bg-[#FF00D6] hover:bg-[#D600B1] text-white px-5 md:px-6 py-2 md:py-2.5 text-sm md:text-base"
               >
                 {isSubmitting ? (
                   <span className="flex items-center">
