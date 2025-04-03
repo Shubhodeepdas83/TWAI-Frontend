@@ -43,12 +43,17 @@ export async function GET(request, { params }) {
       if (!session?.user) {
         return new Response('Unauthorized', { status: 401 });
       }
+
+      const user = await prisma.user.findUnique({
+        where: { email: session.user.email },
+        select: { id: true },
+      });
       
       // Verify document belongs to the user
       const userDocument = await prisma.document.findFirst({
         where: {
           id: docId,
-          userId: session.user.id
+          userId: user.id
         }
       });
       
