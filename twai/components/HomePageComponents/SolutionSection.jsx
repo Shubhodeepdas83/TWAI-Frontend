@@ -245,18 +245,24 @@ const SolutionSection = () => {
           How JarWiz AI Transforms Meetings
         </h2>
 
-        <p className="text-base text-center text-gray-300 w-full md:w-4/5 mx-auto mb-8 md:mb-12 hidden md:block">
-          A real-time RAG-based AI super-agent that helps you think, speak, and communicate effectively & accurately.
+        <div className="text-base text-center text-gray-300 w-full md:w-4/5 mx-auto mb-8 md:mb-12">
+          <p className="hidden md:block">
+            A real-time RAG-based AI super-agent that helps you think, speak, and communicate effectively & accurately.
+          </p>
 
           <br className="hidden md:block" />
 
-          Simply update JarWiz AI with meeting details, relevant documents, and integrations (e.g., Salesforce, CRM).
+          <p className="hidden md:block">
+            Simply update JarWiz AI with meeting details, relevant documents, and integrations (e.g., Salesforce, CRM).
+          </p>
 
           <br className="hidden md:block" />
           <br className="hidden md:block" />
 
-          It joins your meeting on any platform, follows the conversation, delivers instant answers, arguments, & action plans.
-        </p>
+          <p>
+            It joins your meeting on any platform, follows the conversation, delivers instant answers, arguments, & action plans.
+          </p>
+        </div>
 
         {isMobile ? (
           <MobileCarousel features={features} />

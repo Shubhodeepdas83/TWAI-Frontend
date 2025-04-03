@@ -123,9 +123,12 @@ const HeroSection = () => {
         </div>
 
         <div className="space-y-4 text-center mx-auto mb-10 md:mb-14 font-medium">
-          <p className="text-lg text-gray-300 animate-fade-in">
+          <p className="hidden md:block text-lg text-gray-300 animate-fade-in">
             Join every meeting with team of AI experts. No more pre-meeting stress, in-meeting anxiety or post-meeting
             regrets.
+          </p>
+          <p className="block md:hidden text-lg text-gray-300 animate-fade-in">
+            Join every meeting with team of AI experts. No more pre-meeting stress or in-meeting anxiety. Dump all your research, ideas & docs onto JarWiz & get instant, in-meeting, 1-click answers.
           </p>
           <p className="hidden md:block text-lg text-gray-300 animate-fade-in animation-delay-200">
             Dump all your research, ideas & plans onto JarWiz and get in-meeting instant answer on any topic.
