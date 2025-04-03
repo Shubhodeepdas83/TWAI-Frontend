@@ -57,8 +57,13 @@ export default function RightSection() {
     useHighlightedText,
     setEnableWebSearch,
     videoRef,
+    microphoneConnected,
+    micStream,
+    setMicrophoneConnected,
+    setMicStream,
     stream,
     setUseRag,
+    setStream,
     saveChatCounter,
   } = useAppContext()
 
@@ -76,6 +81,24 @@ export default function RightSection() {
 
   const handleExit = async () => {
     setLoadingExit(true)
+    if (microphoneConnected) {
+      if (micStream) {
+        micStream.getTracks().forEach((track) => track.stop())
+      }
+      setMicrophoneConnected(false)
+      setMicStream(null)
+      console.log("Microphone disconnected.")
+    }
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop())
+    }
+    setStream(null)
+
+    if (videoRef.current) {
+      videoRef.current.srcObject = null
+    }
+
+
     appendConversation({
       sessionId: sessionId,
       newMessages: wholeConversation
