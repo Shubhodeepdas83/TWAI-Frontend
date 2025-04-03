@@ -59,6 +59,7 @@ export default function DashboardPage() {
   const fetchUserData = async () => {
     setIsLoading(true)
     const data = await getUserDetails()
+    console.log(data)
     if (data.user) {
       setUser(data.user)
       setIsLoading(false)
@@ -68,6 +69,7 @@ export default function DashboardPage() {
   const fetchAgentStore = async () => {
     setIsLoading(true)
     const data = await getAgentStore()
+    console.log(data)
     if (data.agents) {
       setAgents(data.agents)
     } else {
