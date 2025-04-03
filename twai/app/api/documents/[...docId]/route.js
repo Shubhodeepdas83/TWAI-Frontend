@@ -7,6 +7,9 @@ export async function GET(request, { params }) {
     // First check if API key is valid
     const secretKey = request.headers.get('x-api-key');
     const isValidSecretKey = secretKey === process.env.SECRET_KEY;
+
+    console.log('Received API key:', secretKey);
+    console.log('Is valid API key:', isValidSecretKey);
     
     // Handle the document ID which could be in the format:
     // ['docId'] or ['docId.pdf']
