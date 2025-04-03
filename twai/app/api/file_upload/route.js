@@ -58,10 +58,21 @@ export async function POST(request) {
     const document = await prisma.document.create({
       data: {
         userId: user.id,
-        fileUrl,
+        awsFileUrl: fileUrl,
+        fileUrl: fileUrl, // Temporary value, will be updated below
         description,
         title: title || fileName,
         isEmbedded: add_embedding,
+      },
+    });
+
+    // Update the document with the correct fileUrl that includes the document ID
+    const updatedDoc = await prisma.document.update({
+      where: { id: document.id },
+      data: {
+        
+        fileUrl: `${process.env.BASE_PATH}/api/documents/${document.id}.pdf`,
+        awsFileUrl:document.fileUrl
       },
     });
 
@@ -72,7 +83,7 @@ export async function POST(request) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ s3_url: fileUrl, userId: user.id }),
+        body: JSON.stringify({ s3_url: updatedDoc.fileUrl, userId: user.id }),
       });
 
       if (!embedResponse.ok) {

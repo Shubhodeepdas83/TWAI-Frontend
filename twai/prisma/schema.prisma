@@ -42,6 +42,7 @@ model Document {
   userId      String
   user        User              @relation(fields: [userId], references: [id])
   fileUrl     String
+  awsFileUrl  String?
   uploadedAt  DateTime          @default(now())
   title       String?
   description String?

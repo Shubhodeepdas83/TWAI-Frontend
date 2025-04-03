@@ -143,7 +143,7 @@ export async function removeDocument(documentId) {
 
   const document = await prisma.document.findUnique({
     where: { id: documentId },
-    select: { userId: true, fileUrl: true, isEmbedded: true },
+    select: { userId: true, fileUrl: true, isEmbedded: true,awsFileUrl:true },
   })
 
   if (!document) {
@@ -156,7 +156,7 @@ export async function removeDocument(documentId) {
 
   try {
     // Extract filename from the full URL
-    const fileKey = document.fileUrl.substring(document.fileUrl.lastIndexOf("/") + 1)
+    const fileKey = document.awsFileUrl.substring(document.awsFileUrl.lastIndexOf("/") + 1)
 
     await s3.send(
       new DeleteObjectCommand({

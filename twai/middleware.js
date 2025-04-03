@@ -3,12 +3,15 @@ import { getToken } from 'next-auth/jwt'
 
 export async function middleware(req) {
   const session = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
-  
-  if (!session && req.nextUrl.pathname !== '/') {
+  const { pathname } = req.nextUrl
+
+  // Allow access to root and any path starting with /document/ if there's no session
+  if (!session && pathname !== '/' && !pathname.startsWith('/document/')) {
     return NextResponse.redirect(new URL('/', req.url))
   }
-  
-  if (session && req.nextUrl.pathname === '/') {
+
+  // Redirect logged-in users from root to dashboard
+  if (session && pathname === '/') {
     return NextResponse.redirect(new URL('/dashboard', req.url))
   }
 
