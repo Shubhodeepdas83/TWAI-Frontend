@@ -29,15 +29,15 @@ const ProblemSection = () => {
 
   const problemItems = [
     {
-      title: "Time Wasted - before meetings",
+      title: "Before Meetings - Time Wasted",
       description: "Hours spent preparing materials that may never be referenced during the meeting."
     },
     {
-      title: "Information Overload - during meetings",
+      title: "During Meetings - Information Overload",
       description: "Struggling to recall key data points when they are most needed in discussions."
     },
     {
-      title: "Lost Opportunities - after meetings",
+      title: "After Meetings - Lost Opportunities",
       description: "Missing crucial insights that could have led to better business decisions."
     }
   ]
