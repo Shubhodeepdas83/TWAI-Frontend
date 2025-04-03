@@ -1,16 +1,11 @@
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function GET(request, { params }) {
   try {
-    // First check if API key is valid
+    // For testing purposes - log the secret key header
     const secretKey = request.headers.get('x-api-key');
-    const isValidSecretKey = secretKey === process.env.SECRET_KEY;
-
     console.log('Received API key:', secretKey);
-    console.log('Is valid API key:', isValidSecretKey);
-    
+
     // Handle the document ID which could be in the format:
     // ['docId'] or ['docId.pdf']
     let docId = params.docId[0];
@@ -39,28 +34,6 @@ export async function GET(request, { params }) {
       return new Response('Document not found', { status: 404 });
     }
     
-    // If API key is not valid, check user authentication and document ownership
-    if (!isValidSecretKey) {
-      const session = await getServerSession(authOptions);
-      
-      if (!session?.user) {
-        return new Response('Unauthorized', { status: 401 });
-      }
-      
-      // Verify document belongs to the user
-      const userDocument = await prisma.document.findFirst({
-        where: {
-          id: docId,
-          userId: session.user.id
-        }
-      });
-      
-      if (!userDocument) {
-        return new Response('You do not have permission to access this document', { status: 403 });
-      }
-    }
-    
-    // API key is valid or user is authenticated and owns the document, proceed with returning the PDF
     // Fetch the document from S3 URL with additional options
     const response = await fetch(document.awsFileUrl, {
       headers: {
