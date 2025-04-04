@@ -6,7 +6,7 @@ export async function middleware(req) {
   const { pathname } = req.nextUrl
 
   // Allow access to root and any path starting with /document/ if there's no session
-  if (!session && pathname !== '/' && !pathname.startsWith('/document/')) {
+  if (!session && pathname !== '/' && !pathname.startsWith('/document/') && !pathname.startsWith('/api/documents/')) {
     return NextResponse.redirect(new URL('/', req.url))
   }
 

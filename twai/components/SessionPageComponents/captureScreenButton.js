@@ -4,11 +4,13 @@ import { useAppContext } from "../../context/AppContext"
 import { Button } from "@/components/ui/button"
 import { MonitorSmartphone, StopCircle } from "lucide-react"
 import { useState } from "react"
+import { useParams } from "next/navigation"
 
 export default function CaptureScreenButton() {
   const { setWholeConversation, setStream, videoRef, stream } = useAppContext()
   const [isCapturing, setIsCapturing] = useState(false)
-
+  const params = useParams()
+  
   let socket = null
 
   const startScreenShare = async () => {
@@ -76,62 +78,91 @@ export default function CaptureScreenButton() {
     }
   }
 
-  const openWebSocket = () => {
-    return new Promise((resolve, reject) => {
-      const url = "wss://api.deepgram.com/v1/listen?model=nova-3&language=en&smart_format=true&punctuate=true"
+  const fetchDeepgramToken = async () => {
+    const sessionId = params.sessionId
+    
+    const response = await fetch("/api/deepgram-token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        sessionId: sessionId,
+        keyType: "capturescreen"
+      }),
+    })
 
-      socket = new WebSocket(url, ["token", process.env.NEXT_PUBLIC_DEEPGRAM_API_KEY])
+    if (!response.ok) {
+      throw new Error("Failed to fetch Deepgram token")
+    }
 
-      socket.onopen = () => {
-        console.log("Connected to Deepgram WebSocket")
+    const data = await response.json()
+    return data.token.key
+  }
 
-        socket.send(
-          JSON.stringify({
-            type: "Configure",
-            token: process.env.NEXT_PUBLIC_DEEPGRAM_API_KEY,
-            encoding: "opus",
-            sample_rate: 16000,
-            interim_results: true,
-            diarize: true,
-          }),
-        )
+  const openWebSocket = async () => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const token = await fetchDeepgramToken()
+        console.log(token)
+        const url = "wss://api.deepgram.com/v1/listen?model=nova-3&language=en&smart_format=true&punctuate=true"
 
-        resolve()
-      }
+        socket = new WebSocket(url, ["token", token])
 
-      socket.onerror = (error) => {
-        console.error("WebSocket error", error)
-        reject(error)
-      }
+        socket.onopen = () => {
+          console.log("Connected to Deepgram WebSocket")
 
-      const MAX_MESSAGE_LENGTH = 200
+          socket.send(
+            JSON.stringify({
+              type: "Configure",
+              token: token,
+              encoding: "opus",
+              sample_rate: 16000,
+              interim_results: true,
+              diarize: true,
+            }),
+          )
 
-      socket.onmessage = (event) => {
-        const data = JSON.parse(event.data)
-        if (data.channel && data.channel.alternatives) {
-          const transcript = data.channel.alternatives[0].transcript
-          if (transcript.trim()) {
-            const timestamp = new Date().toISOString() // Universal UTC timestamp
+          resolve()
+        }
 
-            setWholeConversation((prev) => {
-              const lastMessage = prev[prev.length - 1]
+        socket.onerror = (error) => {
+          console.error("WebSocket error", error)
+          reject(error)
+        }
 
-              if (lastMessage?.other) {
-                const updatedMessage = lastMessage.other + " " + transcript
+        const MAX_MESSAGE_LENGTH = 200
 
-                if (updatedMessage.length > MAX_MESSAGE_LENGTH) {
-                  // Start a new "other" message with timestamp
-                  return [...prev, { other: transcript, time: timestamp, saved: false, hidden: false }]
+        socket.onmessage = (event) => {
+          const data = JSON.parse(event.data)
+          if (data.channel && data.channel.alternatives) {
+            const transcript = data.channel.alternatives[0].transcript
+            if (transcript.trim()) {
+              const timestamp = new Date().toISOString() // Universal UTC timestamp
+
+              setWholeConversation((prev) => {
+                const lastMessage = prev[prev.length - 1]
+
+                if (lastMessage?.other) {
+                  const updatedMessage = lastMessage.other + " " + transcript
+
+                  if (updatedMessage.length > MAX_MESSAGE_LENGTH) {
+                    // Start a new "other" message with timestamp
+                    return [...prev, { other: transcript, time: timestamp, saved: false, hidden: false }]
+                  } else {
+                    // Update the last message
+                    return [...prev.slice(0, -1), { other: updatedMessage, time: timestamp, saved: false, hidden: false }]
+                  }
                 } else {
-                  // Update the last message
-                  return [...prev.slice(0, -1), { other: updatedMessage, time: timestamp, saved: false, hidden: false }]
+                  return [...prev, { other: transcript, time: timestamp, saved: false, hidden: false }]
                 }
-              } else {
-                return [...prev, { other: transcript, time: timestamp, saved: false, hidden: false }]
-              }
-            })
+              })
+            }
           }
         }
+      } catch (error) {
+        console.error("Error fetching Deepgram token:", error)
+        reject(error)
       }
     })
   }

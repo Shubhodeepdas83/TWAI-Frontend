@@ -4,6 +4,7 @@ import { useAppContext } from "../../context/AppContext"
 import { Button } from "@/components/ui/button"
 import { Mic, MicOff } from "lucide-react"
 import { useEffect, useState } from "react"
+import { useParams } from "next/navigation"
 
 let socket = null
 
@@ -18,62 +19,91 @@ export default function MicrophoneButton() {
   } = useAppContext()
 
   const [isConnecting, setIsConnecting] = useState(false)
+  const params = useParams()
 
-  const openWebSocket = () => {
-    return new Promise((resolve, reject) => {
-      const url = "wss://api.deepgram.com/v1/listen?model=nova-3&language=en&smart_format=true&punctuate=true"
+  const fetchDeepgramToken = async () => {
+    const sessionId = params.sessionId
 
-      socket = new WebSocket(url, ["token", process.env.NEXT_PUBLIC_DEEPGRAM_API_KEY])
+    const response = await fetch("/api/deepgram-token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        sessionId: sessionId,
+        keyType: "microphone",
+      }),
+    })
 
-      socket.onopen = () => {
-        console.log("Connected to Deepgram WebSocket")
+    if (!response.ok) {
+      throw new Error("Failed to fetch Deepgram token")
+    }
 
-        socket.send(
-          JSON.stringify({
-            type: "Configure",
-            token: process.env.NEXT_PUBLIC_DEEPGRAM_API_KEY,
-            encoding: "opus",
-            sample_rate: 44100,
-            // interim_results: true,
-          }),
-        )
+    const data = await response.json()
+    return data.token.key
+  }
 
-        resolve()
-      }
+  const openWebSocket = async () => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const token = await fetchDeepgramToken()
+        const url = "wss://api.deepgram.com/v1/listen?model=nova-3&language=en&smart_format=true&punctuate=true"
 
-      socket.onerror = (error) => {
-        console.error("WebSocket error", error)
-        reject(error)
-      }
+        socket = new WebSocket(url, ["token", token])
 
-      const MAX_MESSAGE_LENGTH = 200
+        socket.onopen = () => {
+          console.log("Connected to Deepgram WebSocket")
 
-      socket.onmessage = (event) => {
-        const data = JSON.parse(event.data)
-        if (data.channel && data.channel.alternatives) {
-          const transcript = data.channel.alternatives[0].transcript
-          if (transcript.trim()) {
-            const timestamp = new Date().toISOString() // Universal UTC timestamp
+          socket.send(
+            JSON.stringify({
+              type: "Configure",
+              token: token,
+              encoding: "opus",
+              sample_rate: 44100,
+              interim_results: true,
+            }),
+          )
 
-            setWholeConversation((prev) => {
-              const lastMessage = prev[prev.length - 1]
+          resolve()
+        }
 
-              if (lastMessage?.user) {
-                const updatedMessage = lastMessage.user + " " + transcript
+        socket.onerror = (error) => {
+          console.error("WebSocket error", error)
+          reject(error)
+        }
 
-                if (updatedMessage.length > MAX_MESSAGE_LENGTH) {
-                  // If the message exceeds max length, start a new message
-                  return [...prev, { user: transcript, time: timestamp, saved: false, hidden: false }]
+        const MAX_MESSAGE_LENGTH = 200
+
+        socket.onmessage = (event) => {
+          const data = JSON.parse(event.data)
+          if (data.channel && data.channel.alternatives) {
+            const transcript = data.channel.alternatives[0].transcript
+            if (transcript.trim()) {
+              const timestamp = new Date().toISOString() // Universal UTC timestamp
+
+              setWholeConversation((prev) => {
+                const lastMessage = prev[prev.length - 1]
+
+                if (lastMessage?.user) {
+                  const updatedMessage = lastMessage.user + " " + transcript
+
+                  if (updatedMessage.length > MAX_MESSAGE_LENGTH) {
+                    // If the message exceeds max length, start a new message
+                    return [...prev, { user: transcript, time: timestamp, saved: false, hidden: false }]
+                  } else {
+                    // Otherwise, update the last message
+                    return [...prev.slice(0, -1), { user: updatedMessage, time: timestamp, saved: false, hidden: false }]
+                  }
                 } else {
-                  // Otherwise, update the last message
-                  return [...prev.slice(0, -1), { user: updatedMessage, time: timestamp, saved: false, hidden: false }]
+                  return [...prev, { user: transcript, time: timestamp, saved: false, hidden: false }]
                 }
-              } else {
-                return [...prev, { user: transcript, time: timestamp, saved: false, hidden: false }]
-              }
-            })
+              })
+            }
           }
         }
+      } catch (error) {
+        console.error("Error setting up WebSocket:", error)
+        reject(error)
       }
     })
   }
@@ -87,6 +117,10 @@ export default function MicrophoneButton() {
       setMicrophoneConnected(false)
       setMicStream(null)
       console.log("Microphone disconnected.")
+
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.close()
+      }
     } else {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
