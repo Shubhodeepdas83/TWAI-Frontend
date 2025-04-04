@@ -86,23 +86,22 @@ export async function GET(request, { params }) {
       return new Response('Invalid content type received from storage', { status: 500 });
     }
     
-    // Get the file content
-    const fileContent = await response.arrayBuffer();
+    // Stream the content directly instead of loading the whole file in memory
+    const { readable, writable } = new TransformStream();
     
-    if (fileContent.byteLength < 5) {
-      console.error('Received too small file, likely not a valid PDF');
-      return new Response('Invalid PDF file received from storage', { status: 500 });
-    }
+    // Pipe the response to our transform stream
+    response.body.pipeTo(writable).catch(error => {
+      console.error('Error streaming document:', error);
+    });
     
-    // Return the file with appropriate headers
-    return new Response(fileContent, {
+    // Return the readable part as the response with appropriate headers
+    return new Response(readable, {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `inline; filename="${document.name || 'document.pdf'}"`,
-        'Content-Length': fileContent.byteLength.toString(),
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
+        'Content-Length': response.headers.get('content-length') || '',
+        // Use cache-control to allow browser caching for better performance
+        'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
       }
     });
   } catch (error) {
