@@ -73,8 +73,11 @@ export async function POST(request) {
         { status: 500 }
       );
     }
+    console.log(apiKey)
 
     const deepgram = createClient(apiKey);
+
+    console.log(projectId)
 
     const { result: apiKeyResult, error: keyError } = await deepgram.manage.createProjectKey(
       projectId,
