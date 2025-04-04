@@ -25,10 +25,15 @@ export async function POST(request) {
       return NextResponse.json({ error: "Valid keyType (microphone or capturescreen) is required" }, { status: 400 });
     }
 
-    // Get user from database
+    // Get user from database with their API keys
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { id: true, email: true },
+      select: { 
+        id: true, 
+        email: true, 
+        microphoneDeepgramKey: true, 
+        capturescreenDeepgramKey: true 
+      },
     });
 
     if (!user) {
@@ -47,12 +52,12 @@ export async function POST(request) {
       return NextResponse.json({ error: "Session not found or not authorized" }, { status: 404 });
     }
 
-    // Check if there's already a key for the requested type
+    // Check if there's already a key for the requested type at the user level
     const keyFieldName = keyType === 'microphone' ? 'microphoneDeepgramKey' : 'capturescreenDeepgramKey';
     
-    if (dbSession[keyFieldName]) {
-      // Return existing key
-      return NextResponse.json({ token: dbSession[keyFieldName] });
+    if (user[keyFieldName]) {
+      // Return existing key from user record
+      return NextResponse.json({ token: user[keyFieldName] });
     }
 
     // Generate new key
@@ -82,7 +87,7 @@ export async function POST(request) {
     const { result: apiKeyResult, error: keyError } = await deepgram.manage.createProjectKey(
       projectId,
       {
-        comment: `${keyType}-key-${sessionId}-${user.email}`,
+        comment: `${keyType}-key-${user.email}`,
         scopes: ['usage:write'],
       }
     );
@@ -103,9 +108,9 @@ export async function POST(request) {
         );
     }
 
-    // Save the key to the database
-    await prisma.session.update({
-      where: { id: sessionId },
+    // Save the key to the user table instead of the session
+    await prisma.user.update({
+      where: { id: user.id },
       data: { [keyFieldName]: apiKeyResult },
     });
 
