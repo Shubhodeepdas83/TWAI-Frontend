@@ -257,7 +257,7 @@ const SolutionSection = () => {
           </p>
 
           <br className="hidden md:block" />
-          <br className="hidden md:block" />
+        
 
           <p>
             It joins your meeting on any platform, follows the conversation, delivers instant answers, arguments, & action plans.
