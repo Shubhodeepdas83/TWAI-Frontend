@@ -22,19 +22,19 @@ model User {
 }
 
 model Session {
-  id           String           @id @default(uuid())
-  userId       String
-  user         User             @relation(fields: [userId], references: [id])
-  name         String
-  description  String?
-  conversation Json[]           @default([])
-  chat         Json[]           @default([])
-  createdAt    DateTime         @default(now())
-  summary      String?
-  captureToken String?
-  micToken     String?
-  templateId   String?          @map("meeting_template_id")
-  template     MeetingTemplate? @relation(fields: [templateId], references: [id])
+  id                       String           @id @default(uuid())
+  userId                   String
+  user                     User             @relation(fields: [userId], references: [id])
+  name                     String
+  description              String?
+  conversation             Json[]           @default([])
+  chat                     Json[]           @default([])
+  createdAt                DateTime         @default(now())
+  summary                  String?
+  templateId               String?          @map("meeting_template_id")
+  template                 MeetingTemplate? @relation(fields: [templateId], references: [id])
+  microphoneDeepgramKey    Json?
+  capturescreenDeepgramKey Json?
 }
 
 model Document {
