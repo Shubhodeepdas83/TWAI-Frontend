@@ -26,11 +26,16 @@ export async function POST(req) {
 
     const Session = await prisma.session.findUnique({
       where: { userId: user.id, id: sessionId },
-      select: { templateId: true ,conversation:true},
+      select: { templateId: true, conversation:true, isActive: true },
     });
 
     if (!Session) {
       return NextResponse.json({ failure: "Session not found" }, { status: 404 });
+    }
+    
+    // Check if the session is active
+    if (!Session.isActive) {
+      return NextResponse.json({ failure: "This session is no longer active. Please create a new session." }, { status: 403 });
     }
 
     let template = {};

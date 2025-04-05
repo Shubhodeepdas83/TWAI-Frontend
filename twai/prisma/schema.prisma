@@ -37,6 +37,7 @@ model Session {
   summary                  String?
   templateId               String?          @map("meeting_template_id")
   template                 MeetingTemplate? @relation(fields: [templateId], references: [id])
+  isActive                 Boolean          @default(true)
 }
 
 model Document {

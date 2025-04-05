@@ -28,6 +28,7 @@ export default function DashboardPage() {
   const [agents, setAgents] = useState([])
   const [isLoadingSummary, setIsLoadingSummary] = useState(false)
   const [isOpeningSession, setIsOpeningSession] = useState(false)
+  const [showInactiveSessionAlert, setShowInactiveSessionAlert] = useState(false)
   const router = useRouter()
 
   // Add these state variables in the DashboardPage component
@@ -50,6 +51,22 @@ export default function DashboardPage() {
       router.push("/")
     }
   }, [status, router])
+
+  // Check for query parameters to display notifications
+  useEffect(() => {
+    // Check if we have an 'error' query parameter
+    const searchParams = new URLSearchParams(window.location.search);
+    const errorParam = searchParams.get('error');
+    if (errorParam === 'inactive-session') {
+      setShowInactiveSessionAlert(true);
+      // Clear the URL query parameter
+      window.history.replaceState({}, document.title, window.location.pathname);
+      // Auto-hide the alert after 5 seconds
+      setTimeout(() => {
+        setShowInactiveSessionAlert(false);
+      }, 5000);
+    }
+  }, []);
 
   useEffect(() => {
     fetchAgentStore()
@@ -140,7 +157,11 @@ export default function DashboardPage() {
       if (data.summary) {
         setSelectedSessionSummary(data.summary)
         setIsSummaryModalOpen(true)
-      } else {
+      }else if(data.failure){
+        console.error("Error generating summary:", data.failure)
+        alert("Failed to generate summary. Please try again.")
+      }
+       else {
         alert("Failed to generate summary")
       }
     } finally {
@@ -167,6 +188,24 @@ export default function DashboardPage() {
     <div className="flex h-screen bg-gray-50">
       {/* Loading overlays */}
       <LoadingOverlay message="Opening session" isOpen={isOpeningSession} />
+
+      {/* Inactive Session Alert */}
+      {showInactiveSessionAlert && (
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-md shadow-md z-50 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+          </svg>
+          This session is no longer active. Please create a new session.
+          <button 
+            onClick={() => setShowInactiveSessionAlert(false)}
+            className="ml-3 text-amber-800 hover:text-amber-900"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          </button>
+        </div>
+      )}
 
       {/* Sidebar */}
       <div className="flex h-full w-64 flex-col border-r bg-white px-4 py-6 shadow-sm">
@@ -280,48 +319,58 @@ export default function DashboardPage() {
 
               {user?.sessions?.length > 0 ? (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {user.sessions.map((session) => (
-                    <div
-                      key={session.id}
-                      className="rounded-lg border bg-white p-5 shadow-sm transition-shadow hover:shadow-md h-[200px] flex flex-col"
-                    >
-                      <div className="mb-2 flex items-center justify-between">
-                        <h3 className="font-medium text-blue-600 truncate max-w-[200px]">
-                          {session.name || `Session #${session.id}`}
-                        </h3>
-                        <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
-                          {new Date(session.createdAt).toLocaleDateString()}
-                        </span>
-                      </div>
-                      {session.description && (
-                        <p className="mb-3 text-sm text-gray-600 line-clamp-2 flex-grow">{session.description}</p>
-                      )}
-                      <div className="mt-auto flex items-center justify-between">
-                        <SpinnerButton
-                          onClick={() => handleOpenSession(session.id)}
-                          className="rounded-md bg-blue-100 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-200 transition-colors"
-                          loadingText="Opening..."
-                          loading={isOpeningSession}
-                          size="sm"
-                          variant="secondary"
-                        >
-                          Open Session
-                        </SpinnerButton>
+                  {[...user.sessions]
+                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // Sort sessions by date, most recent first
+                    .map((session) => (
+                      <div
+                        key={session.id}
+                        className="rounded-lg border bg-white p-5 shadow-sm transition-shadow hover:shadow-md h-[200px] flex flex-col"
+                      >
+                        <div className="mb-2 flex items-center justify-between">
+                          <h3 className="font-medium text-blue-600 truncate max-w-[200px]">
+                            {session.name || `Session #${session.id}`}
+                          </h3>
+                          <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
+                            {new Date(session.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        {session.description && (
+                          <p className="mb-3 text-sm text-gray-600 line-clamp-2 flex-grow">{session.description}</p>
+                        )}
+                        <div className="mt-auto flex items-center justify-between">
+                          {session.isActive ? (
+                            <SpinnerButton
+                              onClick={() => handleOpenSession(session.id)}
+                              className="rounded-md bg-blue-100 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-200 transition-colors"
+                              loadingText="Opening..."
+                              loading={isOpeningSession}
+                              size="sm"
+                              variant="secondary"
+                            >
+                              Open Session
+                            </SpinnerButton>
+                          ) : (
+                            <span className="text-xs text-amber-600 flex items-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              </svg>
+                              Completed
+                            </span>
+                          )}
 
-                        {/* Update the SpinnerButton in the session card */}
-                        <SpinnerButton
-                          onClick={() => handleGenerateSummary(session.id)}
-                          className="rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200 transition-colors"
-                          loading={loadingSummaryId === session.id}
-                          loadingText="Loading..."
-                          size="sm"
-                          variant="outline"
-                        >
-                          View Summary
-                        </SpinnerButton>
+                          {/* Update the SpinnerButton in the session card */}
+                          <SpinnerButton
+                            onClick={() => handleGenerateSummary(session.id)}
+                            className="rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200 transition-colors"
+                            loading={loadingSummaryId === session.id}
+                            loadingText="Loading..."
+                            size="sm"
+                            variant="outline"
+                          >
+                            View Summary
+                          </SpinnerButton>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               ) : (
                 <div className="rounded-lg border bg-white p-8 text-center shadow-sm">

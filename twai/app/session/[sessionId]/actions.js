@@ -22,6 +22,7 @@ export async function isValidSession({ sessionId }) {
                     conversation: true,
                     createdAt: true,
                     summary: true,
+                    isActive: true,
                 },
             },
         },
@@ -37,30 +38,23 @@ export async function isValidSession({ sessionId }) {
         return { failure: "Session not found" };
     }
 
+    // Check if the session is active
+    if (!foundSession.isActive) {
+        return { failure: "This session is no longer active. Please create a new session." };
+    }
 
     const found = await prisma.session.findUnique({
         where: { id: sessionId },
         select: {
             chat: true,
-            conversation:true,
-            template:true,
-            description:true,
-            name:true,
-            
+            conversation: true,
+            template: true,
+            description: true,
+            name: true,
         },
     });
 
-
-
-
-
-
-
-
-
-    return { chat: found.chat,conversation:found.conversation,sessionDetails:found };
-
-
+    return { chat: found.chat, conversation: found.conversation, sessionDetails: found };
 }
 
 export async function appendConversation({ sessionId, newMessages }) {
@@ -79,6 +73,7 @@ export async function appendConversation({ sessionId, newMessages }) {
                     conversation: true,
                     createdAt: true,
                     summary: true,
+                    isActive: true,
                 },
             },
         },
@@ -94,6 +89,10 @@ export async function appendConversation({ sessionId, newMessages }) {
         return { failure: "Session not found" };
     }
 
+    // Check if the session is active
+    if (!foundSession.isActive) {
+        return { failure: "This session is no longer active. Please create a new session." };
+    }
 
     await prisma.session.update({
         where: { id: sessionId },
@@ -121,6 +120,7 @@ export async function appendChat({ sessionId, newMessages }) {
                     chat: true,
                     createdAt: true,
                     summary: true,
+                    isActive: true,
                 },
             },
         },
@@ -134,6 +134,11 @@ export async function appendChat({ sessionId, newMessages }) {
 
     if (!foundSession) {
         return { failure: "Session not found" };
+    }
+
+    // Check if the session is active
+    if (!foundSession.isActive) {
+        return { failure: "This session is no longer active. Please create a new session." };
     }
 
     // Clone existing chat to avoid modifying state directly

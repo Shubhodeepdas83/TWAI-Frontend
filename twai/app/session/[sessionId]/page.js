@@ -17,7 +17,7 @@ export default function Home() {
   const { sessionId } = useParams()
   const { status } = useSession()
 
-  const { wholeConversation, setCopiedText, setWholeConversation, setChatMessages,setSessionDetails } = useAppContext()
+  const { wholeConversation, setCopiedText, setWholeConversation, setChatMessages, setSessionDetails } = useAppContext()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(true)
   const [loadingPhase, setLoadingPhase] = useState("initializing")
@@ -39,6 +39,11 @@ export default function Home() {
         const data = await isValidSession({ sessionId: sessionId })
 
         if (data.failure) {
+          if (data.failure.includes("no longer active")) {
+            // Handle inactive session - redirect to dashboard with a message
+            router.push("/dashboard?error=inactive-session")
+            return
+          }
           router.push("/")
           return
         }
@@ -52,19 +57,24 @@ export default function Home() {
         if (data.conversation) {
           setWholeConversation(data.conversation.map((c) => ({ ...c, hidden: true, saved: true })))
         }
-        if(data.sessionDetails) {
-          setSessionDetails({description:data.sessionDetails.description,name:data.sessionDetails.name,templateInfo:data.sessionDetails.template})
+        if (data.sessionDetails) {
+          setSessionDetails({ description: data.sessionDetails.description, name: data.sessionDetails.name, templateInfo: data.sessionDetails.template })
         }
 
         setIsLoading(false)
       } catch (error) {
         console.error("Error fetching session data:", error)
+        // If the error is a 403 (inactive session), redirect to dashboard
+        if (error.message && error.message.includes("403")) {
+          router.push("/dashboard?error=inactive-session")
+          return
+        }
         router.push("/")
       }
     }
 
     fetchData()
-  }, [status, sessionId, router])
+  }, [status, sessionId, router, setChatMessages, setWholeConversation, setSessionDetails])
 
   if (status === "loading" || isLoading) {
     return <FullscreenLoader />

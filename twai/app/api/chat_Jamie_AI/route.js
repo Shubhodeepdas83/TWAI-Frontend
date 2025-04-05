@@ -26,10 +26,6 @@ export async function POST(req) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-
-
-    
-
     // Extract form data
     const formData = await req.formData();
     const user_input = formData.get("user_input");
@@ -41,29 +37,33 @@ export async function POST(req) {
     }
 
     const Session = await prisma.session.findUnique({
-      where: { userId: user.id,id:sessionId },
-      select: { templateId:true,chat:true },
+      where: { userId: user.id, id: sessionId },
+      select: { templateId: true, chat: true, isActive: true },
     });
 
     if (!Session) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 });
     }
     
+    // Check if the session is active
+    if (!Session.isActive) {
+      return NextResponse.json({ error: "This session is no longer active. Please create a new session." }, { status: 403 });
+    }
+    
     if(Session.templateId){
       const template = await prisma.meetingTemplate.findUnique({
         where: { id: Session.templateId },
-        select: { purpose:true,
-          goal:true,
-          additionalInfo:true,
-          duration:true,
-          documents:{
-            select:{
-              fileUrl:true,
-              title:true,
-              description:true,     
+        select: { purpose: true,
+          goal: true,
+          additionalInfo: true,
+          duration: true,
+          documents: {
+            select: {
+              fileUrl: true,
+              title: true,
+              description: true,     
             }
           },
-
          },
       });
       if(template){
@@ -84,10 +84,6 @@ export async function POST(req) {
       formData.append("chat_Conversation",JSON.stringify([]))
     }
 
-
-    
-
-
     // Validate required fields
     if (!user_input) {
       return NextResponse.json(
@@ -98,7 +94,6 @@ export async function POST(req) {
         { status: 200 }
       );
     }
-
 
     // Call the FastAPI backend with the extracted data
     const response = await fetch(`${process.env.BACKEND_URL}/chat_with_jamie`, {
