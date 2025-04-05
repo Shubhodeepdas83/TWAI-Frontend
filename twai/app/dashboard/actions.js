@@ -134,7 +134,7 @@ export async function removeDocument(documentId) {
 
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
-    select: { id: true },
+    select: { id: true,vectorId:true },
   })
 
   if (!user) {
@@ -171,7 +171,7 @@ export async function removeDocument(documentId) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ pdf_url: document.fileUrl, userId: user.id }),
+        body: JSON.stringify({ pdf_url: document.fileUrl, userId: user.id ,vectorId:user.vectorId }),
       })
 
       if (!res.ok) {

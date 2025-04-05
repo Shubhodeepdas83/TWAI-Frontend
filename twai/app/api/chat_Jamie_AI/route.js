@@ -19,7 +19,7 @@ export async function POST(req) {
     // Step 2: Get user from database
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { id: true },
+      select: { id: true,vectorId:true },
     });
 
     if (!user) {
@@ -82,6 +82,9 @@ export async function POST(req) {
     }
     else{
       formData.append("chat_Conversation",JSON.stringify([]))
+    }
+    if(user.vectorId){
+      formData.append("vectorId",user.vectorId)
     }
 
 

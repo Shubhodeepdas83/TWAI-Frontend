@@ -17,7 +17,7 @@ export async function POST(req) {
     
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { id: true },
+      select: { id: true ,vectorId:true},
     });
 
     if (!user) {
@@ -56,7 +56,8 @@ export async function POST(req) {
       useHighlightedText,
       highlightedText: copiedText,
       meetingTemplate: JSON.stringify(template),
-      useRag:useRag
+      useRag:useRag,
+      vectorId: user.vectorId,
     };
 
     const endpoints = {

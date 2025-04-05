@@ -18,7 +18,7 @@ export async function POST(request) {
     // Get user from session
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { id: true },
+      select: { id: true ,vectorId:true},
     });
 
     if (!user) {
@@ -72,7 +72,7 @@ export async function POST(request) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ s3_url: fileUrl, userId: user.id }),
+        body: JSON.stringify({ s3_url: fileUrl, userId: user.id,vectorId:user.vectorId }),
       });
 
       if (!embedResponse.ok) {
@@ -80,6 +80,16 @@ export async function POST(request) {
         const errorData = await embedResponse.json();
         console.error(errorData);
       }
+      else{
+        const embedResponseData = await embedResponse.json();
+        if (embedResponseData.response && embedResponseData.vectorId) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { vectorId: embedResponseData.vectorId },
+          });
+        }
+      }
+      
     }
 
     return NextResponse.json({ 

@@ -17,7 +17,7 @@ export async function POST(req) {
     
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { id: true },
+      select: { id: true ,vectorId:true},
     });
 
     if (!user) {
@@ -68,6 +68,7 @@ export async function POST(req) {
       action:action,
       regenerate_Query_or_Result_or_expandquestion:regenerate_Query_or_Result_or_expandquestion,
       prevAnswer:prevAnswer,
+      vectorId: user.vectorId,
     };
 
 
