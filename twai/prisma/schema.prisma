@@ -21,6 +21,7 @@ model User {
   updatedAt                DateTime          @updatedAt
   microphoneDeepgramKey    Json?
   capturescreenDeepgramKey Json?
+  blocked                  Boolean           @default(false)
 }
 
 model Session {

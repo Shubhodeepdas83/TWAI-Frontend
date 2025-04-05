@@ -69,7 +69,10 @@ export async function POST(req) {
 
     const response = await fetch(`${process.env.BACKEND_URL}${endpoints[requestType]}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "BACKEND-SECRET": process.env.BACKEND_SECRET 
+      },
       body: JSON.stringify(payload),
     });
 

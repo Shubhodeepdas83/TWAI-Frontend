@@ -170,6 +170,7 @@ export async function removeDocument(documentId) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "BACKEND-SECRET": process.env.BACKEND_SECRET
         },
         body: JSON.stringify({ pdf_url: document.fileUrl, userId: user.id }),
       })
@@ -222,6 +223,7 @@ export async function getSummary(sessionId) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "BACKEND-SECRET": process.env.BACKEND_SECRET
       },
       body: JSON.stringify({ raw_conversation: s.conversation }),
     });
@@ -395,6 +397,7 @@ export async function updateDocument(documentId, formData) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "BACKEND-SECRET": process.env.BACKEND_SECRET
         },
         body: JSON.stringify({ s3_url: document.fileUrl, userId: user.id }),
       })
@@ -411,6 +414,7 @@ export async function updateDocument(documentId, formData) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "BACKEND-SECRET": process.env.BACKEND_SECRET
         },
         body: JSON.stringify({ pdf_url: document.fileUrl, userId: user.id }),
       })

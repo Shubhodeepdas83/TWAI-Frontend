@@ -24,6 +24,21 @@ export const authOptions = {
         throw new Error('No profile');
       }
 
+      // Find the user by email to check if they're blocked
+      const existingUser = await prisma.user.findUnique({
+        where: {
+          email: profile.email,
+        },
+        select: {
+          blocked: true
+        }
+      });
+
+      // If the user exists and is blocked, prevent sign in
+      if (existingUser && existingUser.blocked) {
+        return false; // Prevents the sign in
+      }
+
       await prisma.user.upsert({
         where: {
           email: profile.email,
@@ -41,6 +56,9 @@ export const authOptions = {
     async session({ session, token }) {
       if (token?.id) {
         session.user.id = token.id;
+        
+        // Pass the blocked status from token to session
+        session.isBlocked = token.isBlocked || false;
       }
       return session;
     },
@@ -50,19 +68,32 @@ export const authOptions = {
           where: {
             email: profile.email,
           },
+          select: {
+            id: true,
+            blocked: true
+          }
         });
         if (!fetchedUser) {
           throw new Error('No user found');
         }
 
         token.id = fetchedUser.id;
+        token.isBlocked = fetchedUser.blocked;
+      } else if (token.id) {
+        // Check if the user has been blocked since the token was issued
+        const user = await prisma.user.findUnique({
+          where: { id: token.id },
+          select: { blocked: true }
+        });
+        
+        if (user) {
+          token.isBlocked = user.blocked;
+        }
       }
       return token;
     },
   },
 };
-
-
 
 const handler = NextAuth(authOptions)
 export { handler as GET, handler as POST }
