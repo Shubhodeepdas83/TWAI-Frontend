@@ -11,7 +11,8 @@ import { isValidSession } from "./actions"
 import { useAppContext } from "../../../context/AppContext"
 import { Toaster } from "@/components/ui/toaster"
 import { FullscreenLoader } from "@/components/loading-page"
-import { appendConversation,appendChat } from "./actions"
+import { appendConversation, appendChat } from "./actions"
+import { toast } from "@/hooks/use-toast"
 export default function Home() {
   const { sessionId } = useParams()
   const { status } = useSession()
@@ -20,7 +21,8 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true)
   const [loadingPhase, setLoadingPhase] = useState("initializing")
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false); // <-- Add state for unsaved changes
-
+  const [anyUnsavedChat, setAnyUnsavedChat] = useState(false); // <-- Add state for unsaved chat messages
+  const [anyUnsavedConv, setAnyUnsavedConv] = useState(false); // <-- Add state for unsaved conversation messages
   // --- Existing useEffect for fetching data ---
   useEffect(() => {
     const fetchData = async () => {
@@ -70,27 +72,36 @@ export default function Home() {
 
   // --- New useEffect for 'beforeunload' ---
   useEffect(() => {
-    const handleBeforeUnload = (event) => {
+    const handleBeforeUnload = async (event) => {
       if (hasUnsavedChanges) {
+        
         event.preventDefault();
-        appendConversation({
-          sessionId: sessionId,
-          newMessages: wholeConversation
-            .filter((msg) => msg.saved == false)
-            .map((message) =>
-              ["user", "other", "time"].reduce((acc, key) => {
-                if (message.hasOwnProperty(key)) acc[key] = message[key]
-                return acc
-              }, {}),
-            ),
-        })
-        appendChat({
-          sessionId,
-          newMessages: chatMessages.filter((msg) => msg.saved == false).map(({ saved, hidden, ...rest }) => rest),
-        })
-        event.returnValue = ''; // Legacy support
-        return 'We are still saving your conversation. Are you sure you want to leave?';
+
+        if (anyUnsavedConv) {
+          await appendConversation({
+            sessionId: sessionId,
+            newMessages: wholeConversation
+              .filter((msg) => msg.saved == false)
+              .map((message) =>
+                ["user", "other", "time"].reduce((acc, key) => {
+                  if (message.hasOwnProperty(key)) acc[key] = message[key]
+                  return acc
+                }, {}),
+              ),
+          })
+        }
+        if (anyUnsavedChat) {
+          await appendChat({
+            sessionId,
+            newMessages: chatMessages.filter((msg) => msg.saved == false).map(({ saved, hidden, ...rest }) => rest),
+          })
+          event.returnValue = ''; // Legacy support
+          return 'We are still saving your conversation. Are you sure you want to leave?';
+        }
+
+        
       }
+
       // If no unsaved changes, return undefined (or nothing) to allow navigation without prompt
     };
 
@@ -106,8 +117,8 @@ export default function Home() {
 
   useEffect(() => {
     const checkUnsaved = () => {
-      const anyUnsavedChat = chatMessages.some(msg => !msg.saved);
-      const anyUnsavedConv = wholeConversation.some(item => !item.saved);
+      setAnyUnsavedChat(chatMessages.some(msg => !msg.saved))
+      setAnyUnsavedConv(wholeConversation.some(item => !item.saved))
       setHasUnsavedChanges(anyUnsavedChat || anyUnsavedConv);
     };
     checkUnsaved();
