@@ -104,8 +104,6 @@ export async function GET(request, { params }) {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `inline; filename="${document.name || 'document.pdf'}"`,
         'Content-Length': response.headers.get('content-length') || '',
-        // Use cache-control to allow browser caching for better performance
-        'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
       }
     });
   } catch (error) {
