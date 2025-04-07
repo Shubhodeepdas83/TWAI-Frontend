@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { X } from "lucide-react"
+import { X, Upload } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 
 export default function DocumentUploadModal({ isOpen, onClose, onSuccess }) {
   const [file, setFile] = useState(null)
@@ -10,6 +11,7 @@ export default function DocumentUploadModal({ isOpen, onClose, onSuccess }) {
   const [addEmbedding, setAddEmbedding] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
+  const { toast } = useToast()
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0])
@@ -22,7 +24,11 @@ export default function DocumentUploadModal({ isOpen, onClose, onSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!file) {
-      alert("No file selected.")
+      toast({
+        title: "No file selected",
+        description: "Please select a PDF file to upload.",
+        variant: "destructive",
+      })
       return
     }
 
@@ -48,16 +54,21 @@ export default function DocumentUploadModal({ isOpen, onClose, onSuccess }) {
 
       const { signedUrl, fileUrl } = await signedUrlResponse.json()
 
+      // Start the upload in the background
+      toast({
+        title: "Upload started",
+        description: `Uploading ${file.name} in the background...`,
+      })
+
+      // Close the modal immediately to allow user to continue working
+      onClose()
+
       // 2. Upload the file directly to S3 using the signed URL
       const uploadResponse = await fetch(signedUrl, {
         method: "PUT",
         body: file,
         headers: {
           "Content-Type": file.type,
-        },
-        onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-          setUploadProgress(percentCompleted)
         },
       })
 
@@ -83,16 +94,33 @@ export default function DocumentUploadModal({ isOpen, onClose, onSuccess }) {
       const data = await metadataResponse.json()
 
       if (metadataResponse.ok) {
-        onSuccess()
+        toast({
+          title: "Upload complete",
+          description: `${file.name} has been successfully uploaded.`,
+          variant: "success",
+        })
+        onSuccess(data.documentId) // Pass the new document ID to update the UI
       } else {
-        alert(data.error || "Failed to save document metadata.")
+        toast({
+          title: "Upload failed",
+          description: data.error || "Failed to save document metadata.",
+          variant: "destructive",
+        })
       }
     } catch (error) {
-      alert("An error occurred while uploading the file.")
+      toast({
+        title: "Upload failed",
+        description: error.message || "An error occurred while uploading the file.",
+        variant: "destructive",
+      })
       console.error("Upload error:", error)
     } finally {
       setIsLoading(false)
       setUploadProgress(0)
+      setFile(null)
+      setTitle("")
+      setDescription("")
+      setAddEmbedding(false)
     }
   }
 
@@ -164,18 +192,6 @@ export default function DocumentUploadModal({ isOpen, onClose, onSuccess }) {
             </label>
           </div>
 
-          {isLoading && uploadProgress > 0 && (
-            <div className="w-full">
-              <div className="h-2 w-full bg-gray-200 rounded-full">
-                <div 
-                  className="h-full bg-blue-600 rounded-full" 
-                  style={{ width: `${uploadProgress}%` }}
-                ></div>
-              </div>
-              <p className="text-xs text-center mt-1">{uploadProgress}% uploaded</p>
-            </div>
-          )}
-
           <div className="flex justify-end space-x-2">
             <button
               type="button"
@@ -187,9 +203,19 @@ export default function DocumentUploadModal({ isOpen, onClose, onSuccess }) {
             <button
               type="submit"
               disabled={isLoading || !file}
-              className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:bg-blue-400"
+              className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:bg-blue-400 flex items-center"
             >
-              {isLoading ? "Uploading..." : "Upload Document"}
+              {isLoading ? (
+                <>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                  Uploading...
+                </>
+              ) : (
+                <>
+                  <Upload className="mr-1 h-4 w-4" />
+                  Upload Document
+                </>
+              )}
             </button>
           </div>
         </form>

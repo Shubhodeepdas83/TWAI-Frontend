@@ -1,10 +1,10 @@
 "use client"
 
 import { useSession, signOut } from "next-auth/react"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { getUserDetails, removeDocument, getSummary, deleteMeetingTemplate, getAgentStore } from "./actions"
-import { Calendar, FileText, Folder, LogOut, Plus, Trash, User, Edit, Store, List, Smile } from "lucide-react"
+import { Calendar, FileText, Folder, LogOut, Plus, Trash, User, Edit, Store } from "lucide-react"
 import CreateSessionModal from "../../components/DashboardPageComponents/CreateSessionModal"
 import DocumentUploadModal from "../../components/DashboardPageComponents/DocumentUploadModal"
 import CreateTemplateModal from "../../components/DashboardPageComponents/CreateTemplateModal"
@@ -12,6 +12,9 @@ import EditDocumentModal from "../../components/DashboardPageComponents/EditDocu
 import EditTemplateModal from "../../components/DashboardPageComponents/EditTemplateModal"
 import { DashboardSkeleton, LoadingOverlay } from "@/components/loading-page"
 import { SpinnerButton } from "@/components/ui/spinnerButton"
+import { Toaster } from "@/components/ui/toaster"
+import { useToast } from "@/hooks/use-toast"
+import PDFViewerModal from "@/components/DashboardPageComponents/PDFViewerModal"
 
 export default function DashboardPage() {
   const { data: session, status } = useSession()
@@ -29,7 +32,10 @@ export default function DashboardPage() {
   const [isLoadingSummary, setIsLoadingSummary] = useState(false)
   const [isOpeningSession, setIsOpeningSession] = useState(false)
   const [showInactiveSessionAlert, setShowInactiveSessionAlert] = useState(false)
+  const [selectedPdfUrl, setSelectedPdfUrl] = useState(null)
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false)
   const router = useRouter()
+  const { toast } = useToast()
 
   // Add these state variables in the DashboardPage component
   const [isEditDocumentModalOpen, setIsEditDocumentModalOpen] = useState(false)
@@ -55,44 +61,45 @@ export default function DashboardPage() {
   // Check for query parameters to display notifications
   useEffect(() => {
     // Check if we have an 'error' query parameter
-    const searchParams = new URLSearchParams(window.location.search);
-    const errorParam = searchParams.get('error');
-    if (errorParam === 'inactive-session') {
-      setShowInactiveSessionAlert(true);
+    const searchParams = new URLSearchParams(window.location.search)
+    const errorParam = searchParams.get("error")
+    if (errorParam === "inactive-session") {
+      setShowInactiveSessionAlert(true)
       // Clear the URL query parameter
-      window.history.replaceState({}, document.title, window.location.pathname);
+      window.history.replaceState({}, document.title, window.location.pathname)
       // Auto-hide the alert after 5 seconds
       setTimeout(() => {
-        setShowInactiveSessionAlert(false);
-      }, 5000);
+        setShowInactiveSessionAlert(false)
+      }, 5000)
     }
-  }, []);
-
-  useEffect(() => {
-    fetchAgentStore()
-    fetchUserData()
   }, [])
 
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
     setIsLoading(true)
     const data = await getUserDetails()
-    console.log(data)
     if (data.user) {
       setUser(data.user)
       setIsLoading(false)
     }
-  }
+  }, [])
 
-  const fetchAgentStore = async () => {
-    setIsLoading(true)
+  const fetchAgentStore = useCallback(async () => {
     const data = await getAgentStore()
-    console.log(data)
     if (data.agents) {
       setAgents(data.agents)
     } else {
-      alert("Failed to fetch agents")
+      toast({
+        title: "Failed to fetch agents",
+        description: "Could not retrieve agent data. Please try again later.",
+        variant: "destructive",
+      })
     }
-  }
+  }, [toast])
+
+  useEffect(() => {
+    fetchAgentStore()
+    fetchUserData()
+  }, [fetchAgentStore, fetchUserData])
 
   const handleDeleteDocument = async (documentId) => {
     setIsDeleting(true)
@@ -102,14 +109,32 @@ export default function DashboardPage() {
       const result = await removeDocument(documentId)
 
       if (result.success) {
-        await fetchUserData()
+        // Update the documents list without a full refetch
+        setUser((prevUser) => ({
+          ...prevUser,
+          documents: prevUser.documents.filter((doc) => doc.id !== documentId),
+        }))
+
+        toast({
+          title: "Document deleted",
+          description: "The document has been successfully deleted.",
+          variant: "success",
+        })
       } else if (result.error || result.failure) {
         console.error("Error deleting document:", result.error || result.failure)
-        alert("Failed to delete document. Please try again.")
+        toast({
+          title: "Failed to delete document",
+          description: result.error || result.failure || "Please try again.",
+          variant: "destructive",
+        })
       }
     } catch (error) {
       console.error("Exception while deleting document:", error)
-      alert("An error occurred while deleting the document.")
+      toast({
+        title: "Error",
+        description: "An error occurred while deleting the document.",
+        variant: "destructive",
+      })
     } finally {
       setIsDeleting(false)
       setDeletingId(null)
@@ -124,14 +149,32 @@ export default function DashboardPage() {
       const result = await deleteMeetingTemplate(templateId)
 
       if (result.success) {
-        await fetchUserData()
+        // Update the templates list without a full refetch
+        setUser((prevUser) => ({
+          ...prevUser,
+          meetingTemplates: prevUser.meetingTemplates.filter((template) => template.id !== templateId),
+        }))
+
+        toast({
+          title: "Template deleted",
+          description: "The meeting template has been successfully deleted.",
+          variant: "success",
+        })
       } else if (result.failure) {
         console.error("Error deleting template:", result.failure)
-        alert("Failed to delete template. Please try again.")
+        toast({
+          title: "Failed to delete template",
+          description: result.failure || "Please try again.",
+          variant: "destructive",
+        })
       }
     } catch (error) {
       console.error("Exception while deleting template:", error)
-      alert("An error occurred while deleting the template.")
+      toast({
+        title: "Error",
+        description: "An error occurred while deleting the template.",
+        variant: "destructive",
+      })
     } finally {
       setIsDeleting(false)
       setDeletingId(null)
@@ -143,13 +186,11 @@ export default function DashboardPage() {
     router.push(`/session/${sessionId}`)
   }
 
-  // Add this to the component
   const handleSignOut = async () => {
     setIsSigningOut(true)
     await signOut()
   }
 
-  // Update the handleGenerateSummary function
   const handleGenerateSummary = async (sessionId) => {
     setLoadingSummaryId(sessionId)
     try {
@@ -157,19 +198,25 @@ export default function DashboardPage() {
       if (data.summary) {
         setSelectedSessionSummary(data.summary)
         setIsSummaryModalOpen(true)
-      }else if(data.failure){
+      } else if (data.failure) {
         console.error("Error generating summary:", data.failure)
-        alert("Failed to generate summary. Please try again.")
-      }
-       else {
-        alert("Failed to generate summary")
+        toast({
+          title: "Failed to generate summary",
+          description: data.failure || "Please try again.",
+          variant: "destructive",
+        })
+      } else {
+        toast({
+          title: "Failed to generate summary",
+          description: "Could not generate summary. Please try again.",
+          variant: "destructive",
+        })
       }
     } finally {
       setLoadingSummaryId(null)
     }
   }
 
-  // Add these handlers in the DashboardPage component
   const handleEditDocument = (document) => {
     setSelectedDocument(document)
     setIsEditDocumentModalOpen(true)
@@ -178,6 +225,59 @@ export default function DashboardPage() {
   const handleEditTemplate = (template) => {
     setSelectedTemplate(template)
     setIsEditTemplateModalOpen(true)
+  }
+
+  const handleViewPdf = (fileUrl) => {
+    setSelectedPdfUrl(fileUrl)
+    setIsPdfModalOpen(true)
+  }
+
+  const handleDocumentUploadSuccess = (newDocumentId) => {
+    // Fetch just the new document and add it to the state
+    const fetchNewDocument = async () => {
+      const data = await getUserDetails()
+      if (data.user && data.user.documents) {
+        const newDocument = data.user.documents.find((doc) => doc.id === newDocumentId)
+        if (newDocument) {
+          setUser((prevUser) => ({
+            ...prevUser,
+            documents: [newDocument, ...prevUser.documents],
+          }))
+        }
+      }
+    }
+
+    fetchNewDocument()
+  }
+
+  const handleDocumentUpdateSuccess = (updatedDocument) => {
+    // Update the document in the state without a full refetch
+    setUser((prevUser) => ({
+      ...prevUser,
+      documents: prevUser.documents.map((doc) => (doc.id === updatedDocument.id ? updatedDocument : doc)),
+    }))
+
+    toast({
+      title: "Document updated",
+      description: "The document has been successfully updated.",
+      variant: "success",
+    })
+  }
+
+  const handleTemplateUpdateSuccess = (updatedTemplate) => {
+    // Update the template in the state without a full refetch
+    setUser((prevUser) => ({
+      ...prevUser,
+      meetingTemplates: prevUser.meetingTemplates.map((template) =>
+        template.id === updatedTemplate.id ? updatedTemplate : template,
+      ),
+    }))
+
+    toast({
+      title: "Template updated",
+      description: "The meeting template has been successfully updated.",
+      variant: "success",
+    })
   }
 
   if (status === "loading" || isLoading) {
@@ -193,15 +293,23 @@ export default function DashboardPage() {
       {showInactiveSessionAlert && (
         <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-md shadow-md z-50 flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            <path
+              fillRule="evenodd"
+              d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+              clipRule="evenodd"
+            />
           </svg>
           This session is no longer active. Please create a new session.
-          <button 
+          <button
             onClick={() => setShowInactiveSessionAlert(false)}
             className="ml-3 text-amber-800 hover:text-amber-900"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              <path
+                fillRule="evenodd"
+                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                clipRule="evenodd"
+              />
             </svg>
           </button>
         </div>
@@ -284,7 +392,7 @@ export default function DashboardPage() {
       <div className="flex flex-1 flex-col overflow-hidden">
         <header className="flex h-16 items-center justify-between border-b bg-white px-6 shadow-sm">
           <h1 className="text-lg font-medium">
-            {activeTab === "sessions" && "Interview Sessions"}
+            {activeTab === "sessions" && "Meeting Sessions"}
             {activeTab === "documents" && "Document Library"}
             {activeTab === "templates" && "Meeting Templates"}
             {activeTab === "agentStore" && "Agent Store"}
@@ -314,7 +422,7 @@ export default function DashboardPage() {
             <div>
               <div className="mb-4">
                 <h2 className="text-lg font-medium">Available Sessions</h2>
-                <p className="text-sm text-gray-500">A list of your Interview Sessions.</p>
+                <p className="text-sm text-gray-500">A list of your Meeting Sessions.</p>
               </div>
 
               {user?.sessions?.length > 0 ? (
@@ -351,8 +459,13 @@ export default function DashboardPage() {
                             </SpinnerButton>
                           ) : (
                             <span className="text-xs text-amber-600 flex items-center">
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              </svg>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-4 w-4 mr-1"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              ></svg>
                               Completed
                             </span>
                           )}
@@ -435,7 +548,7 @@ export default function DashboardPage() {
                       {/* Action Buttons */}
                       <div className="flex gap-2">
                         <button
-                          onClick={() => window.open(doc.fileUrl, "_blank")}
+                          onClick={() => handleViewPdf(doc.fileUrl)}
                           className="rounded-md bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 hover:bg-blue-200 transition-colors"
                         >
                           View
@@ -640,10 +753,7 @@ export default function DashboardPage() {
       <DocumentUploadModal
         isOpen={isDocumentModalOpen}
         onClose={() => setIsDocumentModalOpen(false)}
-        onSuccess={() => {
-          setIsDocumentModalOpen(false)
-          fetchUserData()
-        }}
+        onSuccess={handleDocumentUploadSuccess}
       />
 
       <CreateTemplateModal
@@ -689,26 +799,26 @@ export default function DashboardPage() {
         </div>
       )}
 
+      {/* PDF Viewer Modal */}
+      <PDFViewerModal isOpen={isPdfModalOpen} onClose={() => setIsPdfModalOpen(false)} pdfUrl={selectedPdfUrl} />
+
       {/* Add these modals at the end of the component */}
       <EditDocumentModal
         isOpen={isEditDocumentModalOpen}
         onClose={() => setIsEditDocumentModalOpen(false)}
         document={selectedDocument}
-        onSuccess={() => {
-          setIsEditDocumentModalOpen(false)
-          fetchUserData()
-        }}
+        onSuccess={handleDocumentUpdateSuccess}
       />
 
       <EditTemplateModal
         isOpen={isEditTemplateModalOpen}
         onClose={() => setIsEditTemplateModalOpen(false)}
         template={selectedTemplate}
-        onSuccess={() => {
-          setIsEditTemplateModalOpen(false)
-          fetchUserData()
-        }}
+        onSuccess={handleTemplateUpdateSuccess}
       />
+
+      {/* Toast notifications */}
+      <Toaster />
     </div>
   )
 }
