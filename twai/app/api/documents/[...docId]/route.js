@@ -48,6 +48,10 @@ export async function GET(request, { params }) {
         where: { email: session.user.email },
         select: { id: true },
       });
+
+      if (!user) {
+        return new Response('User not found', { status: 404 });
+      }
       
       // Verify document belongs to the user
       const userDocument = await prisma.document.findFirst({

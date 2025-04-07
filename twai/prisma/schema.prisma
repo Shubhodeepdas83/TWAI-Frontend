@@ -21,7 +21,6 @@ model User {
   updatedAt                DateTime          @updatedAt
   microphoneDeepgramKey    Json?
   capturescreenDeepgramKey Json?
-  vectorId         String?
   blocked                  Boolean           @default(false)
 }
 
