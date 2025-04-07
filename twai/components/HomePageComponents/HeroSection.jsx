@@ -86,8 +86,9 @@ const HeroSection = () => {
 
         <div className="hidden md:block text-center">
           <h1 className="text-6xl lg:text-7xl mb-8 text-center font-extrabold bg-gradient-to-r from-jarwiz-400 to-jarwiz-500 bg-clip-text text-transparent">
+            <div>Your real-time, 1-click</div>
             <div className="flex items-center justify-center flex-wrap">
-              <span className="block sm:inline">Your real-time, 1-click, AI Meeting Co</span>
+              <span className="block sm:inline">AI Meeting Co</span>
               <div
                 className="relative overflow-hidden mx-auto sm:mx-0 sm:ml-1 mt-2 sm:mt-0"
                 style={{
