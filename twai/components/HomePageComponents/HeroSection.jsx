@@ -87,7 +87,7 @@ const HeroSection = () => {
         <div className="hidden md:block text-center">
           <h1 className="text-6xl lg:text-7xl mb-8 text-center font-extrabold bg-gradient-to-r from-jarwiz-400 to-jarwiz-500 bg-clip-text text-transparent">
             <div className="flex items-center justify-center flex-wrap">
-              <span className="block sm:inline">Your AI Meeting Co</span>
+              <span className="block sm:inline">Your real-time, 1-click, AI Meeting Co</span>
               <div
                 className="relative overflow-hidden mx-auto sm:mx-0 sm:ml-1 mt-2 sm:mt-0"
                 style={{
@@ -131,7 +131,7 @@ const HeroSection = () => {
             Join every meeting with team of AI experts. No more pre-meeting stress or in-meeting anxiety. Dump all your research, ideas & docs onto JarWiz & get instant, in-meeting, 1-click answers.
           </p>
           <p className="hidden md:block text-lg text-gray-300 animate-fade-in animation-delay-200">
-            Dump all your research, ideas & plans onto JarWiz and get in-meeting instant answer on any topic.
+            Drop all your docs, ideas & notes into JarWiz—get in-meeting instant answers, citations, and arguments.
           </p>
           <p className="hidden md:block text-lg text-gray-300 animate-fade-in animation-delay-500">
             1-click, context-aware agents working in background—no need to type queries or interrupt your flow.
