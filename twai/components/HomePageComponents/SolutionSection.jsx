@@ -246,18 +246,17 @@ const SolutionSection = () => {
         </h2>
 
         <div className="text-base text-center text-gray-300 w-full md:w-4/5 mx-auto mb-8 md:mb-12">
-          <p className="hidden md:block">
+          <p className="hidden md:block mb-2">
             A real-time RAG-based AI super-agent that helps you think, speak, and communicate effectively & accurately.
           </p>
 
-          <br className="hidden md:block" />
 
-          <p className="hidden md:block">
+
+          <p className="hidden md:block mb-2">
             Simply update JarWiz AI with meeting details, relevant documents, and integrations (e.g., Salesforce, CRM).
           </p>
 
-          <br className="hidden md:block" />
-        
+
 
           <p>
             It joins your meeting on any platform, follows the conversation, delivers instant answers, arguments, & action plans.
