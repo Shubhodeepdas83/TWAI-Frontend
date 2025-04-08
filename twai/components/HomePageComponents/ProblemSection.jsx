@@ -30,15 +30,15 @@ const ProblemSection = () => {
   const problemItems = [
     {
       title: "Before Meetings - Time Wasted",
-      description: "Hours spent preparing materials that may never be referenced during the meeting."
+      description: "You spend hours preparing details that are never referenced during meetings."
     },
     {
       title: "During Meetings - Information Overload",
-      description: "Struggling to recall key data points when they are most needed in discussions."
+      description: "You struggle to remember key data points when the pressure is on."
     },
     {
       title: "After Meetings - Lost Opportunities",
-      description: "Missing crucial insights that could have led to better business decisions."
+      description: "You leave thinking, “I should’ve said that,” or forget critical next steps."
     }
   ]
 
@@ -151,7 +151,7 @@ const ProblemSection = () => {
     <section className="section-padding bg-[#0f1217] text-white py-10 md:py-16">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold text-white text-center mb-6 md:mb-8">
-          The Hidden Cost of Ineffective Meetings
+          Why Meetings Suck — Too Much Prep. Too Little Outcome.
         </h2>
 
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">

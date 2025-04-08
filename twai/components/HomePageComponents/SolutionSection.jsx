@@ -197,12 +197,12 @@ const SolutionSection = () => {
     {
       icon: <MessageSquare size={22} />,
       title: "Real-time AI collaborator",
-      description: "Understands the meeting flow & provides relevant inputs exactly when you need, without disrupting the natural conversation."
+      description: "Understands the meeting flow, suggests a sharper counter-argument, spots gaps and adds value, without disrupting the natural conversation."
     },
     {
       icon: <FileText size={22} />,
       title: "1-Click assistance",
-      description: "Pre-defined quick-action AI-agents. Customized for un-interruptive & summarized assistance that is easy to grasp."
+      description: "Pre-defined quick-action AI-agents. Customized for instant, un-interruptive & summarized assistance that is easy to grasp."
     },
     {
       icon: <FileText size={22} />,
@@ -217,12 +217,12 @@ const SolutionSection = () => {
     {
       icon: <Link size={22} />,
       title: "Seamless integration",
-      description: "Works with all popular meeting platforms like Zoom, Google Meet, Microsoft Teams and other browser based meeting apps."
+      description: "Compatible with Zoom, Google Meet, Teams, and all popular meeting platforms — no setup stress."
     },
     {
       icon: <Settings size={22} />,
       title: "Customizable AI agents",
-      description: "Tailor the AI to specific roles or industries, ensuring you get exactly the type of assistance most relevant to your business needs."
+      description: "Custom-fit AI agents for your job, your industry, your style. Ensuring you get exactly the type of assistance most relevant to your business needs."
     }
   ];
 
@@ -242,12 +242,12 @@ const SolutionSection = () => {
     <section className="section-padding bg-[#181d26] text-white py-12 md:py-16">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold text-white text-center mb-6 md:mb-8">
-          How JarWiz AI Transforms Meetings
+          JarWiz AI: Smarter Discussions. Better Outcomes. In Half the Time.
         </h2>
 
         <div className="text-base text-center text-gray-300 w-full md:w-4/5 mx-auto mb-8 md:mb-12">
           <p className="hidden md:block mb-2">
-            A real-time RAG-based AI super-agent that helps you think, speak, and communicate effectively & accurately.
+            A real-time AI meeting companion that helps you think faster, speak smarter, and get to the point, every time.
           </p>
 
 
