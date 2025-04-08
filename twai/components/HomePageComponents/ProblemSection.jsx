@@ -151,7 +151,7 @@ const ProblemSection = () => {
     <section className="section-padding bg-[#0f1217] text-white py-10 md:py-16">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold text-white text-center mb-6 md:mb-8">
-          Meetings Need a Reboot — Too Much Prep for Too Little Outcome
+          Why Meetings Suck — Too Much Prep. Too Little Outcome.
         </h2>
 
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
