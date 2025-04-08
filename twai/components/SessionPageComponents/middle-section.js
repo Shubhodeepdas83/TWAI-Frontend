@@ -134,7 +134,14 @@ export default function MiddleSection() {
         }),
       })
 
-      if (!response.ok) throw new Error(`Server responded with ${response.status}`)
+      if (!response.ok) {
+        if (response.status === 403) {
+          // Session is inactive, redirect to dashboard with error parameter
+          router.push("/dashboard?error=inactive-session")
+          return
+        }
+        throw new Error(`Server responded with ${response.status}`)
+      }
 
       const reader = response.body?.getReader()
       if (!reader) throw new Error("Streaming not supported")

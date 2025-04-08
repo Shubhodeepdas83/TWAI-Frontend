@@ -3,12 +3,14 @@
 import { useState, useEffect } from "react"
 import { updateDocument } from "../../app/dashboard/actions"
 import { X } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 
 export default function EditDocumentModal({ isOpen, onClose, document, onSuccess }) {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [addEmbedding, setAddEmbedding] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { toast } = useToast()
 
   useEffect(() => {
     if (document) {
@@ -30,14 +32,30 @@ export default function EditDocumentModal({ isOpen, onClose, document, onSuccess
     try {
       const result = await updateDocument(document.id, formData)
       if (result.success) {
-        onSuccess()
+        // Pass the updated document to the parent component
+        const updatedDocument = {
+          ...document,
+          title,
+          description,
+          isEmbedded: addEmbedding,
+        }
+        onSuccess(updatedDocument)
+        onClose()
       } else {
         console.error("Failed to update document:", result.failure || result.error)
-        alert("Failed to update document. Please try again.")
+        toast({
+          title: "Failed to update document",
+          description: result.failure || result.error || "Please try again.",
+          variant: "destructive",
+        })
       }
     } catch (error) {
       console.error("Error updating document:", error)
-      alert("An error occurred while updating the document.")
+      toast({
+        title: "Error",
+        description: "An error occurred while updating the document.",
+        variant: "destructive",
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -110,7 +128,14 @@ export default function EditDocumentModal({ isOpen, onClose, document, onSuccess
               disabled={isSubmitting}
               className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:bg-blue-400"
             >
-              {isSubmitting ? "Updating..." : "Update Document"}
+              {isSubmitting ? (
+                <div className="flex items-center">
+                  <div className="mr-2 h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
+                  Updating...
+                </div>
+              ) : (
+                "Update Document"
+              )}
             </button>
           </div>
         </form>

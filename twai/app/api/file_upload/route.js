@@ -82,6 +82,7 @@ export async function POST(request) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "BACKEND-SECRET": process.env.BACKEND_SECRET
         },
         body: JSON.stringify({ s3_url: updatedDoc.fileUrl, userId: user.id }),
       });

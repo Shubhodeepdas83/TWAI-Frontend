@@ -67,7 +67,7 @@ export default function WelcomeModal() {
             {
               Icon: Mic,
               title: "Connect to Microphone",
-              text: "Use the microphone button to record your voice during the interview. Your speech will be transcribed in real-time.",
+              text: "Use the microphone button to record your voice during the Meeting. Your speech will be transcribed in real-time.",
             },
             {
               Icon: MonitorSmartphone,

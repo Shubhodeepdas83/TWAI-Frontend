@@ -42,11 +42,17 @@ export async function GET(request) {
         name: true,
         description: true,
         templateId: true,
+        isActive: true,
       },
     })
 
     if (!sessionDetails) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 })
+    }
+    
+    // Check if the session is active
+    if (!sessionDetails.isActive) {
+      return NextResponse.json({ error: "This session is no longer active. Please create a new session." }, { status: 403 })
     }
 
     // If session has a template, get template details

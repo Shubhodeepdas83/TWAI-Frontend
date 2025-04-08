@@ -34,6 +34,7 @@ export async function getUserDetails() {
           createdAt: true,
           summary: true,
           templateId: true,
+          isActive: true,
         },
       },
       documents: {
@@ -107,10 +108,22 @@ export async function createSession(formData) {
   const description = formData.get("description") || ""
   const templateId = formData.get("templateId") || null
 
+  // First, deactivate all existing sessions for this user
+  await prisma.session.updateMany({
+    where: {
+      userId: user.id,
+      isActive: true,
+    },
+    data: {
+      isActive: false,
+    },
+  })
+
   const sessionData = {
     userId: user.id,
     name,
     description,
+    isActive: true, // Explicitly set the new session as active
   }
 
   // Add template relation if a template was selected
@@ -170,6 +183,7 @@ export async function removeDocument(documentId) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "BACKEND-SECRET": process.env.BACKEND_SECRET
         },
         body: JSON.stringify({ pdf_url: document.fileUrl, userId: user.id }),
       })
@@ -216,12 +230,13 @@ export async function getSummary(sessionId) {
   if (!s) {
     return { failure: "Summary not found or user not linked to the summary" }
   }
-
-  if (!s.summary) {
+  console.log(s.isActive)
+  if (!s.summary || s.isActive) {
     const response = await fetch(`${process.env.BACKEND_URL}/process-ai-summary`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "BACKEND-SECRET": process.env.BACKEND_SECRET
       },
       body: JSON.stringify({ raw_conversation: s.conversation }),
     });
@@ -269,6 +284,7 @@ export async function getSummary(sessionId) {
       createdAt: s.createdAt,
     };
   }else{
+
     return {
       summary: s.summary,
       createdAt: s.createdAt,
@@ -395,6 +411,7 @@ export async function updateDocument(documentId, formData) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "BACKEND-SECRET": process.env.BACKEND_SECRET
         },
         body: JSON.stringify({ s3_url: document.fileUrl, userId: user.id }),
       })
@@ -411,6 +428,7 @@ export async function updateDocument(documentId, formData) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "BACKEND-SECRET": process.env.BACKEND_SECRET
         },
         body: JSON.stringify({ pdf_url: document.fileUrl, userId: user.id }),
       })

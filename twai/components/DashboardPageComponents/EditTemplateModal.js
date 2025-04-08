@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { updateMeetingTemplate, getEmbeddedDocuments } from "../../app/dashboard/actions"
 import { X } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 
 export default function EditTemplateModal({ isOpen, onClose, template, onSuccess }) {
   const [purpose, setPurpose] = useState("")
@@ -13,6 +14,7 @@ export default function EditTemplateModal({ isOpen, onClose, template, onSuccess
   const [availableDocuments, setAvailableDocuments] = useState([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const { toast } = useToast()
 
   useEffect(() => {
     if (template) {
@@ -37,9 +39,20 @@ export default function EditTemplateModal({ isOpen, onClose, template, onSuccess
       const result = await getEmbeddedDocuments()
       if (result.documents) {
         setAvailableDocuments(result.documents)
+      } else {
+        toast({
+          title: "Failed to fetch documents",
+          description: "Could not retrieve embedded documents. Please try again.",
+          variant: "destructive",
+        })
       }
     } catch (error) {
       console.error("Error fetching documents:", error)
+      toast({
+        title: "Error",
+        description: "An error occurred while fetching documents.",
+        variant: "destructive",
+      })
     } finally {
       setIsLoading(false)
     }
@@ -63,14 +76,35 @@ export default function EditTemplateModal({ isOpen, onClose, template, onSuccess
     try {
       const result = await updateMeetingTemplate(template.id, formData)
       if (result.success) {
-        onSuccess()
+        // Create updated template object to pass to parent component
+        const updatedTemplate = {
+          ...template,
+          purpose,
+          goal,
+          additionalInfo,
+          duration,
+          documents: availableDocuments
+            .filter((doc) => selectedDocuments.includes(doc.id))
+            .map((doc) => ({ id: doc.id, title: doc.title })),
+        }
+
+        onSuccess(updatedTemplate)
+        onClose()
       } else {
         console.error("Failed to update template:", result.failure)
-        alert("Failed to update template. Please try again.")
+        toast({
+          title: "Failed to update template",
+          description: result.failure || "Please try again.",
+          variant: "destructive",
+        })
       }
     } catch (error) {
       console.error("Error updating template:", error)
-      alert("An error occurred while updating the template.")
+      toast({
+        title: "Error",
+        description: "An error occurred while updating the template.",
+        variant: "destructive",
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -195,7 +229,14 @@ export default function EditTemplateModal({ isOpen, onClose, template, onSuccess
               disabled={isSubmitting}
               className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:bg-blue-400"
             >
-              {isSubmitting ? "Updating..." : "Update Template"}
+              {isSubmitting ? (
+                <div className="flex items-center">
+                  <div className="mr-2 h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
+                  Updating...
+                </div>
+              ) : (
+                "Update Template"
+              )}
             </button>
           </div>
         </form>
