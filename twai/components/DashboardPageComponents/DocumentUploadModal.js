@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { X, Upload } from "lucide-react"
+import { X, Upload, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 export default function DocumentUploadModal({ isOpen, onClose, onSuccess }) {
@@ -54,10 +54,18 @@ export default function DocumentUploadModal({ isOpen, onClose, onSuccess }) {
 
       const { signedUrl, fileUrl } = await signedUrlResponse.json()
 
-      // Start the upload in the background
+      // Create a persistent toast with a unique ID for the upload
+      const uploadToastId = `upload-${Date.now()}`
       toast({
+        id: uploadToastId,
         title: "Upload started",
-        description: `Uploading ${file.name} in the background...`,
+        description: (
+          <div className="flex items-center space-x-2">
+            <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+            <span>Uploading {file.name} in the background...</span>
+          </div>
+        ),
+        duration: Infinity, // Make toast persist until dismissed
       })
 
       // Close the modal immediately to allow user to continue working
@@ -94,20 +102,25 @@ export default function DocumentUploadModal({ isOpen, onClose, onSuccess }) {
       const data = await metadataResponse.json()
 
       if (metadataResponse.ok) {
+        // Dismiss the upload toast and show success toast
         toast({
+          id: uploadToastId, // Replace the existing upload toast
           title: "Upload complete",
           description: `${file.name} has been successfully uploaded.`,
           variant: "success",
         })
         onSuccess(data.documentId) // Pass the new document ID to update the UI
       } else {
+        // Dismiss the upload toast and show error toast
         toast({
+          id: uploadToastId, // Replace the existing upload toast
           title: "Upload failed",
           description: data.error || "Failed to save document metadata.",
           variant: "destructive",
         })
       }
     } catch (error) {
+      // Create a new error toast
       toast({
         title: "Upload failed",
         description: error.message || "An error occurred while uploading the file.",
