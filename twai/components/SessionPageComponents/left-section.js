@@ -30,11 +30,14 @@ export default function LeftSection() {
   const [showInput, setShowInput] = useState(false)
   const scrollAreaRef = useRef(null)
   const conversationEndRef = useRef(null)
+  
+  // Add interval ref instead of debounce timer
+  const saveIntervalRef = useRef(null);
+  // Track unsaved messages
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // Add this inside the component function
   const { toast } = useToast()
-
-
 
   const handleAddConversation = () => {
     const timestamp = new Date().toISOString() // Universal UTC timestamp
@@ -63,8 +66,6 @@ export default function LeftSection() {
       ),
     )
   }, [showConversation])
-
-
 
   useEffect(() => {
     const handleMouseUp = () => {
@@ -111,9 +112,64 @@ export default function LeftSection() {
     return () => document.removeEventListener("mouseup", handleMouseUp);
   }, []);
 
-
-
-
+  // Replace the interval-based auto-save implementation
+  useEffect(() => {
+    // Clear any existing interval when the component mounts or dependencies change
+    if (saveIntervalRef.current) {
+      clearInterval(saveIntervalRef.current);
+    }
+    
+    // Set up an interval that checks for unsaved messages every 5 seconds
+    saveIntervalRef.current = setInterval(async () => {
+      console.log("Auto-save check running...");
+      // Get the current state directly to ensure we have the latest data
+      const currentConversation = wholeConversation;
+      
+      // Check if there are any unsaved messages
+      const unsavedMessages = currentConversation
+        .filter((msg) => msg.saved === false)
+        .map((message) =>
+          ["user", "other", "time"].reduce((acc, key) => {
+            if (message.hasOwnProperty(key)) acc[key] = message[key]
+            return acc
+          }, {}),
+        );
+      
+      console.log(`Found ${unsavedMessages.length} unsaved messages`);
+      
+      // Only save if there are unsaved messages
+      if (unsavedMessages.length > 0) {
+        try {
+          console.log("Attempting to save messages:", unsavedMessages);
+          const appending = await appendConversation({
+            sessionId,
+            newMessages: unsavedMessages,
+          });
+          
+          if (appending.success) {
+            // Update with the latest whole conversation state
+            setWholeConversation(current => 
+              current.map(msg => 
+                msg.saved === false ? { ...msg, saved: true } : msg
+              )
+            );
+            console.log("Conversation auto-saved successfully");
+          } else {
+            console.error("Error auto-saving conversation:", appending.failure);
+          }
+        } catch (error) {
+          console.error("Failed to auto-save conversation:", error);
+        }
+      }
+    }, 5000); // Run every 5 seconds
+    
+    // Cleanup interval on component unmount or when dependencies change
+    return () => {
+      if (saveIntervalRef.current) {
+        clearInterval(saveIntervalRef.current);
+      }
+    };
+  }, [wholeConversation, sessionId]);
 
   return (
     <div className="h-full flex flex-col gap-2">
