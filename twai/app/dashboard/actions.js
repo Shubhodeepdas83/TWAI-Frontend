@@ -169,7 +169,7 @@ export async function removeDocument(documentId) {
 
   try {
     // Extract filename from the full URL
-    const fileKey = document.awsFileUrl.substring(document.awsFileUrl.lastIndexOf("/") + 1)
+    const fileKey = document.awsFileUrl.substring(document.awsFileUrl.indexOf("amazonaws.com") + 14)
 
     await s3.send(
       new DeleteObjectCommand({

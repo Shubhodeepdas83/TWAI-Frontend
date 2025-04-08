@@ -80,9 +80,9 @@ export function FloatingImageWindow({ imageData, onClose }) {
       <div
         className="floating-window-header"
         onMouseDown={handleMouseDown}
-        style={{ cursor: isDragging ? "grabbing" : "grab" }}
+        style={{ cursor: isDragging ? "grabbing" : "grab", backgroundColor: "#0c8eeb" }}
       >
-        <h3 className="text-sm font-medium">Image Preview</h3>
+        <h3 className="text-sm font-medium text-white">Image Preview</h3>
         <div className="window-controls flex items-center gap-2">
           {/* <Button
             variant="outline"
