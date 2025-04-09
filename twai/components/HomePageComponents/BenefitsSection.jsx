@@ -7,7 +7,7 @@ const benefitsData = [
         id: "time",
         icon: <Clock className="h-6 w-6 md:h-7 md:w-7" />,
         title: "Save Time",
-        description: "Reduce prep and follow-up time by up to 50% with automatic information retrieval and meeting summaries.",
+        
         points: [
             "Less time spent preparing materials",
             "Automatic meeting notes and summaries",
@@ -18,7 +18,7 @@ const benefitsData = [
         id: "confidence",
         icon: <CheckCircle className="h-6 w-6 md:h-7 md:w-7" />,
         title: "Boost Confidence",
-        description: "Instant access to data means you're always prepared, even for unexpected questions or discussion topics.",
+      
         points: [
             "Eliminate anxiety about forgetting details",
             "Provide accurate information on demand",
@@ -29,7 +29,7 @@ const benefitsData = [
         id: "outcomes",
         icon: <TrendingUp className="h-6 w-6 md:h-7 md:w-7" />,
         title: "Improve Outcomes",
-        description: "Make better decisions and close deals faster with AI-powered insights and suggestions during meetings.",
+        
         points: [
             "Higher conversion rates in sales calls",
             "More productive team discussions",
