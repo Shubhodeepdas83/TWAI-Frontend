@@ -258,9 +258,9 @@ const SolutionSection = () => {
 
 
 
-          <p>
-            It joins your meeting on any platform, follows the conversation, delivers instant answers, arguments, & action plans.
-          </p>
+//           <p>
+//            It joins your meeting on any platform, follows the conversation, delivers instant answers, arguments, & action plans.
+//          </p>
         </div>
 
         {isMobile ? (
