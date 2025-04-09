@@ -257,12 +257,6 @@ const SolutionSection = () => {
           </p>
 
 
-
-//           <p>
-//            It joins your meeting on any platform, follows the conversation, delivers instant answers, arguments, & action plans.
-//          </p>
-        </div>
-
         {isMobile ? (
           <MobileCarousel features={features} />
         ) : (
