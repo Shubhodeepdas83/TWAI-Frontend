@@ -197,22 +197,22 @@ const SolutionSection = () => {
     {
       icon: <MessageSquare size={22} />,
       title: "Real-time AI collaborator",
-      description: "Understands the meeting flow, suggests a sharper counter-argument, spots gaps and adds value, without disrupting the natural conversation."
+      description: "Follows the flow, fills gaps, and sharpens arguments, without disrupting the conversation."
     },
     {
       icon: <FileText size={22} />,
       title: "1-Click assistance",
-      description: "Pre-defined quick-action AI-agents. Customized for instant, un-interruptive & summarized assistance that is easy to grasp."
+      description: "Quick-action AI agents for instant, clear, and non-intrusive support."
     },
     {
       icon: <FileText size={22} />,
       title: "Instant web & doc search",
-      description: "Searches uploaded documents & web to pull up exact information when needed, saving you from awkward pauses while searching for data."
+      description: "Searches uploaded documents & web to pull up exact information when needed, along with citations."
     },
     {
       icon: <Lightbulb size={22} />,
       title: "Contextual suggestions",
-      description: "Offers live advice based on the discussion, helping you make better decisions and identify opportunities you might have missed."
+      description: "Live context-aware suggestions to help you decide & spot hidden opportunities you might have missed."
     },
     {
       icon: <Link size={22} />,
@@ -222,7 +222,7 @@ const SolutionSection = () => {
     {
       icon: <Settings size={22} />,
       title: "Customizable AI agents",
-      description: "Custom-fit AI agents for your job, your industry, your style. Ensuring you get exactly the type of assistance most relevant to your business needs."
+      description: "Custom-fit AI agents tailored to your role, industry, and style, for ultra-relevant support."
     }
   ];
 
