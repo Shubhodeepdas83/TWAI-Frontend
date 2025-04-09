@@ -256,7 +256,7 @@ const SolutionSection = () => {
             Simply update JarWiz AI with meeting details, relevant documents, and integrations (e.g., Salesforce, CRM).
           </p>
 
-
+        </div>
         {isMobile ? (
           <MobileCarousel features={features} />
         ) : (
