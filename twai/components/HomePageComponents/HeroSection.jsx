@@ -19,7 +19,7 @@ const HeroSection = () => {
   }, [suffixes.length])
 
   return (
-    <section className="pt-32 pb-20 md:py-40 px-4 bg-[#0f1217] text-white relative overflow-hidden">
+    <section className=" pt-32 pb-16 md:pt-32 md:pb-20 bg-[#0f1217] text-white relative overflow-hidden">
       <div className="absolute inset-0 opacity-40">
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -47,16 +47,16 @@ const HeroSection = () => {
 
       <div className="container mx-auto relative z-10">
         <div className="block md:hidden text-center mb-8">
-          <h1 className="text-2xl bg-gradient-to-r from-jarwiz-400 to-jarwiz-500 bg-clip-text text-transparent">
+          <h1 className="text-3xl bg-gradient-to-r from-jarwiz-400 to-jarwiz-500 bg-clip-text text-transparent">
           Your real-time, 1-click
           </h1>
-          <h2 className="text-2xl pl-3 bg-gradient-to-r from-jarwiz-400 to-jarwiz-500 bg-clip-text text-transparent flex items-center justify-center">
+          <h2 className="text-3xl pl-3 bg-gradient-to-r from-jarwiz-400 to-jarwiz-500 bg-clip-text text-transparent flex items-center justify-center">
             Meeting Co
             <div
               className="relative overflow-hidden ml-1"
               style={{
                 height: "1.5em",
-                minWidth: "110px",
+                minWidth: "130px",
                 display: "inline-block",
                 verticalAlign: "bottom",
               }}
@@ -64,12 +64,12 @@ const HeroSection = () => {
               {suffixes.map((suffix, index) => (
                 <span
                   key={suffix}
-                  className={`absolute transition-all duration-500 ease-in-out text-[#ff00d4] text-2xl whitespace-nowrap ${
+                  className={`absolute transition-all duration-500 ease-in-out text-[#ff00d4] text-3xl whitespace-nowrap ${
                     index === textIndex ? "opacity-100 transform-none" : "opacity-0 translate-y-6"
                   }`}
                   style={{
                     left: "-2%",
-                    top: "6%",
+                    top: "14%",
                     textShadow:
                       index === textIndex ? "0 0 2px rgba(255,0,214,0.2)" : "none",
                     WebkitBackgroundClip: "text",
@@ -128,7 +128,7 @@ const HeroSection = () => {
             regrets.
           </p>
           <p className="block md:hidden text-lg text-gray-300 animate-fade-in">
-            Join every meeting with team of AI experts. No more pre-meeting stress or in-meeting anxiety.
+            Join every meeting with team of AI experts.
             <br />
             Drop all your docs, ideas & notes into JarWiz—get in-meeting instant answers, citations & arguments.
           </p>

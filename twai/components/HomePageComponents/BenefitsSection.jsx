@@ -187,7 +187,7 @@ const BenefitsSection = () => {
 
 
     return (
-        <section id="benefits" className="section-padding bg-[#121620] py-12 md:py-16">
+        <section id="benefits" className="section-padding bg-[#121620] py-8 md:py-16">
             <div className="container mx-auto px-4">
                 <h2 className="text-2xl md:text-3xl font-normal md:font-bold text-white text-center mb-6 md:mb-8">
                     Why Choose Jarwiz AI?
