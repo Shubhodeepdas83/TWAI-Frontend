@@ -47,16 +47,17 @@ const HeroSection = () => {
 
       <div className="container mx-auto relative z-10">
         <div className="block md:hidden text-center mb-8">
-          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-jarwiz-400 to-jarwiz-500 bg-clip-text text-transparent">
-            Your Meeting
+          <h1 className="text-2xl bg-gradient-to-r from-jarwiz-400 to-jarwiz-500 bg-clip-text text-transparent">
+          Your real-time, 1-click
           </h1>
-          <h2 className="text-4xl font-extrabold pl-3 bg-gradient-to-r from-jarwiz-400 to-jarwiz-500 bg-clip-text text-transparent flex items-center justify-center">
-            AI Co
+          <h2 className="text-2xl pl-3 bg-gradient-to-r from-jarwiz-400 to-jarwiz-500 bg-clip-text text-transparent flex items-center justify-center">
+            Meeting Co
             <div
               className="relative overflow-hidden ml-1"
               style={{
-                height: "1.2em",
-                minWidth: "150px",
+                height: "1.5em",
+                top: "1px",
+                minWidth: "110px",
                 display: "inline-block",
                 verticalAlign: "bottom",
               }}
@@ -64,7 +65,7 @@ const HeroSection = () => {
               {suffixes.map((suffix, index) => (
                 <span
                   key={suffix}
-                  className={`absolute transition-all duration-500 ease-in-out font-extrabold text-[#ff00d4] text-3xl whitespace-nowrap ${
+                  className={`absolute transition-all duration-500 ease-in-out text-[#ff00d4] text-2xl whitespace-nowrap ${
                     index === textIndex ? "opacity-100 transform-none" : "opacity-0 translate-y-6"
                   }`}
                   style={{
@@ -128,7 +129,9 @@ const HeroSection = () => {
             regrets.
           </p>
           <p className="block md:hidden text-lg text-gray-300 animate-fade-in">
-            Join every meeting with team of AI experts. No more pre-meeting stress or in-meeting anxiety. Dump all your research, ideas & docs onto JarWiz & get instant, in-meeting, 1-click answers.
+            Join every meeting with team of AI experts. No more pre-meeting stress or in-meeting anxiety.
+            <br />
+            Drop all your docs, ideas & notes into JarWiz—get in-meeting instant answers, citations & arguments.
           </p>
           <p className="hidden md:block text-lg text-gray-300 animate-fade-in animation-delay-200">
             Drop all your docs, ideas & notes into JarWiz—get in-meeting instant answers, citations, and arguments.

@@ -6,7 +6,7 @@ const FeaturesSection = () => {
   return (
     <section id="features" className="section-padding bg-[#0f1217]">
       <div className="container mx-auto px-4">
-        <h2 className="section-title text-white text-3xl md:text-4xl font-bold text-center mb-8 md:mb-12 animate-fade-in">
+        <h2 className="section-title text-white text-2xl md:text-4xl font-normal md:font-bold text-center mb-8 md:mb-12 animate-fade-in">
           Key Features
         </h2>
 

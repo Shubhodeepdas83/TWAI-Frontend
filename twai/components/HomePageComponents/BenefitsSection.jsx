@@ -47,8 +47,8 @@ const BenefitCard = ({ benefit, isMobile = false }) => {
                     {benefit.icon}
                 </div>
             )}
-            <h3 className={`text-lg font-semibold ${isMobile ? 'text-[#FF00D6]' : 'text-white'} mb-2 md:mb-3`}>{benefit.title}</h3>
-            <p className="text-sm text-gray-300 mb-4 md:mb-6 flex-grow">{benefit.description}</p>
+            <h3 className={`text-lg font-semibold ${isMobile ? 'text-[#FF00D6]' : 'text-white'} ${isMobile ? '' : ' mb-2'} md:mb-3`}>{benefit.title}</h3>
+            <p className={`hidden md:block text-sm text-gray-300 ${isMobile ? '' : ' mb-4 '} md:mb-6 flex-grow`}>{benefit.description}</p>
             <ul className="space-y-2 md:space-y-3">
                 {benefit.points.map((point, index) => (
                     <li key={index} className="flex items-start">
@@ -189,7 +189,7 @@ const BenefitsSection = () => {
     return (
         <section id="benefits" className="section-padding bg-[#121620] py-12 md:py-16">
             <div className="container mx-auto px-4">
-                <h2 className="text-3xl font-bold text-white text-center mb-6 md:mb-8">
+                <h2 className="text-2xl md:text-3xl font-normal md:font-bold text-white text-center mb-6 md:mb-8">
                     Why Choose Jarwiz AI?
                 </h2>
 

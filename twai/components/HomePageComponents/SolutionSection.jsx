@@ -241,11 +241,11 @@ const SolutionSection = () => {
   return (
     <section className="section-padding bg-[#181d26] text-white py-12 md:py-16">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-bold text-white text-center mb-6 md:mb-8">
-          JarWiz AI: Smarter Discussions. Better Outcomes. In Half the Time.
+        <h2 className="text-2xl md:text-3xl font-normal md:font-bold text-white text-center mb-3 md:mb-8">
+          JarWiz AI: Smarter Discussions. Better Outcomes. In 1-click.
         </h2>
 
-        <div className="text-base text-center text-gray-300 w-full md:w-4/5 mx-auto mb-8 md:mb-12">
+        <div className="text-base text-center text-gray-300 w-full md:w-4/5 mx-auto mb-4 md:mb-12">
           <p className="hidden md:block mb-2">
             A real-time AI meeting companion that helps you think faster, speak smarter, and get to the point, every time.
           </p>

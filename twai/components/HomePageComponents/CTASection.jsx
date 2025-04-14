@@ -12,7 +12,7 @@ const CTASection = () => {
     <section className="py-12 md:py-16 px-4 bg-[#0f1217] border-t border-gray-800">
       <div className="container mx-auto">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-white mb-4 md:mb-6">
+          <h2 className="text-2xl md:text-3xl font-normal md:font-bold text-white mb-4 md:mb-6">
             Ready to Transform Your Meetings?
           </h2>
           <p className="text-base text-gray-300 mb-6 md:mb-8">
