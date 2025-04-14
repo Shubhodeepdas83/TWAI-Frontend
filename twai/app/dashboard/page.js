@@ -408,7 +408,7 @@ export default function DashboardPage() {
             >
               <span className="flex items-center">
                 <Plus className="mr-1 h-4 w-4" />
-                {activeTab === "sessions" && "Create Session"}
+                {activeTab === "sessions" && "Start New Session"}
                 {activeTab === "documents" && "Upload Document"}
                 {activeTab === "templates" && "Create Template"}
               </span>
@@ -426,30 +426,48 @@ export default function DashboardPage() {
               </div>
 
               {user?.sessions?.length > 0 ? (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <div className="w-full border rounded-lg overflow-hidden">
+                  <div className="grid grid-cols-[2fr_2fr_1fr_1fr_2fr] gap-4 p-2 text-gray-700 font-medium bg-gray-100">
+                    <span>Name</span>
+                    <span>Description</span>
+                    <span>Date</span>
+                    <span>Status</span>
+                    <span>Actions</span>
+                  </div>
+
                   {[...user.sessions]
-                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // Sort sessions by date, most recent first
+                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
                     .map((session) => (
                       <div
                         key={session.id}
-                        className="rounded-lg border bg-white p-5 shadow-sm transition-shadow hover:shadow-md h-[200px] flex flex-col"
+                        className="grid grid-cols-[2fr_2fr_1fr_1fr_2fr] gap-4 p-2 border-b items-center"
                       >
-                        <div className="mb-2 flex items-center justify-between">
-                          <h3 className="font-medium text-blue-600 truncate max-w-[200px]">
-                            {session.name || `Session #${session.id}`}
-                          </h3>
-                          <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
-                            {new Date(session.createdAt).toLocaleDateString()}
+                        {/* Session Name */}
+                        <span className="truncate text-blue-600">{session.name || `Session #${session.id}`}</span>
+
+                        {/* Session Description (truncated) */}
+                        <span className="truncate text-gray-600">{session.description || "No description"}</span>
+
+                        {/* Creation Date */}
+                        <span className="text-xs text-gray-500">{new Date(session.createdAt).toLocaleDateString()}</span>
+
+                        {/* Status Badge */}
+                        <div className="text-left">
+                          <span
+                            className={`text-xs px-2 py-1 rounded-full inline-block ${
+                              session.isActive ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"
+                            }`}
+                          >
+                            {session.isActive ? "Active" : "Completed"}
                           </span>
                         </div>
-                        {session.description && (
-                          <p className="mb-3 text-sm text-gray-600 line-clamp-2 flex-grow">{session.description}</p>
-                        )}
-                        <div className="mt-auto flex items-center justify-between">
-                          {session.isActive ? (
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-2">
+                          {session.isActive && (
                             <SpinnerButton
                               onClick={() => handleOpenSession(session.id)}
-                              className="rounded-md bg-blue-100 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-200 transition-colors"
+                              className="rounded-md bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 hover:bg-blue-200 transition-colors"
                               loadingText="Opening..."
                               loading={isOpeningSession}
                               size="sm"
@@ -457,23 +475,10 @@ export default function DashboardPage() {
                             >
                               Open Session
                             </SpinnerButton>
-                          ) : (
-                            <span className="text-xs text-amber-600 flex items-center">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-4 w-4 mr-1"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              ></svg>
-                              Completed
-                            </span>
                           )}
-
-                          {/* Update the SpinnerButton in the session card */}
                           <SpinnerButton
                             onClick={() => handleGenerateSummary(session.id)}
-                            className="rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200 transition-colors"
+                            className="rounded-md bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-200 transition-colors"
                             loading={loadingSummaryId === session.id}
                             loadingText="Loading..."
                             size="sm"
@@ -495,7 +500,7 @@ export default function DashboardPage() {
                     className="mt-4 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
                   >
                     <Plus className="mr-1 inline-block h-4 w-4" />
-                    Create Session
+                    Start New Session
                   </button>
                 </div>
               )}
@@ -775,7 +780,7 @@ export default function DashboardPage() {
                 onClick={() => setIsSummaryModalOpen(false)}
                 className="rounded-full p-1 hover:bg-gray-200 transition-colors"
               >
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>

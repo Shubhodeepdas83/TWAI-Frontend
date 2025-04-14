@@ -1,24 +1,40 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { createSession, getUserDetails } from "../../app/dashboard/actions"
+import { useState, useEffect, useRef } from "react"
+import { createSession, getUserDetails, getEmbeddedDocuments } from "../../app/dashboard/actions"
 import { useRouter } from "next/navigation"
-import { X } from "lucide-react"
+import { X, Check, ChevronDown } from "lucide-react"
 
 export default function CreateSessionModal({ isOpen, onClose, onSuccess }) {
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
   const [selectedTemplate, setSelectedTemplate] = useState("")
   const [templates, setTemplates] = useState([])
+  const [embeddedDocuments, setEmbeddedDocuments] = useState([])
+  const [selectedDocuments, setSelectedDocuments] = useState([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const dropdownRef = useRef(null)
   const router = useRouter()
 
   useEffect(() => {
     if (isOpen) {
       fetchTemplates()
+      fetchEmbeddedDocuments()
     }
   }, [isOpen])
+
+  useEffect(() => {
+    // Close dropdown when clicking outside
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [dropdownRef])
 
   const fetchTemplates = async () => {
     setIsLoading(true)
@@ -34,6 +50,27 @@ export default function CreateSessionModal({ isOpen, onClose, onSuccess }) {
     }
   }
 
+  const fetchEmbeddedDocuments = async () => {
+    try {
+      const data = await getEmbeddedDocuments()
+      if (data.documents) {
+        setEmbeddedDocuments(data.documents)
+      }
+    } catch (error) {
+      console.error("Error fetching embedded documents:", error)
+    }
+  }
+
+  const toggleDocumentSelection = (docId) => {
+    setSelectedDocuments(prev => {
+      if (prev.includes(docId)) {
+        return prev.filter(id => id !== docId)
+      } else {
+        return [...prev, docId]
+      }
+    })
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
@@ -44,6 +81,10 @@ export default function CreateSessionModal({ isOpen, onClose, onSuccess }) {
     if (selectedTemplate) {
       formData.append("templateId", selectedTemplate)
     }
+    
+    selectedDocuments.forEach(docId => {
+      formData.append("documentIds", docId)
+    })
 
     try {
       const result = await createSession(formData)
@@ -104,6 +145,52 @@ export default function CreateSessionModal({ isOpen, onClose, onSuccess }) {
             />
           </div>
 
+          {/* Custom Multi-select Dropdown with Checkboxes */}
+          <div className="relative" ref={dropdownRef}>
+            <label htmlFor="documents" className="block text-sm font-medium text-gray-700 mb-1">
+              Embedded Documents (Optional)
+            </label>
+            <button
+              type="button"
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className="flex items-center justify-between w-full rounded-md border border-gray-300 px-3 py-2 bg-white shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+            >
+              <span className="text-sm truncate">
+                {selectedDocuments.length === 0 
+                  ? "-- Select documents --" 
+                  : `${selectedDocuments.length} document${selectedDocuments.length > 1 ? 's' : ''} selected`}
+              </span>
+              <ChevronDown className="h-4 w-4 ml-2" />
+            </button>
+            
+            {dropdownOpen && (
+              <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-56 overflow-y-auto">
+                {embeddedDocuments.length > 0 ? (
+                  embeddedDocuments.map((doc) => (
+                    <div 
+                      key={doc.id}
+                      onClick={() => toggleDocumentSelection(doc.id)}
+                      className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-100"
+                    >
+                      <div className="flex items-center">
+                        <div className={`w-4 h-4 border rounded flex items-center justify-center mr-2 ${
+                          selectedDocuments.includes(doc.id) 
+                            ? 'bg-blue-500 border-blue-500' 
+                            : 'border-gray-300'
+                        }`}>
+                          {selectedDocuments.includes(doc.id) && <Check className="w-3 h-3 text-white" />}
+                        </div>
+                        <span className="text-sm">{doc.title || 'Untitled Document'}</span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="px-3 py-2 text-sm text-gray-500">No embedded documents available</div>
+                )}
+              </div>
+            )}
+          </div>
+
           <div>
             <label htmlFor="template" className="block text-sm font-medium text-gray-700">
               Meeting Template (Optional)
@@ -126,6 +213,8 @@ export default function CreateSessionModal({ isOpen, onClose, onSuccess }) {
               </select>
             )}
           </div>
+
+          
 
           <div className="flex justify-end space-x-2">
             <button

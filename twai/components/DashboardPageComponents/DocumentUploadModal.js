@@ -61,11 +61,14 @@ export default function DocumentUploadModal({ isOpen, onClose, onSuccess }) {
         title: "Upload started",
         description: (
           <div className="flex items-center space-x-2">
-            <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+            <div className="relative h-6 w-6">
+              <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+            </div>
             <span>Uploading {file.name} in the background...</span>
           </div>
         ),
         duration: Infinity, // Make toast persist until dismissed
+        className: "bg-blue-50 border-blue-200",
       })
 
       // Close the modal immediately to allow user to continue working

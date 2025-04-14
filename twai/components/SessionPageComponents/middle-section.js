@@ -615,10 +615,13 @@ export default function MiddleSection() {
             <Bot className="h-4 w-4 text-primary" />
             <CardTitle className="text-base font-medium">JarWizAI</CardTitle>
             {isProcessing && (
-              <div className="flex space-x-1 ml-1">
-                <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-primary rounded-full animate-bounce delay-150"></div>
-                <div className="w-2 h-2 bg-primary rounded-full animate-bounce delay-300"></div>
+              <div className="flex items-center ml-2 px-2 py-1 bg-blue-50 rounded-full border border-blue-200">
+                <div className="flex items-center">
+                  <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse mr-1"></div>
+                  <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse delay-150 mr-1"></div>
+                  <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse delay-300 mr-1"></div>
+                </div>
+                <span className="text-xs font-medium text-blue-600 ml-1">Processing...</span>
               </div>
             )}
           </div>

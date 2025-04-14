@@ -107,6 +107,7 @@ export async function createSession(formData) {
   const name = formData.get("name") || "Untitled Session"
   const description = formData.get("description") || ""
   const templateId = formData.get("templateId") || null
+  const documentIds = formData.getAll("documentIds") || []
 
   // First, deactivate all existing sessions for this user
   await prisma.session.updateMany({
@@ -130,7 +131,15 @@ export async function createSession(formData) {
   if (templateId) {
     sessionData.templateId = templateId
   }
+  
+  // Add documents relation if documents were selected
+  if (documentIds.length > 0) {
+    sessionData.documents = {
+      connect: documentIds.map((id) => ({ id })),
+    }
+  }
 
+  // Create session with session data
   const newSession = await prisma.session.create({
     data: sessionData,
   })

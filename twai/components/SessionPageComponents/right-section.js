@@ -24,7 +24,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useParams, useRouter } from "next/navigation"
-import { appendConversation } from "../../app/session/[sessionId]/actions"
+import { appendConversation,completeSession } from "../../app/session/[sessionId]/actions"
 import { unstable_noStore as noStore } from "next/cache"
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { v4 as uuidv4 } from "uuid"
@@ -98,7 +98,8 @@ export default function RightSection() {
       videoRef.current.srcObject = null
     }
 
-    appendConversation({
+    // Save any pending conversation messages first
+    await appendConversation({
       sessionId: sessionId,
       newMessages: wholeConversation
         .filter((msg) => msg.saved == false)
@@ -109,6 +110,10 @@ export default function RightSection() {
           }, {}),
         ),
     })
+    
+    // Mark the session as inactive in the database
+    await completeSession({ sessionId })
+    
     router.push("/dashboard")
   }
 
@@ -521,7 +526,7 @@ export default function RightSection() {
               title={useRag ? "RAG On" : "RAG Off"}
             >
               <Database className="h-3 w-3 mr-1" />
-              RAG
+              Doc Search
             </Button>
           </div>
 

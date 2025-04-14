@@ -166,6 +166,44 @@ export async function appendChat({ sessionId, newMessages }) {
     return { success: foundSession };
 }
 
+export async function completeSession({ sessionId }) {
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+        return { failure: "not authenticated" };
+    }
+
+    const user = await prisma.user.findUnique({
+        where: { email: session.user.email },
+        select: {
+            sessions: {
+                select: {
+                    id: true,
+                    isActive: true,
+                },
+            },
+        },
+    });
+
+    if (!user) {
+        return { failure: "User not found" };
+    }
+
+    const foundSession = user.sessions.find((s) => s.id === sessionId);
+
+    if (!foundSession) {
+        return { failure: "Session not found" };
+    }
+
+    // Update the session to mark it as inactive
+    await prisma.session.update({
+        where: { id: sessionId },
+        data: { isActive: false },
+    });
+
+    return { success: true };
+}
+
 // export async function getToken(sessionId, mode) {
 //     try{
 //         if (mode !== "mic" && mode !== "capture") {

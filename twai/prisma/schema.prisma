@@ -37,6 +37,7 @@ model Session {
   templateId               String?          @map("meeting_template_id")
   template                 MeetingTemplate? @relation(fields: [templateId], references: [id])
   isActive                 Boolean          @default(true)
+  documents                Document[]       // Many-to-many relation with Document
 }
 
 model Document {
@@ -50,6 +51,7 @@ model Document {
   description String?
   isEmbedded  Boolean           @default(false)
   templates   MeetingTemplate[] // Many-to-many relation with MeetingTemplate
+  sessions    Session[]         // Many-to-many relation with Session
 }
 
 model MeetingTemplate {
