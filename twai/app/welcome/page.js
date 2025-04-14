@@ -80,11 +80,11 @@ const Welcome = () => {
                   <div className="h-px w-24 mx-auto my-6" style={{ background: `linear-gradient(to right, transparent, ${jarwiz[500]}/50, transparent)` }}></div>
 
                   <p className="text-lg" style={{ color: 'hsl(var(--muted-foreground))', animation: 'fade-in 0.5s ease-out 0.2s' }}>
-                    We'll be in touch with you soon.
+                    We&apos;ll be in touch with you soon.
                   </p>
 
                   <p className="text-lg" style={{ color: 'hsl(var(--muted-foreground))', animation: 'fade-in 0.5s ease-out 0.3s' }}>
-                    We're crafting something <span className="font-semibold animate-pulse" style={{ color: accentColor }}>extraordinary</span>.
+                    We&apos;re crafting something <span className="font-semibold animate-pulse" style={{ color: accentColor }}>extraordinary</span>.
                   </p>
 
                   <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full blur-3xl" style={{ backgroundColor: `${jarwiz[600]}/15` }}></div>
