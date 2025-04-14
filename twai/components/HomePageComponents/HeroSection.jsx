@@ -56,7 +56,6 @@ const HeroSection = () => {
               className="relative overflow-hidden ml-1"
               style={{
                 height: "1.5em",
-                top: "1px",
                 minWidth: "110px",
                 display: "inline-block",
                 verticalAlign: "bottom",
@@ -70,7 +69,7 @@ const HeroSection = () => {
                   }`}
                   style={{
                     left: "-2%",
-                    top: "11%",
+                    top: "6%",
                     textShadow:
                       index === textIndex ? "0 0 2px rgba(255,0,214,0.2)" : "none",
                     WebkitBackgroundClip: "text",
