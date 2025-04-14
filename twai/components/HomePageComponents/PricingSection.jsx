@@ -3,16 +3,16 @@
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Check, ChevronLeft, ChevronRight } from "lucide-react"
-import WaitlistModal from "./WaitlistModal"
+import Link from "next/link"
 
-// pricingTiers array remains the same
+// pricingTiers array with "Sign Up" instead of "Join Waitlist"
 const pricingTiers = [
-    { id: "free", name: "Free", price: 0, description: "Perfect for checking out first time", meetings: "300 minutes of meetings", storage: "1 GB storage", features: ["Real-time AI meeting assistance", "Document search & retrieval", "Meeting summaries / Transcripts", "Priority support", "5 Agents",], cta: "Join Waitlist", },
-    { id: "basic", name: "Basic", price: 29, description: "Perfect for freelancers and individual consultants", meetings: "1500 minutes of meetings", storage: "5 GB storage", features: ["Everything in Free, plus:", "Agenda item tracking", "Preparation Hub QnA Access", "Priority support", "15 AI-agents",], popular: true, cta: "Join Waitlist", },
-    { id: "pro", name: "Pro", price: 199, description: "Ideal for small teams and growing businesses", meetings: "10000 minutes of meetings", storage: "20 GB storage", features: ["Everything in Basic, plus:", "Custom AI agent development", "Integration with CRM systems", "Dedicated account manager", "Unlimited AI-agent templates",], cta: "Join Waitlist", },
+    { id: "free", name: "Free", price: 0, description: "Perfect for checking out first time", meetings: "300 minutes of meetings", storage: "1 GB storage", features: ["Real-time AI meeting assistance", "Document search & retrieval", "Meeting summaries / Transcripts", "Priority support", "5 Agents",], cta: "Sign Up", },
+    { id: "basic", name: "Basic", price: 29, description: "Perfect for freelancers and individual consultants", meetings: "1500 minutes of meetings", storage: "5 GB storage", features: ["Everything in Free, plus:", "Agenda item tracking", "Preparation Hub QnA Access", "Priority support", "15 AI-agents",], popular: true, cta: "Sign Up", },
+    { id: "pro", name: "Pro", price: 199, description: "Ideal for small teams and growing businesses", meetings: "10000 minutes of meetings", storage: "20 GB storage", features: ["Everything in Basic, plus:", "Custom AI agent development", "Integration with CRM systems", "Dedicated account manager", "Unlimited AI-agent templates",], cta: "Sign Up", },
 ]
 
-const PricingCard = ({ tier, billingCycle, onJoinWaitlist }) => {
+const PricingCard = ({ tier, billingCycle }) => {
     const displayPrice = billingCycle === "annual" && tier.price > 0 ? Math.round(tier.price * 0.8 * 12) : tier.price;
     const priceSuffix = billingCycle === "annual" && tier.price > 0 ? "/year" : "/month";
 
@@ -29,7 +29,9 @@ const PricingCard = ({ tier, billingCycle, onJoinWaitlist }) => {
                      <div className="flex items-center"><Check className="h-4 w-4 text-[#FF00D6] mr-2 flex-shrink-0" />{tier.meetings}</div>
                      <div className="flex items-center"><Check className="h-4 w-4 text-[#FF00D6] mr-2 flex-shrink-0" />{tier.storage}</div>
                  </div>
-                 <Button className={`w-full mt-auto py-3 text-base ${ tier.popular ? "bg-[#FF00D6] hover:bg-[#D600B1] text-white" : "bg-[#242936] hover:bg-[#2f3646] text-white" }`} onClick={() => onJoinWaitlist(tier.id)}>{tier.cta}</Button>
+                 <Link href="/signup">
+                    <Button className={`w-full mt-auto py-3 text-base ${ tier.popular ? "bg-[#FF00D6] hover:bg-[#D600B1] text-white" : "bg-[#242936] hover:bg-[#2f3646] text-white" }`}>{tier.cta}</Button>
+                 </Link>
                  <div className="space-y-2 mt-6 pt-6 border-t border-gray-700">
                      {tier.features.map((feature, index) => (<div key={index} className="flex items-start"><div className="text-[#FF00D6] mr-2 mt-0.5 flex-shrink-0"><Check className="h-4 w-4" /></div><span className="text-sm text-gray-300">{feature}</span></div>))}
                  </div>
@@ -40,8 +42,8 @@ const PricingCard = ({ tier, billingCycle, onJoinWaitlist }) => {
 
 const PricingSection = () => {
   const [billingCycle, setBillingCycle] = useState("monthly")
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [selectedTierId, setSelectedTierId] = useState(null)
+  // const [isModalOpen, setIsModalOpen] = useState(false)
+  // const [selectedTierId, setSelectedTierId] = useState(null)
 
   // --- Mobile Carousel State & Refs ---
   const [isMobile, setIsMobile] = useState(false)
@@ -99,11 +101,11 @@ const PricingSection = () => {
     }
   }, [isMobile]);
 
-  // Open modal handler
-  const handleJoinWaitlist = (tierId) => {
-    setSelectedTierId(tierId);
-    setIsModalOpen(true);
-  }
+  // Open modal handler - commented out as we're using direct sign up link now
+  // const handleJoinWaitlist = (tierId) => {
+  //   setSelectedTierId(tierId);
+  //   setIsModalOpen(true);
+  // }
 
   // --- Carousel Navigation ---
   const nextSlide = () => {
@@ -209,7 +211,6 @@ const PricingSection = () => {
                             <PricingCard
                                 tier={tier}
                                 billingCycle={billingCycle}
-                                onJoinWaitlist={handleJoinWaitlist}
                             />
                         </div>
                     ))}
@@ -226,14 +227,11 @@ const PricingSection = () => {
                         key={tier.id}
                         tier={tier}
                         billingCycle={billingCycle}
-                        onJoinWaitlist={handleJoinWaitlist}
                     />
                 ))}
             </div>
         )}
       </div>
-
-      <WaitlistModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} tierId={selectedTierId} />
     </section>
   )
 }

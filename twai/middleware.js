@@ -4,12 +4,13 @@ import { getToken } from 'next-auth/jwt'
 export async function middleware(req) {
   const session = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
   
-  if (!session && req.nextUrl.pathname !== '/') {
+  // Allow access to signup page without authentication
+  if (!session && req.nextUrl.pathname !== '/' && req.nextUrl.pathname !== '/signup') {
     return NextResponse.redirect(new URL('/', req.url))
   }
   
   if (session && req.nextUrl.pathname === '/') {
-    return NextResponse.redirect(new URL('/dashboard', req.url))
+    return NextResponse.redirect(new URL('/welcome', req.url))
   }
 
   return NextResponse.next()

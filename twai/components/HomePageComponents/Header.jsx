@@ -3,12 +3,11 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Menu, X } from "lucide-react"
-import WaitlistModal from "./WaitlistModal"
+import Link from "next/link"
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
-  const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -51,6 +50,11 @@ const Header = () => {
           <a href="#faq" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
             FAQ
           </a>
+          <Link href="/signup">
+            <Button className="bg-[#FF00D6] hover:bg-[#D600B1] text-white">
+              Sign Up
+            </Button>
+          </Link>
         </nav>
 
         {/* Mobile Menu Button */}
@@ -103,13 +107,14 @@ const Header = () => {
             >
               FAQ
             </a>
-
+            <Link href="/signup">
+              <Button className="bg-[#FF00D6] hover:bg-[#D600B1] text-white w-full">
+                Sign Up
+              </Button>
+            </Link>
           </div>
         </div>
       )}
-
-      {/* Waitlist Modal */}
-      <WaitlistModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </header>
   )
 }

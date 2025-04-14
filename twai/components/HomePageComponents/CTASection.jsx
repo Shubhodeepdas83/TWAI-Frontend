@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import WaitlistModal from "./WaitlistModal"
+import Link from "next/link"
 
 const CTASection = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -19,12 +20,13 @@ const CTASection = () => {
             Jarwiz AI.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button
-              className="bg-[#FF00D6] hover:bg-[#D600B1] text-white text-base py-4 md:py-6 px-6 md:px-8 rounded-xl w-full sm:w-auto"
-              onClick={() => setIsModalOpen(true)}
-            >
-              Join the Waitlist
-            </Button>
+            <Link href="/signup">
+              <Button
+                className="bg-[#FF00D6] hover:bg-[#D600B1] text-white text-base py-4 md:py-6 px-6 md:px-8 rounded-xl w-full sm:w-auto"
+              >
+                Sign Up
+              </Button>
+            </Link>
           </div>
           <p className="text-sm text-gray-400 mt-4 md:mt-6">
             No credit card required. Early access for waitlist members.

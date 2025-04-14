@@ -3,11 +3,10 @@
 import { Button } from "@/components/ui/button"
 import { VideoIcon, Users } from "lucide-react"
 import { useState, useEffect, useRef } from "react"
-import WaitlistModal from "./WaitlistModal"
+import Link from "next/link"
 
 const HeroSection = () => {
   const [textIndex, setTextIndex] = useState(0)
-  const [isModalOpen, setIsModalOpen] = useState(false)
   const suffixes = ["mpanion", "llaborator", "presenter", "pilot"]
   const suffixRef = useRef(null)
 
@@ -57,7 +56,7 @@ const HeroSection = () => {
               className="relative overflow-hidden ml-1"
               style={{
                 height: "1.2em",
-                minWidth: "150px", /* Further reduced minWidth for better mobile fit */
+                minWidth: "150px",
                 display: "inline-block",
                 verticalAlign: "bottom",
               }}
@@ -65,7 +64,7 @@ const HeroSection = () => {
               {suffixes.map((suffix, index) => (
                 <span
                   key={suffix}
-                  className={`absolute transition-all duration-500 ease-in-out font-extrabold text-[#ff00d4] text-3xl whitespace-nowrap ${ // Added whitespace-nowrap
+                  className={`absolute transition-all duration-500 ease-in-out font-extrabold text-[#ff00d4] text-3xl whitespace-nowrap ${
                     index === textIndex ? "opacity-100 transform-none" : "opacity-0 translate-y-6"
                   }`}
                   style={{
@@ -140,7 +139,7 @@ const HeroSection = () => {
         </div>
 
         <div className="flex flex-wrap md:flex-nowrap justify-center gap-3 md:gap-4 mb-10 md:mb-14 overflow-x-auto w-full px-2 min-w-0">
-          <div className="flex items-center gap-1.5 md:gap-3 text-gray-200 transition-all duration-300 hover:text-white hover:scale-105 flex-shrink-0"> {/* Added flex-shrink-0 */}
+          <div className="flex items-center gap-1.5 md:gap-3 text-gray-200 transition-all duration-300 hover:text-white hover:scale-105 flex-shrink-0">
             <span className="bg-white/10 p-1.5 md:p-2.5 rounded-lg flex items-center justify-center border border-white/5 shadow-lg">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -161,13 +160,13 @@ const HeroSection = () => {
             </span>
             <span className="text-xs md:text-sm font-medium">Google Meet</span>
           </div>
-          <div className="flex items-center gap-1.5 md:gap-3 text-gray-200 transition-all duration-300 hover:text-white hover:scale-105 flex-shrink-0"> {/* Added flex-shrink-0 */}
+          <div className="flex items-center gap-1.5 md:gap-3 text-gray-200 transition-all duration-300 hover:text-white hover:scale-105 flex-shrink-0">
             <span className="bg-white/10 p-1.5 md:p-2.5 rounded-lg flex items-center justify-center border border-white/5 shadow-lg">
               <VideoIcon size={20} className="text-[#0E86D4]" />
             </span>
             <span className="text-xs md:text-sm font-medium">Zoom</span>
           </div>
-          <div className="flex items-center gap-1.5 md:gap-3 text-gray-200 transition-all duration-300 hover:text-white hover:scale-105 flex-shrink-0"> {/* Added flex-shrink-0 */}
+          <div className="flex items-center gap-1.5 md:gap-3 text-gray-200 transition-all duration-300 hover:text-white hover:scale-105 flex-shrink-0">
             <span className="bg-white/10 p-1.5 md:p-2.5 rounded-lg flex items-center justify-center border border-white/5 shadow-lg">
               <Users size={20} className="text-[#6264A7]" />
             </span>
@@ -176,16 +175,15 @@ const HeroSection = () => {
         </div>
 
         <div className="flex justify-center">
-          <Button
-            className="bg-[#FF00D6] hover:bg-[#D600B1] text-white text-base py-5 px-8 md:py-6 md:px-10 rounded-xl shadow-lg shadow-[#FF00D6]/20 hover:shadow-xl hover:shadow-[#FF00D6]/30 transition-all duration-300 transform hover:-translate-y-1 w-full sm:w-auto"
-            onClick={() => setIsModalOpen(true)}
-          >
-            Join the Waitlist
-          </Button>
+          <Link href="/signup">
+            <Button
+              className="bg-[#FF00D6] hover:bg-[#D600B1] text-white text-base py-5 px-8 md:py-6 md:px-10 rounded-xl shadow-lg shadow-[#FF00D6]/20 hover:shadow-xl hover:shadow-[#FF00D6]/30 transition-all duration-300 transform hover:-translate-y-1 w-full sm:w-auto"
+            >
+              Sign Up
+            </Button>
+          </Link>
         </div>
       </div>
-
-      <WaitlistModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </section>
   )
 }
