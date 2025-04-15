@@ -30,9 +30,11 @@ export async function middleware(req) {
   }
 
   // Redirect logged-in users from root to dashboard, but only if not blocked
-  if (session && !session.isBlocked) {
+  if (session && !session.isBlocked && pathname !== '/welcome') {
     return NextResponse.redirect(new URL('/welcome', req.url))
   }
+
+  
 
   return NextResponse.next()
 }
