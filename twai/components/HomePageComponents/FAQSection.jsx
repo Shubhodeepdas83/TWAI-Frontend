@@ -30,10 +30,11 @@ const faqs = [
 
 const FAQSection = () => {
   return (
-    <section id="faq" className="section-padding bg-[#121620]">
+    <section id="faq" className="section-padding bg-[#121620] py-6 md:py-16">
       <div className="container mx-auto px-4">
-        <h2 className="section-title text-white text-3xl md:text-4xl font-bold text-center mb-8 md:mb-12">
-          Frequently Asked Questions
+        <h2 className="section-title text-white text-2xl md:text-4xl font-normal md:font-bold text-center mb-8 md:mb-12">
+          <span className="md:hidden">FAQ&apos;s</span>
+          <span className="hidden md:inline">Frequently Asked Questions</span>
         </h2>
 
         <div className="max-w-3xl mx-auto">

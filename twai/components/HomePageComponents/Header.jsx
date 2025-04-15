@@ -1,15 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { signIn } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Menu, X } from "lucide-react"
-import WaitlistModal from "./WaitlistModal"
+import Link from "next/link"
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
-  const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -30,34 +28,33 @@ const Header = () => {
     >
       <div className="container mx-auto px-4 flex justify-between items-center">
         <div className="flex items-center">
-          <a href="#" className="text-2xl md:text-3xl font-extrabold" style={{ color: "#007BFF" }}>
+          <a href="#" className="text-2xl font-extrabold" style={{ color: "#007BFF" }}>
             Jarwiz<span style={{ color: "#FF00D6" }}>AI</span>
           </a>
         </div>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex space-x-8 items-center">
-          <a href="#features" className="text-gray-300 hover:text-white transition-colors">
+          <a href="#features" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
             Features
           </a>
-          <a href="#benefits" className="text-gray-300 hover:text-white transition-colors">
+          <a href="#benefits" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
             Benefits
           </a>
-          <a href="#testimonials" className="text-gray-300 hover:text-white transition-colors">
+          <a href="#testimonials" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
             Testimonials
           </a>
-          <a href="#pricing" className="text-gray-300 hover:text-white transition-colors">
+          <a href="#pricing" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
             Pricing
           </a>
-          <a href="#faq" className="text-gray-300 hover:text-white transition-colors">
+          <a href="#faq" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
             FAQ
           </a>
-          <Button
-            onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-            className="bg-[#FF00D6] hover:bg-[#D600B1] text-white"
-          >
-            Sign Up
-          </Button>
+          <Link href="/signup">
+            <Button className="bg-[#FF00D6] hover:bg-[#D600B1] text-white">
+              Sign Up
+            </Button>
+          </Link>
         </nav>
 
         {/* Mobile Menu Button */}
@@ -77,56 +74,47 @@ const Header = () => {
           <div className="flex flex-col space-y-6 p-8">
             <a
               href="#features"
-              className="text-lg font-medium text-gray-300 hover:text-white transition-colors py-3 border-b border-gray-800"
+              className="text-base font-medium text-gray-300 hover:text-white transition-colors py-3 border-b border-gray-800"
               onClick={() => setIsMenuOpen(false)}
             >
               Features
             </a>
             <a
               href="#benefits"
-              className="text-lg font-medium text-gray-300 hover:text-white transition-colors py-3 border-b border-gray-800"
+              className="text-base font-medium text-gray-300 hover:text-white transition-colors py-3 border-b border-gray-800"
               onClick={() => setIsMenuOpen(false)}
             >
               Benefits
             </a>
             <a
               href="#testimonials"
-              className="text-lg font-medium text-gray-300 hover:text-white transition-colors py-3 border-b border-gray-800"
+              className="text-base font-medium text-gray-300 hover:text-white transition-colors py-3 border-b border-gray-800"
               onClick={() => setIsMenuOpen(false)}
             >
               Testimonials
             </a>
             <a
               href="#pricing"
-              className="text-lg font-medium text-gray-300 hover:text-white transition-colors py-3 border-b border-gray-800"
+              className="text-base font-medium text-gray-300 hover:text-white transition-colors py-3 border-b border-gray-800"
               onClick={() => setIsMenuOpen(false)}
             >
               Pricing
             </a>
             <a
               href="#faq"
-              className="text-lg font-medium text-gray-300 hover:text-white transition-colors py-3 border-b border-gray-800"
+              className="text-base font-medium text-gray-300 hover:text-white transition-colors py-3 border-b border-gray-800"
               onClick={() => setIsMenuOpen(false)}
             >
               FAQ
             </a>
-            <div className="pt-4">
-              <Button
-                className="bg-[#FF00D6] hover:bg-[#D600B1] text-white w-full py-6 text-lg"
-                onClick={() => {
-                  setIsMenuOpen(false)
-                  signIn("google", { callbackUrl: "/dashboard" })
-                }}
-              >
+            <Link href="/signup">
+              <Button className="bg-[#FF00D6] hover:bg-[#D600B1] text-white w-full">
                 Sign Up
               </Button>
-            </div>
+            </Link>
           </div>
         </div>
       )}
-
-      {/* Waitlist Modal */}
-      <WaitlistModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </header>
   )
 }
