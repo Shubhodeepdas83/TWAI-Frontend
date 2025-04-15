@@ -23,7 +23,7 @@ const Signup = () => {
     try {
       // Use NextAuth signIn method with Google provider
       await signIn('google', {
-        callbackUrl: '/welcome',
+        callbackUrl: '/dashboard',
         redirect: true,
       });
       // Note: We don't need to manually set isLoading to false or navigate

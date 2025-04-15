@@ -20,19 +20,19 @@ export async function middleware(req) {
   //   return NextResponse.redirect(new URL('/', req.url))
   // }
 
-  // // Redirect logged-in users from root to dashboard, but only if not blocked
-  // if (session && !session.isBlocked && pathname === '/') {
-  //   return NextResponse.redirect(new URL('/dashboard', req.url))
-  // }
+  // Redirect logged-in users from root to dashboard, but only if not blocked
+  if (session && !session.isBlocked && pathname === '/') {
+    return NextResponse.redirect(new URL('/dashboard', req.url))
+  }
 
   if (!session && pathname !== '/' && !pathname.startsWith('/signup')  ) {
     return NextResponse.redirect(new URL('/', req.url))
   }
 
-  // Redirect logged-in users from root to dashboard, but only if not blocked
-  if (session && !session.isBlocked && pathname !== '/welcome') {
-    return NextResponse.redirect(new URL('/welcome', req.url))
-  }
+  // // Redirect logged-in users from root to dashboard, but only if not blocked
+  // if (session && !session.isBlocked && pathname !== '/welcome') {
+  //   return NextResponse.redirect(new URL('/welcome', req.url))
+  // }
 
   
 
