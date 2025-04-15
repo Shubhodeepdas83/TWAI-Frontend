@@ -4,7 +4,7 @@ import { useSession, signOut } from "next-auth/react"
 import { useEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { getUserDetails, removeDocument, getSummary, deleteMeetingTemplate, getAgentStore, deleteSession } from "./actions"
-import { Calendar, FileText, Folder, LogOut, Plus, Trash, User, Edit, Store } from "lucide-react"
+import { Calendar, FileText, Folder, LogOut, Plus, Trash, User, Edit, Store,Trash2 } from "lucide-react"
 import CreateSessionModal from "../../components/DashboardPageComponents/CreateSessionModal"
 import DocumentUploadModal from "../../components/DashboardPageComponents/DocumentUploadModal"
 import CreateTemplateModal from "../../components/DashboardPageComponents/CreateTemplateModal"
@@ -470,11 +470,10 @@ export default function DashboardPage() {
 
               {user?.sessions?.length > 0 ? (
                 <div className="w-full border rounded-lg overflow-hidden">
-                  <div className="grid grid-cols-[2fr_2fr_1fr_1fr_2fr] gap-4 p-2 text-gray-700 font-medium bg-gray-100">
+                  <div className="grid grid-cols-[2fr_2fr_1fr_2fr] gap-4 p-2 text-gray-700 font-medium bg-gray-100">
                     <span>Name</span>
                     <span>Description</span>
                     <span>Date</span>
-                    <span>Status</span>
                     <span>Actions</span>
                   </div>
 
@@ -483,10 +482,23 @@ export default function DashboardPage() {
                     .map((session) => (
                       <div
                         key={session.id}
-                        className="grid grid-cols-[2fr_2fr_1fr_1fr_2fr] gap-4 p-2 border-b items-center"
+                        className="grid grid-cols-[2fr_2fr_1fr_2fr] gap-4 p-2 border-b items-center"
                       >
-                        {/* Session Name */}
-                        <span className="truncate text-blue-600">{session.name || `Session #${session.id}`}</span>
+                        {/* Session Name with active indicator */}
+                        <div className="flex items-center">
+                          {session.isActive && (
+                            <span className="h-2.5 w-2.5 rounded-full bg-green-500 mr-2 flex-shrink-0" 
+                                  title="Active session"></span>
+                          )}
+                          <span className="truncate text-blue-600">
+                            {session.name || `Session #${session.id}`}
+                            {session.isActive && (
+                              <span className="ml-2 text-xs bg-green-100 text-green-800 px-1.5 py-0.5 rounded-full">
+                                Active
+                              </span>
+                            )}
+                          </span>
+                        </div>
 
                         {/* Session Description (truncated) */}
                         <span className="truncate text-gray-600">{session.description || "No description"}</span>
@@ -498,17 +510,6 @@ export default function DashboardPage() {
                             timeStyle: 'short'
                           })}
                         </span>
-
-                        {/* Status Badge */}
-                        <div className="text-left">
-                          <span
-                            className={`text-xs px-2 py-1 rounded-full inline-block ${
-                              session.isActive ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"
-                            }`}
-                          >
-                            {session.isActive ? "Active" : "Completed"}
-                          </span>
-                        </div>
 
                         {/* Action Buttons */}
                         <div className="flex gap-2">
@@ -532,7 +533,7 @@ export default function DashboardPage() {
                             size="sm"
                             variant="outline"
                           >
-                            View Summary
+                            Summary
                           </SpinnerButton>
                           {!session.isActive && (
                             <SpinnerButton
@@ -544,8 +545,7 @@ export default function DashboardPage() {
                               size="sm"
                               variant="outline"
                             >
-                              <Trash className="mr-1 inline-block h-3 w-3" />
-                              Delete
+                              <Trash className="inline-block h-3 w-3" />
                             </SpinnerButton>
                           )}
                         </div>
@@ -625,7 +625,7 @@ export default function DashboardPage() {
                           className="rounded-md bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-200 transition-colors"
                         >
                           <Edit className="mr-1 inline-block h-3 w-3" />
-                          Edit
+
                         </button>
                         <SpinnerButton
                           onClick={() => handleDeleteDocument(doc.id)}
@@ -636,8 +636,8 @@ export default function DashboardPage() {
                           size="sm"
                           variant="outline"
                         >
-                          <Trash className="mr-1 inline-block h-3 w-3" />
-                          Delete
+                          <Trash className="inline-block h-3 w-3" />
+
                         </SpinnerButton>
                       </div>
                     </div>
