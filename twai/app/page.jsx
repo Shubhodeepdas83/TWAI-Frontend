@@ -1,6 +1,6 @@
 "use client"
 
-import { useSession, signOut } from "next-auth/react"
+import { useSession } from "next-auth/react"
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Header from "@/components/HomePageComponents/Header"
@@ -19,25 +19,6 @@ export default function Home() {
   const { status } = useSession()
   const router = useRouter()
 
-  // Check if user was redirected due to being blocked
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const isBlocked = params.get('blocked') === 'true';
-    
-    if (isBlocked) {
-      // Sign out the user and remove the query parameter
-      signOut({ redirect: false }).then(() => {
-        // Clear the 'blocked' parameter from URL after signing out
-        const newUrl = new URL(window.location.href);
-        newUrl.searchParams.delete('blocked');
-        window.history.replaceState({}, '', newUrl);
-        
-        // Show an alert or notification that the account is blocked
-        alert("Your account has been blocked. Please contact support for assistance.");
-      });
-    }
-  }, []);
-
   useEffect(() => {
     if (status === "authenticated") {
       router.push("/dashboard")
@@ -53,12 +34,11 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0f1217]">
+    <div className="min-h-screen bg-[#0f1217] space-y-0">
       <Header />
       <HeroSection />
       <ProblemSection />
       <SolutionSection />
-      <FeaturesSection />
       <BenefitsSection />
       <TestimonialsSection />
       <PricingSection />
