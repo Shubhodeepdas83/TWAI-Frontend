@@ -1,9 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import { signOut } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import {LoadingOverlay} from '@/components/loading-page';
 
 const Welcome = () => {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
   const jarwiz = {
     50: '#f0f7ff',
     100: '#e0eefe',
@@ -19,6 +25,23 @@ const Welcome = () => {
   };
 
   const accentColor = 'hsl(var(--accent))';
+
+  useEffect(() => {
+    // If user is not authenticated, redirect to homepage
+    if (status === 'unauthenticated') {
+      router.push('/');
+    }
+  }, [status, router]);
+
+  // Show loading state while checking authentication
+  if (status === 'loading') {
+
+  }
+
+  // If not authenticated, don't render the page content
+  if (status === 'unauthenticated') {
+    return null;
+  }
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#0c0d10', color: 'hsl(var(--foreground))' }}>
