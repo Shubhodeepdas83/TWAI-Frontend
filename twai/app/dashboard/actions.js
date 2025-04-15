@@ -26,6 +26,9 @@ export async function getUserDetails() {
       name: true,
       email: true,
       sessions: {
+        where: {
+          isDeleted: false, // Only return non-deleted sessions
+        },
         select: {
           id: true,
           name: true,
@@ -549,5 +552,50 @@ export async function getEmbeddedDocuments() {
   })
 
   return { documents }
+}
+
+export async function deleteSession(sessionId) {
+  const session = await getServerSession(authOptions)
+
+  if (!session) {
+    return { failure: "not authenticated" }
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+    select: { id: true },
+  })
+
+  if (!user) {
+    return { failure: "User not found" }
+  }
+
+  const existingSession = await prisma.session.findUnique({
+    where: { id: sessionId },
+    select: { userId: true, isActive: true },
+  })
+
+  if (!existingSession) {
+    return { failure: "Session not found" }
+  }
+
+  if (existingSession.userId !== user.id) {
+    return { failure: "Unauthorized" }
+  }
+
+  // Only allow deletion of completed sessions
+  if (existingSession.isActive) {
+    return { failure: "Cannot delete active sessions. Please complete the session first." }
+  }
+
+  // Soft delete the session by marking it as deleted
+  await prisma.session.update({
+    where: { id: sessionId },
+    data: {
+      isDeleted: true,
+    },
+  })
+
+  return { success: true }
 }
 

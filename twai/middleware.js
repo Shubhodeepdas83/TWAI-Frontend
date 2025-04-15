@@ -15,17 +15,32 @@ export async function middleware(req) {
     }
   }
 
-  // Allow access to root and any path starting with /document/ if there's no session
-  if (!session && pathname !== '/' && !pathname.startsWith('/signup') && !pathname.startsWith('/document/') && !pathname.startsWith('/api/documents/')) {
+  // Allow public pages: root, signup, terms, privacy, and document routes
+  if (!session && 
+      pathname !== '/' && 
+      !pathname.startsWith('/signup') && 
+      !pathname.startsWith('/terms') && 
+      !pathname.startsWith('/privacy') && 
+      !pathname.startsWith('/welcome') && 
+      !pathname.startsWith('/document/') && 
+      !pathname.startsWith('/api/documents/')) {
     return NextResponse.redirect(new URL('/', req.url))
   }
 
   // Redirect logged-in users from root to dashboard, but only if not blocked
-  if (session && !session.isBlocked && pathname === '/') {
+  if (session && !session.isBlocked &&( pathname === '/' || 
+    pathname.startsWith('/signup') || 
+    pathname.startsWith('/terms') || 
+    pathname.startsWith('/welcome') || //REMOVE THIS AND REPLACE WITH DASHBOARD
+    pathname.startsWith('/privacy'))) {
     return NextResponse.redirect(new URL('/dashboard', req.url))
   }
 
-  if (!session && pathname !== '/' && !pathname.startsWith('/signup')  ) {
+  if (!session && 
+      pathname !== '/' && 
+      !pathname.startsWith('/signup') && 
+      !pathname.startsWith('/terms') && 
+      !pathname.startsWith('/privacy')) {
     return NextResponse.redirect(new URL('/', req.url))
   }
 
@@ -33,9 +48,7 @@ export async function middleware(req) {
   // if (session && !session.isBlocked && pathname !== '/welcome') {
   //   return NextResponse.redirect(new URL('/welcome', req.url))
   // }
-
   
-
   return NextResponse.next()
 }
 

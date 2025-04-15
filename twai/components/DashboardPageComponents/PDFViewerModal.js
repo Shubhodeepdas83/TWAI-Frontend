@@ -56,10 +56,10 @@ export default function PDFViewerModal({ isOpen, onClose, pdfUrl }) {
         <div className="flex items-center justify-between p-4 border-b">
           <h2 className="text-lg font-medium">Document Viewer</h2>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={handleDownload} className="flex items-center gap-1">
+            {/* <Button variant="outline" size="sm" onClick={handleDownload} className="flex items-center gap-1">
               <Download className="h-4 w-4" />
               Download
-            </Button>
+            </Button> */}
             <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0 rounded-full">
               <X className="h-4 w-4" />
             </Button>

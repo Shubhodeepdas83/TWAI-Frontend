@@ -113,13 +113,6 @@ const MobileCarousel = ({ features }) => {
     setIsSwiping(false);
   };
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      nextSlide();
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [features.length]);
-
   return (
     <div
       className="relative w-full overflow-hidden py-6"
@@ -239,7 +232,7 @@ const SolutionSection = () => {
   }, []);
 
   return (
-    <section className="section-padding bg-[#181d26] text-white py-7 md:py-16">
+    <section id="features" className="section-padding bg-[#181d26] text-white py-7 md:py-16">
       <div className="container mx-auto px-4">
         <h2 className="text-2xl md:text-3xl font-normal md:font-bold text-white text-center mb-3 md:mb-8">
           JarWiz AI: Smarter Discussions. Better Outcomes. In 1-click.

@@ -1,4 +1,5 @@
 import { Facebook, Twitter, Linkedin } from "lucide-react"
+import Link from 'next/link'
 
 const Footer = () => {
   return (
@@ -7,9 +8,9 @@ const Footer = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
           <div className="col-span-2 md:col-span-1">
             <h3 className="text-lg font-bold text-white mb-3 md:mb-4">
-              <a href="#" className="text-2xl font-extrabold" style={{ color: "#007BFF" }}>
+              <Link href="/" className="text-2xl font-extrabold" style={{ color: "#007BFF" }}>
                 Jarwiz<span style={{ color: "#FF00D6" }}>AI</span>
-              </a>
+              </Link>
             </h3>
             <p className="text-sm text-gray-400 mb-3 md:mb-4">
               AI-powered meeting assistant that makes every conversation more productive.
@@ -93,14 +94,14 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <Link href="/privacy" className="hover:text-white transition-colors">
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <Link href="/terms" className="hover:text-white transition-colors">
                   Terms of Service
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -113,14 +114,14 @@ const Footer = () => {
           <div>
             <ul className="flex flex-wrap justify-center gap-3 md:gap-6 text-sm">
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <Link href="/privacy" className="hover:text-white transition-colors">
                   Privacy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <Link href="/terms" className="hover:text-white transition-colors">
                   Terms
-                </a>
+                </Link>
               </li>
               <li>
                 <a href="#" className="hover:text-white transition-colors">

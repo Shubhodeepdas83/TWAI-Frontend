@@ -3,7 +3,7 @@
 import { useSession, signOut } from "next-auth/react"
 import { useEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import { getUserDetails, removeDocument, getSummary, deleteMeetingTemplate, getAgentStore } from "./actions"
+import { getUserDetails, removeDocument, getSummary, deleteMeetingTemplate, getAgentStore, deleteSession } from "./actions"
 import { Calendar, FileText, Folder, LogOut, Plus, Trash, User, Edit, Store } from "lucide-react"
 import CreateSessionModal from "../../components/DashboardPageComponents/CreateSessionModal"
 import DocumentUploadModal from "../../components/DashboardPageComponents/DocumentUploadModal"
@@ -15,6 +15,7 @@ import { SpinnerButton } from "@/components/ui/spinnerButton"
 import { Toaster } from "@/components/ui/toaster"
 import { useToast } from "@/hooks/use-toast"
 import PDFViewerModal from "@/components/DashboardPageComponents/PDFViewerModal"
+import { FullscreenLoader } from "@/components/loading-page"
 
 export default function DashboardPage() {
   const { data: session, status } = useSession()
@@ -42,6 +43,8 @@ export default function DashboardPage() {
   const [isEditTemplateModalOpen, setIsEditTemplateModalOpen] = useState(false)
   const [selectedDocument, setSelectedDocument] = useState(null)
   const [selectedTemplate, setSelectedTemplate] = useState(null)
+  const [isDeletingSession, setIsDeletingSession] = useState(false)
+  const [deletingSessionId, setDeletingSessionId] = useState(null)
 
   // Add loading state to sign-out button
   // Fix summary generation bug to apply loading state only to specific session
@@ -181,6 +184,46 @@ export default function DashboardPage() {
     }
   }
 
+  const handleDeleteSession = async (sessionId) => {
+    setIsDeletingSession(true)
+    setDeletingSessionId(sessionId)
+
+    try {
+      const result = await deleteSession(sessionId)
+
+      if (result.success) {
+        // Update the sessions list without a full refetch
+        setUser((prevUser) => ({
+          ...prevUser,
+          sessions: prevUser.sessions.filter((session) => session.id !== sessionId),
+        }))
+
+        toast({
+          title: "Session deleted",
+          description: "The session has been successfully deleted.",
+          variant: "success",
+        })
+      } else if (result.failure) {
+        console.error("Error deleting session:", result.failure)
+        toast({
+          title: "Failed to delete session",
+          description: result.failure || "Please try again.",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      console.error("Exception while deleting session:", error)
+      toast({
+        title: "Error",
+        description: "An error occurred while deleting the session.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsDeletingSession(false)
+      setDeletingSessionId(null)
+    }
+  }
+
   const handleOpenSession = (sessionId) => {
     setIsOpeningSession(true)
     router.push(`/session/${sessionId}`)
@@ -281,7 +324,7 @@ export default function DashboardPage() {
   }
 
   if (status === "loading" || isLoading) {
-    return <DashboardSkeleton />
+    return <FullscreenLoader />
   }
 
   return (
@@ -449,7 +492,12 @@ export default function DashboardPage() {
                         <span className="truncate text-gray-600">{session.description || "No description"}</span>
 
                         {/* Creation Date */}
-                        <span className="text-xs text-gray-500">{new Date(session.createdAt).toLocaleDateString()}</span>
+                        <span className="text-xs text-gray-500">
+                          {new Date(session.createdAt).toLocaleString(undefined, {
+                            dateStyle: 'short', 
+                            timeStyle: 'short'
+                          })}
+                        </span>
 
                         {/* Status Badge */}
                         <div className="text-left">
@@ -486,6 +534,20 @@ export default function DashboardPage() {
                           >
                             View Summary
                           </SpinnerButton>
+                          {!session.isActive && (
+                            <SpinnerButton
+                              onClick={() => handleDeleteSession(session.id)}
+                              disabled={isDeletingSession && deletingSessionId === session.id}
+                              loading={isDeletingSession && deletingSessionId === session.id}
+                              loadingText="Deleting..."
+                              className="rounded-md bg-red-100 px-3 py-1 text-xs font-medium text-red-700 hover:bg-red-200 disabled:bg-gray-100 disabled:text-gray-400 transition-colors"
+                              size="sm"
+                              variant="outline"
+                            >
+                              <Trash className="mr-1 inline-block h-3 w-3" />
+                              Delete
+                            </SpinnerButton>
+                          )}
                         </div>
                       </div>
                     ))}
