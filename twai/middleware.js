@@ -15,10 +15,10 @@ export async function middleware(req) {
     }
   }
 
-  // // Allow access to root and any path starting with /document/ if there's no session
-  // if (!session && pathname !== '/' && !pathname.startsWith('/document/') && !pathname.startsWith('/api/documents/')) {
-  //   return NextResponse.redirect(new URL('/', req.url))
-  // }
+  // Allow access to root and any path starting with /document/ if there's no session
+  if (!session && pathname !== '/' && !pathname.startsWith('/document/') && !pathname.startsWith('/api/documents/')) {
+    return NextResponse.redirect(new URL('/', req.url))
+  }
 
   // Redirect logged-in users from root to dashboard, but only if not blocked
   if (session && !session.isBlocked && pathname === '/') {
